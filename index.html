@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+ <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1b5e20">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Rebanho Pro">
+<title>Gestão Rebanho Pro</title>
+<style>
+:root{
+ --fundo:#f4f7f6;--topo:#1b5e20;--verde:#4caf50;--verde2:#2e7d32;--azul:#1976d2;
+ --azul2:#0277bd;--vermelho:#d32f2f;--laranja:#ef8b00;--cinza:#455a64;
+ --card:#fff;--texto:#263238;--muted:#6b7280;--borda:#e3e8e6;--sombra:0 4px 12px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--fundo);color:var(--texto);font-family:Segoe UI,Arial,sans-serif}
+body{min-height:100vh}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.header{position:sticky;top:0;z-index:1000;background:var(--topo);color:#fff;box-shadow:0 2px 12px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px;padding:10px 12px}
+.brand{flex:1;border:0;background:transparent;color:#fff;text-align:left;padding:6px 8px}
+.brand strong{display:block;font-size:1.08rem;letter-spacing:.7px}.brand small{opacity:.82}
+.icon-btn{border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:10px;padding:11px 10px;font-weight:700}
+.container{max-width:900px;margin:auto;padding:14px}
+.screen{display:none}.screen.active{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:.2;transform:translateY(2px)}to{opacity:1;transform:none}}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.stat{background:var(--card);border-radius:13px;padding:14px 10px;text-align:center;box-shadow:var(--sombra);border-bottom:4px solid var(--verde)}
+.stat .value{display:block;font-size:1.35rem;font-weight:800;color:var(--topo)}.stat .label{font-size:.68rem;color:var(--muted);font-weight:800;text-transform:uppercase}
+.card{background:var(--card);border-radius:15px;padding:16px;margin-bottom:14px;box-shadow:var(--sombra)}
+.section-title{font-size:.88rem;font-weight:900;text-transform:uppercase;margin:20px 0 10px;border-left:4px solid var(--topo);padding-left:9px}
+.chart{height:155px;background:#fff;border-radius:15px;padding:14px;margin:14px 0;box-shadow:var(--sombra)}
+.chart-title{font-size:.72rem;text-transform:uppercase;font-weight:800;color:var(--muted)}
+.bars{height:112px;display:flex;align-items:flex-end;justify-content:space-around;gap:5px;padding:20px 4px 20px}
+.bar-wrap{height:100%;flex:1;display:flex;align-items:flex-end;justify-content:center;position:relative}
+.bar{width:min(26px,70%);min-height:2px;background:var(--verde);border-radius:5px 5px 0 0;position:relative}
+.bar-val{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:.58rem;font-weight:800;white-space:nowrap}
+.bar-day{position:absolute;bottom:-19px;font-size:.62rem;color:var(--muted)}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.menu-btn{border:0;border-radius:15px;color:#fff;font-weight:900;min-height:92px;padding:18px 8px;box-shadow:0 5px 0 rgba(0,0,0,.14);transition:.08s}
+.menu-btn:active{transform:translateY(4px);box-shadow:none}
+.m-green{background:var(--verde)}.m-dark{background:var(--verde2)}.m-blue{background:var(--azul)}.m-cyan{background:var(--azul2)}.m-gray{background:var(--cinza)}.m-red{background:var(--vermelho)}.m-orange{background:var(--laranja)}
+label{display:block;font-weight:800;font-size:.82rem;margin:0 0 6px}
+input,select,textarea{width:100%;border:1px solid #ccd5d2;border-radius:10px;padding:12px;background:#fff;color:var(--texto);margin-bottom:13px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--verde)}
+textarea{min-height:110px;resize:vertical}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.btn{border:0;border-radius:10px;padding:12px 14px;font-weight:900}
+.btn-block{width:100%;padding:14px}.btn-green{background:var(--verde);color:#fff}.btn-dark{background:var(--cinza);color:#fff}.btn-blue{background:var(--azul);color:#fff}.btn-red{background:var(--vermelho);color:#fff}.btn-light{background:#e9eeec;color:#263238}.btn-orange{background:var(--laranja);color:#fff}
+.back{width:100%;margin-bottom:12px}
+.badge{display:inline-block;padding:4px 8px;border-radius:7px;color:#fff;font-size:.65rem;font-weight:900;text-transform:uppercase}
+.badge-lac{background:var(--verde)}.badge-seca{background:#7b8790}.badge-pro{background:#f5a623}
+.animal{padding:15px}.animal-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.animal-name{font-weight:900;font-size:1.05rem}.animal-info{border-top:1px solid var(--borda);margin-top:10px;padding-top:9px;font-size:.8rem;line-height:1.6;color:#4b5563}
+.alert{padding:13px;border-radius:11px;background:#fff;margin-bottom:9px;border-left:6px solid;box-shadow:0 2px 6px rgba(0,0,0,.05);font-size:.83rem}
+.alert.red{border-color:var(--vermelho)}.alert.orange{border-color:var(--laranja)}.alert.blue{border-color:var(--azul)}.alert.gray{border-color:var(--cinza)}
+.notice{padding:12px;border-radius:10px;background:#f0f7f0;font-size:.82rem;margin-bottom:12px}
+.empty{padding:22px;text-align:center;color:var(--muted);background:#fff;border-radius:12px}
+table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1px solid var(--borda);text-align:left;font-size:.78rem}th{font-size:.7rem;text-transform:uppercase;color:var(--muted)}
+.table-scroll{overflow:auto}
+.month-nav{display:flex;align-items:center;gap:8px;justify-content:space-between;margin-bottom:12px}.month-nav strong{text-align:center;text-transform:capitalize}
+.summary{background:var(--azul);color:#fff;border-radius:11px;padding:13px;margin-bottom:13px}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.summary-item{text-align:center}.summary-item small{display:block;opacity:.8;font-size:.65rem}.summary-item b{font-size:1.05rem}
+.day-checks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:13px}
+.day-check{border:1px solid #ccd5d2;border-radius:10px;padding:9px 5px;text-align:center;font-size:.72rem;font-weight:800;background:#fff}
+.day-check input{width:auto;margin:0 4px 0 0}.day-check:has(input:checked){background:#e9f6eb;border-color:var(--verde)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;z-index:3000}.modal.open{display:flex}
+.modal-box{background:#fff;width:100%;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}
+.small{font-size:.72rem;color:var(--muted)}.danger-text{color:var(--vermelho);font-weight:800}.success-text{color:var(--verde2);font-weight:800}
+.file-label{display:block;text-align:center;padding:14px;border-radius:10px;background:var(--verde2);color:#fff;font-weight:900;margin-bottom:10px}
+.hidden{display:none!important}
+.lock{min-height:70vh;display:flex;align-items:center;justify-content:center}.lock-card{text-align:center;max-width:520px;width:100%}
+.pro-box{border:2px solid #f0b429;background:#fff8df}
+.kpi-line{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--borda);font-size:.8rem}
+@media(min-width:700px){.menu-btn{min-height:105px}.container{padding:20px}.day-checks{grid-template-columns:repeat(7,1fr)}}
+</style>
+</head>
+<body>
+<header class="header">
+  <button class="brand" onclick="navigate('home')"><strong>GESTÃO REBANHO PRO</strong><small>Gestão simples do seu rebanho</small></button>
+  <button class="icon-btn" onclick="navigate('manual')">📖 MANUAL</button>
+  <button class="icon-btn" onclick="navigate('config')">⚙️</button>
+</header>
+
+<main class="container">
+<section id="screen_home" class="screen active">
+  <div id="testBanner"></div>
+  <div class="grid-2">
+    <div class="stat"><span class="value" id="kpiToday">0,0 L</span><span class="label">Hoje (Ordenha)</span></div>
+    <div class="stat"><span class="value" id="kpiMonthDelivery">0,0 L</span><span class="label">Mês (Entrega)</span></div>
+    <div class="stat"><span class="value" id="kpiAvgCow">0,0 L</span><span class="label">Média/Vaca Mês</span></div>
+    <div class="stat"><span class="value" id="kpiLactation">0 / 0</span><span class="label">Lactação / Rebanho</span></div>
+  </div>
+  <div class="chart"><div class="chart-title">Tendência — últimos 7 dias</div><div class="bars" id="chartBars"></div></div>
+  <div class="menu">
+    <button class="menu-btn m-green" onclick="guard('producao')">🥛 PRODUÇÃO</button>
+    <button class="menu-btn m-dark" onclick="guard('rebanho')">🐄 REBANHO</button>
+    <button class="menu-btn m-blue" onclick="guard('entregas')">🚚 ENTREGAS</button>
+    <button class="menu-btn m-cyan" onclick="guard('agenda')">📅 AGENDA</button>
+    <button class="menu-btn m-orange" onclick="guard('novilhas')">🐮 NOVILHAS</button>
+    <button class="menu-btn m-gray" onclick="navigate('backup')">💾 BACKUP</button>
+  </div>
+  <div class="section-title">Avisos e tarefas</div>
+  <div id="homeAlerts"></div>
+</section>
+
+<section id="screen_producao" class="screen">
+<button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+<div class="card">
+  <h2>Produção diária</h2>
+  <label>Data</label><input type="date" id="prodDate" onchange="loadProductionDay()">
+  <div id="individualNotice"></div>
+  <div id="aggregateFields">
+    <div class="row"><div><label>Manhã (L)</label><input type="number" min="0" step="0.1" id="prodMorning" oninput="calcProduction()"></div><div><label>Tarde (L)</label><input type="number" min="0" step="0.1" id="prodAfternoon" oninput="calcProduction()"></div></div>
+  </div>
+  <div id="individualFields" class="hidden"></div>
+  <div class="notice">Total do dia: <b id="prodTotal">0,0</b> L &nbsp; | &nbsp; Média/vaca: <b id="prodAvg">0,0</b> L</div>
+  <button class="btn btn-green btn-block" onclick="saveProduction()">💾 SALVAR PRODUÇÃO</button>
+</div>
+</section>
+
+<section id="screen_rebanho" class="screen">
+<button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+<div class="card">
+  <h2 id="cowFormTitle">Cadastrar animal</h2>
+  <input type="hidden" id="cowEditId">
+  <label>Nome / Brinco</label><input id="cowName" maxlength="60">
+  <div class="row"><div><label>Último parto</label><input type="date" id="cowCalving"></div><div><label>Inseminação</label><input type="date" id="cowInsemination"></div></div>
+  <label>Status</label><select id="cowStatus"><option value="lactacao">Em Lactação</option><option value="seca">Seca</option></select>
+  <div class="notice" id="heiferPrompt">Ao informar um novo parto, você poderá cadastrar a fêmea nascida no Rebanho de Novilhas.</div>
+  <div id="heiferFields" class="hidden">
+    <label><input type="checkbox" id="registerHeifer" style="width:auto;margin:0 5px 0 0"> Registrar a fêmea deste parto como novilha</label>
+    <div id="heiferNameWrap" class="hidden"><label>Nome / Brinco da novilha</label><input id="heiferName"></div>
+  </div>
+  <button class="btn btn-green btn-block" onclick="saveCow()">💾 SALVAR NO REBANHO</button>
+  <button class="btn btn-red btn-block hidden" id="deleteCowBtn" onclick="deleteCow()">🗑️ EXCLUIR ANIMAL</button>
+  <button class="btn btn-light btn-block hidden" id="cancelCowBtn" onclick="resetCowForm()">✖️ CANCELAR EDIÇÃO</button>
+</div>
+<div id="cowList"></div>
+</section>
+
+<section id="screen_entregas" class="screen">
+<button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+<div class="card">
+ <div class="month-nav"><button class="btn btn-light" onclick="changeMonth(-1)">⬅️ Anterior</button><strong id="deliveryMonth"></strong><button class="btn btn-light" onclick="changeMonth(1)">Próximo ➡️</button></div>
+ <label>Preço líquido por litro (R$)</label><input type="number" min="0" step="0.0001" id="milkPrice" oninput="saveMilkPrice(this.value)">
+ <div class="summary"><div class="summary-grid">
+  <div class="summary-item"><small>TOTAL LITROS</small><b id="deliveryTotal">0,0 L</b></div>
+  <div class="summary-item"><small>VALOR TOTAL</small><b id="deliveryValue">R$ 0,00</b></div>
+  <div class="summary-item"><small>MÉDIA/ENTREGA</small><b id="deliveryAvgEntry">0,0 L</b></div>
+ </div></div>
+ <div class="table-scroll"><table><thead><tr><th>Dia</th><th>Litros entregues</th></tr></thead><tbody id="deliveryTable"></tbody></table></div>
+</div>
+</section>
+
+<section id="screen_agenda" class="screen">
+<button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+<div class="card">
+ <h2>Agenda e descarte de leite</h2>
+ <label>Data</label><input type="date" id="agendaDate">
+ <label>Descrição</label><input id="agendaText" maxlength="120" placeholder="Ex.: Veterinário, vacinação, manejo...">
+ <label>Dias para descartar o leite (opcional)</label><input type="number" min="0" step="1" id="agendaDiscardDays" placeholder="Ex.: 5">
+ <label>Vaca/animal (opcional)</label><input id="agendaAnimal" maxlength="60" placeholder="Ex.: 23 - Mimosa">
+ <button class="btn btn-cyan btn-block" style="background:var(--azul2);color:#fff" onclick="saveAgenda()">➕ ADICIONAR COMPROMISSO</button>
+</div>
+<div id="agendaList"></div>
+</section>
+
+<section id="screen_novilhas" class="screen">
+<button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+<div class="card">
+ <h2>Rebanho de Novilhas</h2>
+ <p class="small">Novilhas nascidas a partir de partos registrados podem ser acompanhadas até o primeiro parto.</p>
+ <button class="btn btn-green btn-block" onclick="openNewHeiferModal()">➕ CADASTRAR NOVILHA</button>
+</div>
+<div id="heiferList"></div>
+</section>
+
+<section id="screen_config" class="screen">
+<button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+<div class="card pro-box">
+ <h2>Licença</h2><div id="licensePanel"></div>
+</div>
+<div class="card">
+ <h2>Alertas de secagem</h2>
+ <label>Receber aviso a partir de</label>
+ <div class="row"><input type="number" min="0" max="12" id="dryMonths"><input type="number" min="0" max="30" id="dryDays"></div>
+ <p class="small">O cálculo considera meses aproximados de 30,44 dias. O padrão é 7 meses e 15 dias (aprox. 225 dias).</p>
+ <button class="btn btn-green btn-block" onclick="saveSettings()">💾 SALVAR CONFIGURAÇÕES</button>
+</div>
+<div class="card">
+ <h2>Dias de medição individual</h2>
+ <p class="small">Nos dias selecionados, a tela Produção permitirá lançar manhã e tarde por vaca.</p>
+ <div class="day-checks" id="measurementDays"></div>
+ <button class="btn btn-green btn-block" onclick="saveMeasurementDays()">💾 SALVAR DIAS DE MEDIÇÃO</button>
+</div>
+<div class="card">
+ <h2>Informações da instalação</h2>
+ <div class="kpi-line"><span>ID da instalação</span><b id="configInstallId">—</b></div>
+ <div class="kpi-line"><span>Instalado em</span><b id="configInstallDate">—</b></div>
+ <div class="kpi-line"><span>Status</span><b id="configStatus">—</b></div>
+</div>
+</section>
+
+<section id="screen_manual" class="screen">
+<button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+<div class="card">
+ <h2 style="color:var(--topo)">Manual de Funções</h2>
+ <p><b>Idealizado por:</b> Luan Ferreira</p><p><b>Instagram:</b> @luan122006</p><p><b>WhatsApp:</b> 42 9850-8930</p>
+ <hr>
+ <h3>Dashboard</h3><p>Mostra ordenha de hoje, entregas do mês, média por vaca em dias registrados e a quantidade de lactantes e animais do rebanho. O gráfico apresenta os últimos 7 dias.</p>
+ <h3>Produção</h3><p>Registre manhã e tarde. Nos dias configurados para medição individual, informe os litros de cada vaca por turno. O aplicativo calcula o total e a média automaticamente.</p>
+ <h3>Rebanho</h3><p>Cadastre vacas, parto, inseminação e status. O cartão mostra lactação, gestação e indicadores da medição individual. A lista prioriza quem mais produz e deixa as vacas secas por último.</p>
+ <h3>Entregas</h3><p>Registre os litros vendidos por dia, preço líquido do mês e acompanhe faturamento, média diária até a data atual e média por entrega.</p>
+ <h3>Agenda</h3><p>Cadastre compromissos. Para descarte de leite, informe os dias e o sistema cria alertas durante o período.</p>
+ <h3>Novilhas</h3><p>Acompanhe nascimento, idade, inseminação e gestação. Ao registrar o primeiro parto, a novilha é transferida para o rebanho principal.</p>
+ <h3>Configurações e PRO</h3><p>Consulte o ID, ative o PRO, configure a secagem e escolha os dias de medição individual. O PRO custa R$ 32,90 em pagamento único e é vitalício.</p>
+ <h3>Backup</h3><p>O backup inclui todo o banco, inclusive licença. O arquivo é validado por assinatura antes da restauração. Um lembrete semanal é exibido para recomendar o backup.</p>
+</div>
+</section>
+
+<section id="screen_backup" class="screen">
+<button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+<div class="card">
+ <h2>Backup e restauração</h2>
+ <div id="backupReminder"></div>
+ <button class="btn btn-blue btn-block" onclick="downloadBackup()">⬇️ BAIXAR BACKUP</button>
+ <div style="height:10px"></div>
+ <label class="file-label" for="backupFile">📂 RESTAURAR VIA ARQUIVO</label>
+ <input id="backupFile" class="hidden" type="file" accept=".json,application/json" onchange="restoreBackupFile(event)">
+ <p class="small">O arquivo contém os dados do aplicativo e a licença. Se a assinatura não corresponder ao conteúdo, a restauração será recusada.</p>
+</div>
+</section>
+</main>
+
+
+<div id="heiferModal" class="modal" onclick="if(event.target===this)closeModal()">
+ <div class="modal-box">
+  <h2 id="heiferModalTitle">Nova novilha</h2>
+  <input type="hidden" id="heiferEditId">
+  <label>Nome / Brinco</label><input id="heiferNameModal">
+  <label>Data de nascimento</label><input type="date" id="heiferBirthModal">
+  <label>Inseminação (opcional)</label><input type="date" id="heiferInsemModal">
+  <div class="row"><button class="btn btn-light" onclick="closeModal()">CANCELAR</button><button class="btn btn-green" onclick="saveHeifer()">SALVAR</button></div>
+ </div>
+</div>
+
+<script>
+'use strict';
+
+/* =========================
+   BANCO CENTRAL E LICENÇA
+   ========================= */
+const DB_KEY='gestao_rebanho_pro_db_v1';
+const APP_VERSION='1.0.0';
+const TRIAL_DAYS=40;
+const PRICE_TEXT='R$ 32,90';
+const WHATSAPP_NUMBER='554298508930';
+
+function defaultDB(){
+ return {
+  version:APP_VERSION,
+  vacas:[],
+  producao:{},
+  entregas:{},
+  agenda:[],
+  novilhas:[],
+  financeiro:{},
+  configuracoes:{
+   secagem:{meses:7,dias:15},
+   diasMedicao:[1,3,5] // domingo=0 ... sábado=6; padrão: terça, quinta, sábado
+  },
+  licenca:{idInstalacao:null,dataInstalacao:null,isPro:false},
+  backup:{ultimoBackup:null},
+  meta:{criadoEm:null,atualizadoEm:null}
+ };
+}
+let db=loadDB();
+let selectedMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let currentScreen='home';
+
+function normalizeDB(raw){
+ const base=defaultDB();
+ if(!raw || typeof raw!=='object') return base;
+ const n=Object.assign(base,raw);
+ n.vacas=Array.isArray(raw.vacas)?raw.vacas:[];
+ n.producao=raw.producao&&typeof raw.producao==='object'?raw.producao:{};
+ n.entregas=raw.entregas&&typeof raw.entregas==='object'?raw.entregas:{};
+ n.agenda=Array.isArray(raw.agenda)?raw.agenda.map(a=>Object.assign({},a,{texto:a.texto??a.text??''})):[];
+ n.novilhas=Array.isArray(raw.novilhas)?raw.novilhas:[];
+ n.financeiro=raw.financeiro&&typeof raw.financeiro==='object'?raw.financeiro:{};
+ n.configuracoes=Object.assign(base.configuracoes,raw.configuracoes||{});
+ n.configuracoes.secagem=Object.assign(base.configuracoes.secagem,(raw.configuracoes&&raw.configuracoes.secagem)||{});
+ n.configuracoes.diasMedicao=Array.isArray(raw.configuracoes&&raw.configuracoes.diasMedicao)?raw.configuracoes.diasMedicao.map(Number).filter(x=>x>=0&&x<=6):base.configuracoes.diasMedicao;
+ n.licenca=Object.assign(base.licenca,raw.licenca||{});
+ n.backup=Object.assign(base.backup,raw.backup||{});
+ n.meta=Object.assign(base.meta,raw.meta||{});
+ if(!n.licenca.idInstalacao) n.licenca.idInstalacao=generateInstallId();
+ if(!n.licenca.dataInstalacao) n.licenca.dataInstalacao=new Date().toISOString();
+ if(typeof n.licenca.isPro!=='boolean') n.licenca.isPro=false;
+ if(!n.meta.criadoEm) n.meta.criadoEm=new Date().toISOString();
+ return n;
+}
+function loadDB(){
+ try{
+  const raw=localStorage.getItem(DB_KEY);
+  return normalizeDB(raw?JSON.parse(raw):null);
+ }catch(e){return normalizeDB(null)}
+}
+function saveDB(show=false){
+ db.meta.atualizadoEm=new Date().toISOString();
+ try{localStorage.setItem(DB_KEY,JSON.stringify(db)); if(show) toast('Dados salvos no celular.');}
+ catch(e){alert('Não foi possível salvar no armazenamento deste aparelho.');}
+}
+function generateInstallId(){
+ return Math.floor(100000+Math.random()*900000000);
+}
+function ensureLicense(){
+ if(!db.licenca.idInstalacao) db.licenca.idInstalacao=generateInstallId();
+ if(!db.licenca.dataInstalacao) db.licenca.dataInstalacao=new Date().toISOString();
+ saveDB(false);
+}
+ensureLicense();
+
+function installDate(){
+ return new Date(db.licenca.dataInstalacao);
+}
+function trialElapsed(){
+ return Math.floor((Date.now()-installDate().getTime())/86400000);
+}
+function licenseState(){
+ if(db.licenca.isPro) return {state:'pro',days:Infinity,remaining:Infinity};
+ const days=trialElapsed();
+ return days<TRIAL_DAYS?{state:'trial',days,remaining:TRIAL_DAYS-days}:{state:'blocked',days,remaining:0};
+}
+function expectedKey(){
+ const id=Number(db.licenca.idInstalacao);
+ return Math.floor((id*17)+2026+(id/2)).toString();
+}
+function validateKey(value){return String(value||'').replace(/\D/g,'')===expectedKey();}
+function activatePro(){
+ const input=document.getElementById('activationKey');
+ if(!input) return;
+ if(validateKey(input.value)){
+  db.licenca.isPro=true; saveDB(false); alert('PRO ativado com sucesso! Acesso vitalício liberado.'); renderAll(); navigate('home');
+ }else alert('Chave inválida para este ID de instalação.');
+}
+function canUseApp(){
+ const s=licenseState();
+ return s.state!=='blocked';
+}
+function guard(screen){
+ if(canUseApp()) navigate(screen); else showWall();
+}
+function showWall(){
+ currentScreen='wall';
+ document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+ let wall=document.getElementById('screen_wall');
+ if(!wall){
+  wall=document.createElement('section');wall.id='screen_wall';wall.className='screen';
+  wall.innerHTML=`<div class="lock"><div class="card lock-card pro-box">
+   <h1>🔒 TESTE ENCERRADO</h1><p>Seu período gratuito de 40 dias terminou.</p>
+   <p>O aplicativo custa <b>${PRICE_TEXT}</b>, pagamento único, com acesso PRO vitalício.</p>
+   <div class="kpi-line"><span>ID da instalação</span><b>${db.licenca.idInstalacao}</b></div>
+   <button class="btn btn-dark btn-block" onclick="copyInstallId()">📋 COPIAR ID</button><div style="height:8px"></div>
+   <button class="btn btn-green btn-block" onclick="openWhatsApp()">🛒 COMPRAR PRO — ${PRICE_TEXT}</button><div style="height:8px"></div>
+   <label>Chave de ativação</label><input id="wallKey" inputmode="numeric" placeholder="Digite a chave">
+   <button class="btn btn-blue btn-block" onclick="activateWallPro()">🔑 ATIVAR PRO</button>
+  </div></div>`;
+  document.querySelector('main').appendChild(wall);
+ }
+ wall.classList.add('active');window.scrollTo(0,0);
+}
+function activateWallPro(){
+ const k=document.getElementById('wallKey').value;
+ if(validateKey(k)){db.licenca.isPro=true;saveDB(false);alert('PRO ativado com sucesso!');renderAll();navigate('home')}
+ else alert('Chave inválida para este ID.');
+}
+function copyInstallId(){
+ const txt=String(db.licenca.idInstalacao);
+ if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(txt).then(()=>toast('ID copiado.'));
+ else {const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('ID copiado.')}
+}
+function openWhatsApp(){
+ const msg=encodeURIComponent('Olá! Quero comprar o Gestão Rebanho Pro. Meu ID de instalação é '+db.licenca.idInstalacao+'.');
+ window.open('https://wa.me/'+WHATSAPP_NUMBER+'?text='+msg,'_blank');
+}
+
+/* =========================
+   NAVEGAÇÃO E UTILITÁRIOS
+   ========================= */
+function navigate(screen){
+ if(screen!=='home' && screen!=='manual' && screen!=='config' && screen!=='backup' && !canUseApp()) {showWall();return}
+ const el=document.getElementById('screen_'+screen);
+ if(!el)return;
+ document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+ el.classList.add('active');currentScreen=screen;window.scrollTo(0,0);
+ if(screen==='producao'){if(!document.getElementById('prodDate').value)document.getElementById('prodDate').value=isoToday();loadProductionDay()}
+ if(screen==='rebanho')resetCowForm();
+ if(screen==='entregas')renderDeliveries();
+ if(screen==='agenda')renderAgenda();
+ if(screen==='novilhas')renderHeifers();
+ if(screen==='config')renderConfig();
+ if(screen==='backup')renderBackup();
+ if(screen==='home')renderHome();
+}
+function toast(msg){
+ const d=document.createElement('div');d.textContent=msg;Object.assign(d.style,{position:'fixed',top:'70px',left:'50%',transform:'translateX(-50%)',background:'#263238',color:'#fff',padding:'11px 15px',borderRadius:'10px',zIndex:5000,fontWeight:'700',fontSize:'.8rem'});
+ document.body.appendChild(d);setTimeout(()=>d.remove(),1800);
+}
+function isoToday(){return localISO(new Date())}
+function localISO(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
+function parseLocalDate(s){return s?new Date(s+'T12:00:00'):null}
+function fmtDate(s){if(!s)return '—';const d=parseLocalDate(s);return d.toLocaleDateString('pt-BR')}
+function fmtNumber(n,dec=1){return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:dec})}
+function money(n){return Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function daysBetween(a,b=new Date()){const d=parseLocalDate(a);if(!d)return null;const ref=new Date(b);ref.setHours(12,0,0,0);return Math.floor((ref-d)/86400000)}
+function monthsDays(total){
+ total=Math.max(0,Math.floor(total||0));const months=Math.floor(total/30.44),days=Math.floor(total%30.44);
+ if(months===0)return `${days} ${days===1?'dia':'dias'}`;
+ return `${months} ${months===1?'mês':'meses'}${days?` e ${days} ${days===1?'dia':'dias'}`:''}`;
+}
+function escapeHTML(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+
+/* =========================
+   DASHBOARD / ALERTAS
+   ========================= */
+function renderHome(){
+ const today=isoToday(), month=today.slice(0,7);
+ const p=db.producao[today];const todayTotal=productionTotal(p);
+ document.getElementById('kpiToday').textContent=fmtNumber(todayTotal)+' L';
+ const entries=monthDeliveryStats(month);
+ document.getElementById('kpiMonthDelivery').textContent=fmtNumber(entries.total)+' L';
+ const lact=db.vacas.filter(v=>v.status==='lactacao');
+ const daysWithProduction=Object.keys(db.producao).filter(k=>k.startsWith(month)&&productionTotal(db.producao[k])>0).length;
+ const avg=daysWithProduction&&lact.length?entries.monthProductionTotal()/daysWithProduction/lact.length:0;
+ document.getElementById('kpiAvgCow').textContent=fmtNumber(avg)+' L';
+ document.getElementById('kpiLactation').textContent=`${lact.length} / ${db.vacas.length}`;
+ renderChart();renderHomeAlerts();renderTrialBanner();
+}
+function productionTotal(p){
+ if(!p)return 0;
+ if(p.individual && typeof p.individual==='object'){
+  const vals=Object.values(p.individual);let m=0,t=0,has=false;
+  vals.forEach(x=>{m+=Number(x.m||0);t+=Number(x.t||0);if(Number(x.m||0)||Number(x.t||0))has=true});
+  if(has)return m+t;
+ }
+ return Number(p.m||0)+Number(p.t||0);
+}
+function productionPeriodTotals(p){
+ if(!p)return {m:0,t:0};
+ if(p.individual){
+  let m=0,t=0;Object.values(p.individual).forEach(x=>{m+=Number(x.m||0);t+=Number(x.t||0)});return {m,t};
+ }
+ return {m:Number(p.m||0),t:Number(p.t||0)};
+}
+function renderChart(){
+ const box=document.getElementById('chartBars');box.innerHTML='';
+ const arr=[];let max=1;for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const val=productionTotal(db.producao[localISO(d)]);arr.push({day:d.getDate(),val});if(val>max)max=val}
+ arr.forEach(x=>{const h=Math.max(2,x.val/max*100);box.innerHTML+=`<div class="bar-wrap"><div class="bar" style="height:${h}%">${x.val>0?`<span class="bar-val">${fmtNumber(x.val,0)}</span>`:''}</div><span class="bar-day">${x.day}</span></div>`});
+}
+function renderHomeAlerts(){
+ const box=document.getElementById('homeAlerts');let out='';
+ const today=isoToday();
+ db.agenda.forEach(a=>{
+  const start=parseLocalDate(a.data);if(!start)return;
+  const end=a.discardDays?new Date(start.getTime()+Number(a.discardDays)*86400000):start;
+  const todayD=parseLocalDate(today);
+  if(a.data===today || (a.discardDays && todayD>=start && todayD<=end)){
+   const title=a.discardDays?'DESCARTE DE LEITE':'HOJE';
+   out+=`<div class="alert ${a.discardDays?'red':'blue'}"><b>${title}:</b> ${escapeHTML(a.texto||a.text||'Sem descrição')}${a.animal?` — ${escapeHTML(a.animal)}`:''}${a.discardDays?`<br><span class="small">Período de descarte: ${fmtDate(a.data)} até ${fmtDate(localISO(end))}</span>`:''}<button class="btn btn-light" style="float:right;padding:4px 8px" onclick="deleteAgenda(${a.id})">X</button></div>`;
+  }
+ });
+ db.vacas.forEach(v=>{
+  if(!v.inseminacao)return;
+  const days=daysBetween(v.inseminacao);
+  if(days>=270){
+   out+=`<div class="alert red"><b>PARTO:</b> ${escapeHTML(v.nome)} — ${days} dias de gestação. Registre o parto para encerrar este alerta.</div>`;
+  }else if(days>=dryThresholdDays() && v.status==='lactacao'){
+   out+=`<div class="alert orange"><b>SECAR:</b> ${escapeHTML(v.nome)} — ${days} dias de gestação. O alerta desaparece ao mudar para Seca.</div>`;
+  }
+ });
+ db.novilhas.forEach(h=>{
+  if(h.inseminacao){const days=daysBetween(h.inseminacao);if(days>=255)out+=`<div class="alert red"><b>PARTO DE NOVILHA:</b> ${escapeHTML(h.nome)} — ${days} dias de gestação. Parto previsto próximo.</div>`}
+ });
+ const week=7*86400000,last=db.backup.ultimoBackup?new Date(db.backup.ultimoBackup).getTime():0;
+ if(!last || Date.now()-last>=week)out+=`<div class="alert gray"><b>BACKUP:</b> Está na hora de fazer um backup semanal dos seus dados. <button class="btn btn-light" style="float:right;padding:5px" onclick="navigate('backup')">FAZER</button></div>`;
+ if(!out)out='<div class="empty">Nenhum aviso para hoje.</div>';
+ box.innerHTML=out;
+}
+function renderTrialBanner(){
+ const b=document.getElementById('testBanner'),s=licenseState();
+ if(s.state==='pro'){b.innerHTML='<div class="notice pro-box"><b>USUÁRIO PRO</b> — acesso vitalício.</div>'}
+ else if(s.state==='trial'){b.innerHTML=`<div class="notice"><b>Teste gratuito:</b> ${s.remaining} ${s.remaining===1?'dia restante':'dias restantes'}.</div>`}
+ else b.innerHTML='';
+}
+function dryThresholdDays(){return Math.max(0,Number(db.configuracoes.secagem.meses||0)*30.44+Number(db.configuracoes.secagem.dias||0))}
+
+/* =========================
+   PRODUÇÃO
+   ========================= */
+function isMeasurementDay(dateStr){
+ const d=parseLocalDate(dateStr);return db.configuracoes.diasMedicao.includes(d.getDay());
+}
+function loadProductionDay(){
+ const date=document.getElementById('prodDate').value||isoToday(),p=db.producao[date]||{};
+ const individual=isMeasurementDay(date);
+ document.getElementById('individualNotice').innerHTML=individual?'<div class="notice"><b>Medição individual ativa:</b> selecione a produção de cada vaca nos dois turnos.</div>':'';
+ document.getElementById('aggregateFields').classList.toggle('hidden',individual);
+ document.getElementById('individualFields').classList.toggle('hidden',!individual);
+ if(individual)renderIndividualInputs(p.individual||{});
+ else {document.getElementById('prodMorning').value=p.m??'';document.getElementById('prodAfternoon').value=p.t??''}
+ calcProduction();
+}
+function renderIndividualInputs(existing){
+ const cows=db.vacas.filter(v=>v.status==='lactacao');
+ const box=document.getElementById('individualFields');
+ if(!cows.length){box.innerHTML='<div class="empty">Cadastre vacas em lactação para fazer a medição individual.</div>';return}
+ box.innerHTML='<label>Produção por vaca</label>'+cows.map(v=>{const x=existing[v.id]||{};return `<div class="card" style="padding:12px;background:#f8faf9"><b>${escapeHTML(v.nome)}</b><div class="row"><div><label>Manhã</label><input type="number" min="0" step="0.1" data-cow="${v.id}" data-turn="m" value="${x.m??''}" oninput="calcProduction()"></div><div><label>Tarde</label><input type="number" min="0" step="0.1" data-cow="${v.id}" data-turn="t" value="${x.t??''}" oninput="calcProduction()"></div></div></div>`}).join('');
+}
+function readIndividual(){
+ const out={};document.querySelectorAll('#individualFields input[data-cow]').forEach(i=>{const id=i.dataset.cow;out[id]=out[id]||{m:0,t:0};out[id][i.dataset.turn]=Number(i.value||0)});return out;
+}
+function calcProduction(){
+ let total=0;if(isMeasurementDay(document.getElementById('prodDate').value||isoToday())){const x=readIndividual();Object.values(x).forEach(v=>total+=Number(v.m||0)+Number(v.t||0))}
+ else total=Number(document.getElementById('prodMorning').value||0)+Number(document.getElementById('prodAfternoon').value||0);
+ const n=db.vacas.filter(v=>v.status==='lactacao').length;document.getElementById('prodTotal').textContent=fmtNumber(total);document.getElementById('prodAvg').textContent=fmtNumber(n?total/n:0);
+}
+function saveProduction(){
+ if(!canUseApp())return showWall();
+ const date=document.getElementById('prodDate').value;if(!date)return alert('Informe a data.');
+ if(isMeasurementDay(date)){
+  db.producao[date]={individual:readIndividual(),m:0,t:0,medicaoIndividual:true};
+ }else{
+  db.producao[date]={m:Number(document.getElementById('prodMorning').value||0),t:Number(document.getElementById('prodAfternoon').value||0),medicaoIndividual:false};
+ }
+ saveDB(false);alert('Produção salva.');renderAll();
+}
+
+/* =========================
+   REBANHO
+   ========================= */
+function cowIndividualStats(id){
+ let vals=[];Object.keys(db.producao).forEach(date=>{const p=db.producao[date];if(p&&p.individual&&p.individual[id]){const x=p.individual[id];const total=Number(x.m||0)+Number(x.t||0);if(total>0)vals.push({date,total})}});
+ if(!vals.length)return null;
+ const avg=vals.reduce((s,x)=>s+x.total,0)/vals.length;const record=Math.max(...vals.map(x=>x.total));return {avg,record,count:vals.length};
+}
+function resetCowForm(){
+ document.getElementById('cowFormTitle').textContent='Cadastrar animal';['cowEditId','cowName','cowCalving','cowInsemination','heiferName'].forEach(id=>document.getElementById(id).value='');
+ document.getElementById('cowStatus').value='lactacao';document.getElementById('deleteCowBtn').classList.add('hidden');document.getElementById('cancelCowBtn').classList.add('hidden');
+ document.getElementById('heiferFields').classList.add('hidden');document.getElementById('registerHeifer').checked=false;document.getElementById('heiferNameWrap').classList.add('hidden');
+ renderCowList();
+}
+document.getElementById('registerHeifer').addEventListener('change',()=>document.getElementById('heiferNameWrap').classList.toggle('hidden',!document.getElementById('registerHeifer').checked));
+document.getElementById('cowCalving').addEventListener('change',()=>document.getElementById('heiferFields').classList.toggle('hidden',!document.getElementById('cowCalving').value));
+function saveCow(){
+ const name=document.getElementById('cowName').value.trim();if(!name)return alert('Informe o nome/brinco.');
+ const edit=document.getElementById('cowEditId').value;const calving=document.getElementById('cowCalving').value;
+ const old=edit?db.vacas.find(v=>v.id===Number(edit)):null;
+ let inseminacao=document.getElementById('cowInsemination').value;
+ // Ao registrar um novo parto em uma vaca já existente, a gestação anterior termina.
+ // Porém, se o usuário informar uma nova inseminação no mesmo salvamento, ela é preservada.
+ if(old && calving && calving!==old.parto && (!inseminacao || inseminacao===old.inseminacao)) inseminacao='';
+ const obj={id:edit?Number(edit):Date.now(),nome:name,parto:calving,inseminacao,status:document.getElementById('cowStatus').value};
+ if(edit){const i=db.vacas.findIndex(v=>v.id===Number(edit));if(i>=0)db.vacas[i]=obj}
+ else db.vacas.push(obj);
+ if(calving&&document.getElementById('registerHeifer').checked){
+  const hn=document.getElementById('heiferName').value.trim();if(!hn)return alert('Informe o nome/brinco da novilha.');
+  db.novilhas.push({id:Date.now()+1,nome:hn,nascimento:calving,mae:name,inseminacao:'',parto:null,transferida:false});
+ }
+ saveDB(false);alert('Animal salvo.');resetCowForm();renderAll();
+}
+function renderCowList(){
+ const box=document.getElementById('cowList');
+ const sorted=[...db.vacas].sort((a,b)=>{
+  if(a.status==='seca'&&b.status!=='seca')return 1;if(a.status!=='seca'&&b.status==='seca')return -1;
+  const sa=cowIndividualStats(a.id)?.avg||0,sb=cowIndividualStats(b.id)?.avg||0;return sb-sa;
+ });
+ box.innerHTML=sorted.length?sorted.map(v=>{
+  const lac=v.parto?monthsDays(daysBetween(v.parto)):'Não informado';const ges=v.inseminacao?monthsDays(daysBetween(v.inseminacao)):'Não informada';const st=cowIndividualStats(v.id);
+  return `<div class="card animal" onclick="editCow(${v.id})"><div class="animal-head"><span class="animal-name">${escapeHTML(v.nome)}</span><span class="badge ${v.status==='lactacao'?'badge-lac':'badge-seca'}">${v.status==='lactacao'?'Em Lactação':'Seca'}</span></div>
+  <div class="animal-info"><b>Tempo de lactação:</b> ${lac}<br><b>Gestação:</b> ${ges}<br><b>Média individual:</b> ${st?fmtNumber(st.avg)+' L':'Sem dados para cálculo'}<br><b>Recorde individual:</b> ${st?fmtNumber(st.record)+' L':'Sem dados para cálculo'}${!v.inseminacao?'<br><span class="danger-text">⚠ Inseminação não registrada</span>':''}</div></div>`
+ }).join(''):'<div class="empty">Nenhum animal cadastrado.</div>';
+}
+function editCow(id){
+ const v=db.vacas.find(x=>x.id===id);if(!v)return;
+ document.getElementById('cowFormTitle').textContent='Editar animal';document.getElementById('cowEditId').value=v.id;document.getElementById('cowName').value=v.nome;document.getElementById('cowCalving').value=v.parto||'';document.getElementById('cowInsemination').value=v.inseminacao||'';document.getElementById('cowStatus').value=v.status||'lactacao';document.getElementById('heiferFields').classList.add('hidden');document.getElementById('deleteCowBtn').classList.remove('hidden');document.getElementById('cancelCowBtn').classList.remove('hidden');window.scrollTo(0,0);
+}
+function deleteCow(){
+ const id=Number(document.getElementById('cowEditId').value);if(!id)return;if(!confirm('Excluir este animal?'))return;
+ db.vacas=db.vacas.filter(v=>v.id!==id);saveDB(false);resetCowForm();renderAll();
+}
+
+/* =========================
+   ENTREGAS
+   ========================= */
+function monthKey(d=selectedMonth){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function monthDeliveryStats(month){
+ const ent=db.entregas[month]||{preco:0,dias:{}};let total=0,count=0;
+ Object.values(ent.dias||{}).forEach(v=>{const n=Number(v||0);if(n>0){total+=n;count++}});
+ const parts=month.split('-').map(Number),daysInMonth=new Date(parts[0],parts[1],0).getDate();
+ return {total,count,avgEntry:count?total/count:0,preco:Number(ent.preco||0),daysInMonth,monthProductionTotal(){let s=0;Object.keys(db.producao).filter(k=>k.startsWith(month)).forEach(k=>s+=productionTotal(db.producao[k]));return s}};
+}
+function renderDeliveries(){
+ const m=monthKey();const ent=db.entregas[m]||{preco:0,dias:{}};const st=monthDeliveryStats(m);
+ document.getElementById('deliveryMonth').textContent=selectedMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});document.getElementById('milkPrice').value=ent.preco||'';
+ document.getElementById('deliveryTotal').textContent=fmtNumber(st.total)+' L';document.getElementById('deliveryValue').textContent=money(st.total*st.preco);document.getElementById('deliveryAvgEntry').textContent=fmtNumber(st.avgEntry)+' L';
+ let rows='';for(let i=1;i<=st.daysInMonth;i++){const ds=`${m}-${String(i).padStart(2,'0')}`;rows+=`<tr><td>${i}</td><td><input type="number" min="0" step="0.1" value="${ent.dias[ds]??''}" style="margin:0;padding:9px" oninput="updateDelivery('${ds}',this.value)"></td></tr>`}
+ document.getElementById('deliveryTable').innerHTML=rows;
+}
+function changeMonth(dir){selectedMonth=new Date(selectedMonth.getFullYear(),selectedMonth.getMonth()+dir,1);renderDeliveries()}
+function saveMilkPrice(v){const m=monthKey();if(!db.entregas[m])db.entregas[m]={preco:0,dias:{}};db.entregas[m].preco=Number(v||0);saveDB(false);updateDeliverySummary()}
+function updateDelivery(date,v){const m=date.slice(0,7);if(!db.entregas[m])db.entregas[m]={preco:0,dias:{}};const n=Number(v||0);if(n>0)db.entregas[m].dias[date]=n;else delete db.entregas[m].dias[date];saveDB(false);updateDeliverySummary()}
+function updateDeliverySummary(){const st=monthDeliveryStats(monthKey());document.getElementById('deliveryTotal').textContent=fmtNumber(st.total)+' L';document.getElementById('deliveryValue').textContent=money(st.total*st.preco);document.getElementById('deliveryAvgEntry').textContent=fmtNumber(st.avgEntry)+' L'}
+
+/* =========================
+   AGENDA
+   ========================= */
+function saveAgenda(){
+ const date=document.getElementById('agendaDate').value,text=document.getElementById('agendaText').value.trim(),days=Number(document.getElementById('agendaDiscardDays').value||0),animal=document.getElementById('agendaAnimal').value.trim();
+ if(!date||!text)return alert('Informe data e descrição.');
+ db.agenda.push({id:Date.now(),data:date,texto:text,discardDays:days,animal});saveDB(false);document.getElementById('agendaText').value='';document.getElementById('agendaDiscardDays').value='';document.getElementById('agendaAnimal').value='';renderAgenda();renderHomeAlerts();
+}
+function renderAgenda(){
+ const box=document.getElementById('agendaList'),arr=[...db.agenda].sort((a,b)=>String(b.data).localeCompare(String(a.data)));
+ box.innerHTML=arr.length?arr.map(a=>`<div class="card"><button class="btn btn-light" style="float:right;padding:5px 8px;color:var(--vermelho)" onclick="deleteAgenda(${a.id})">EXCLUIR</button><b>${fmtDate(a.data)}</b><p style="margin-bottom:4px">${escapeHTML(a.texto||a.text||'Sem descrição')}</p>${a.animal?`<span class="small">Animal: ${escapeHTML(a.animal)}</span><br>`:''}${a.discardDays?`<span class="small danger-text">Descarte por ${a.discardDays} dia(s), de ${fmtDate(a.data)} até ${fmtDate(localISO(new Date(parseLocalDate(a.data).getTime()+a.discardDays*86400000)))}</span>`:''}</div>`).join(''):'<div class="empty">Nenhum compromisso cadastrado.</div>';
+}
+function deleteAgenda(id){if(!confirm('Excluir este compromisso?'))return;db.agenda=db.agenda.filter(a=>a.id!==id);saveDB(false);renderAgenda();renderHomeAlerts()}
+
+/* =========================
+   NOVILHAS
+   ========================= */
+function openNewHeiferModal(){
+ document.getElementById('heiferEditId').value='';document.getElementById('heiferModalTitle').textContent='Nova novilha';document.getElementById('heiferNameModal').value='';document.getElementById('heiferBirthModal').value=isoToday();document.getElementById('heiferInsemModal').value='';document.getElementById('heiferModal').classList.add('open');
+}
+function editHeifer(id){
+ const h=db.novilhas.find(x=>x.id===id);if(!h)return;document.getElementById('heiferEditId').value=h.id;document.getElementById('heiferModalTitle').textContent='Editar novilha';document.getElementById('heiferNameModal').value=h.nome;document.getElementById('heiferBirthModal').value=h.nascimento;document.getElementById('heiferInsemModal').value=h.inseminacao||'';document.getElementById('heiferModal').classList.add('open');
+}
+function closeModal(){document.getElementById('heiferModal').classList.remove('open')}
+function saveHeifer(){
+ const name=document.getElementById('heiferNameModal').value.trim(),birth=document.getElementById('heiferBirthModal').value;if(!name||!birth)return alert('Informe nome e nascimento.');
+ const edit=document.getElementById('heiferEditId').value,obj={id:edit?Number(edit):Date.now(),nome:name,nascimento:birth,mae:'',inseminacao:document.getElementById('heiferInsemModal').value,parto:null,transferida:false};
+ if(edit){const i=db.novilhas.findIndex(x=>x.id===Number(edit));if(i>=0)obj.mae=db.novilhas[i].mae||'',db.novilhas[i]=obj}else db.novilhas.push(obj);
+ saveDB(false);closeModal();renderHeifers();renderHomeAlerts();
+}
+function renderHeifers(){
+ const box=document.getElementById('heiferList');
+ box.innerHTML=db.novilhas.length?db.novilhas.map(h=>{const age=daysBetween(h.nascimento);const gest=h.inseminacao?daysBetween(h.inseminacao):null;return `<div class="card animal"><div class="animal-head"><span class="animal-name">${escapeHTML(h.nome)}</span><span class="badge" style="background:${gest!==null&&gest>=255?'var(--vermelho)':'var(--verde2)'}">${gest!==null?monthsDays(gest):'Sem inseminação'}</span></div><div class="animal-info"><b>Nascimento:</b> ${fmtDate(h.nascimento)}<br><b>Idade:</b> ${monthsDays(age)}${h.mae?`<br><b>Mãe:</b> ${escapeHTML(h.mae)}`:''}<br><b>Inseminação:</b> ${h.inseminacao?fmtDate(h.inseminacao):'Não registrada'}${gest!==null?`<br><b>Gestação:</b> ${monthsDays(gest)}`:''}</div><div class="row" style="margin-top:10px"><button class="btn btn-light" onclick="editHeifer(${h.id})">✏️ EDITAR</button><button class="btn btn-green" onclick="calfParturition(${h.id})">👶 REGISTRAR PARTO</button></div></div>`}).join(''):'<div class="empty">Nenhuma novilha cadastrada.</div>';
+}
+function calfParturition(id){
+ const h=db.novilhas.find(x=>x.id===id);if(!h)return;const date=prompt('Data do parto (AAAA-MM-DD):',isoToday());if(!date)return;
+ const name=prompt('Nome/brinco da vaca que entrará no rebanho:',h.nome);if(!name)return;
+ db.vacas.push({id:Date.now(),nome:name,parto:date,inseminacao:h.inseminacao||'',status:'lactacao'});
+ db.novilhas=db.novilhas.filter(x=>x.id!==id);saveDB(false);alert('Novilha transferida para o Rebanho Principal.');renderAll();
+}
+
+/* =========================
+   CONFIGURAÇÕES / PRO
+   ========================= */
+function renderConfig(){
+ const s=licenseState(),panel=document.getElementById('licensePanel');
+ document.getElementById('configInstallId').textContent=db.licenca.idInstalacao;document.getElementById('configInstallDate').textContent=new Date(db.licenca.dataInstalacao).toLocaleString('pt-BR');document.getElementById('configStatus').textContent=s.state==='pro'?'USUÁRIO PRO':s.state==='trial'?`TESTE — ${s.remaining} dias restantes`:'BLOQUEADO';
+ if(s.state==='pro')panel.innerHTML='<div class="notice pro-box"><b>USUÁRIO PRO</b><br>Acesso vitalício, sem renovação e sem expiração.</div>';
+ else panel.innerHTML=`<div class="notice"><b>ID da instalação:</b> ${db.licenca.idInstalacao}<br><span class="small">Teste: ${s.state==='trial'?s.remaining+' dias restantes':'encerrado'}</span></div><button class="btn btn-dark btn-block" onclick="copyInstallId()">📋 COPIAR ID</button><div style="height:8px"></div><label>Chave de ativação</label><input id="activationKey" inputmode="numeric" placeholder="Digite a chave recebida"><button class="btn btn-green btn-block" onclick="activatePro()">🔑 ATIVAR PRO</button><div style="height:8px"></div><button class="btn btn-blue btn-block" onclick="openWhatsApp()">🛒 COMPRAR PRO — ${PRICE_TEXT}</button>`;
+ document.getElementById('dryMonths').value=db.configuracoes.secagem.meses;document.getElementById('dryDays').value=db.configuracoes.secagem.dias;
+ const names=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];document.getElementById('measurementDays').innerHTML=names.map((n,i)=>`<label class="day-check"><input type="checkbox" value="${i}" ${db.configuracoes.diasMedicao.includes(i)?'checked':''}>${n}</label>`).join('');
+}
+function saveSettings(){db.configuracoes.secagem.meses=Math.max(0,Number(document.getElementById('dryMonths').value||0));db.configuracoes.secagem.dias=Math.max(0,Number(document.getElementById('dryDays').value||0));saveDB(false);alert('Configurações salvas.');renderAll()}
+function saveMeasurementDays(){const vals=[...document.querySelectorAll('#measurementDays input:checked')].map(x=>Number(x.value));db.configuracoes.diasMedicao=vals;saveDB(false);alert(vals.length?'Dias de medição salvos.':'Nenhum dia de medição individual selecionado. A produção será registrada de forma geral.');if(currentScreen==='producao')loadProductionDay()}
+
+/* =========================
+   BACKUP COM ASSINATURA
+   ========================= */
+function stablePayload(obj){return JSON.stringify(obj)}
+async function makeSignature(payload){
+ if(window.crypto&&crypto.subtle){const data=new TextEncoder().encode(payload),buf=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+ return simpleHash(payload);
+}
+function simpleHash(str){let h1=2166136261>>>0,h2=16777619>>>0;for(let i=0;i<str.length;i++){h1^=str.charCodeAt(i);h1=Math.imul(h1,16777619)>>>0;h2^=Math.imul(h2,31)>>>0}return (h1.toString(16).padStart(8,'0')+h2.toString(16).padStart(8,'0'))}
+async function downloadBackup(){
+ const payload=stablePayload(db),sig=await makeSignature(payload),pack={payload,v:APP_VERSION,sig};
+ const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');const safe=(db.vacas[0]?.nome||'rebanho').replace(/[^a-z0-9À-ÿ_-]+/gi,'_');a.href=url;a.download=`Backup_${safe}_${isoToday()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ db.backup.ultimoBackup=new Date().toISOString();saveDB(false);renderBackup();renderHomeAlerts();toast('Backup baixado.');
+}
+async function restoreBackupFile(ev){
+ const file=ev.target.files&&ev.target.files[0];if(!file)return;
+ try{
+  const text=await file.text(),pack=JSON.parse(text);
+  if(!pack||typeof pack.payload!=='string'||typeof pack.sig!=='string')throw new Error('estrutura');
+  const sig=await makeSignature(pack.payload);if(sig!==pack.sig)throw new Error('assinatura');
+  const parsed=JSON.parse(pack.payload);
+  if(!parsed.licenca||!parsed.licenca.idInstalacao||!parsed.licenca.dataInstalacao||typeof parsed.licenca.isPro!=='boolean')throw new Error('banco');
+  db=normalizeDB(parsed);saveDB(false);alert('Backup válido restaurado com sucesso. O aplicativo será recarregado.');location.reload();
+ }catch(e){alert(e.message==='assinatura'?'Backup corrompido ou alterado. Restauração recusada.':'Arquivo de backup inválido. Nenhum dado foi alterado.')}
+ ev.target.value='';
+}
+function renderBackup(){
+ const b=document.getElementById('backupReminder'),last=db.backup.ultimoBackup?new Date(db.backup.ultimoBackup):null;
+ b.innerHTML=!last||Date.now()-last.getTime()>=7*86400000?'<div class="notice"><b>Recomendação:</b> faça um backup agora para manter seus dados protegidos.</div>':`<div class="notice"><b>Último backup:</b> ${last.toLocaleString('pt-BR')}</div>`;
+}
+
+/* =========================
+   RENDER / INICIALIZAÇÃO
+   ========================= */
+function renderAll(){
+ if(!canUseApp() && currentScreen!=='config' && currentScreen!=='manual' && currentScreen!=='backup')showWall();
+ renderHome();renderCowList();renderAgenda();renderHeifers();renderConfig();renderBackup();
+}
+document.getElementById('prodDate').value=isoToday();document.getElementById('agendaDate').value=isoToday();
+renderAll();
+if(!canUseApp())showWall();
+setInterval(()=>{if(currentScreen==='home')renderHome();},60000);
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+
+        navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+                console.log('Service Worker registrado com sucesso:', registration.scope);
+            })
+            .catch(error => {
+                console.error('Erro ao registrar o Service Worker:', error);
+            });
+
+    });
+}
+</script>
+</body>
+</html>
