@@ -55,7 +55,7 @@ textarea{min-height:110px;resize:vertical}
 .btn-block{width:100%;padding:14px}.btn-green{background:var(--verde);color:#fff}.btn-dark{background:var(--cinza);color:#fff}.btn-blue{background:var(--azul);color:#fff}.btn-red{background:var(--vermelho);color:#fff}.btn-light{background:#e9eeec;color:#263238}.btn-orange{background:var(--laranja);color:#fff}
 .back{width:100%;margin-bottom:12px}
 .badge{display:inline-block;padding:4px 8px;border-radius:7px;color:#fff;font-size:.65rem;font-weight:900;text-transform:uppercase}
-.badge-lac{background:var(--verde)}.badge-seca{background:#7b8790}.badge-pro{background:#f5a623}
+.badge-lac{background:var(--verde)}.badge-seca{background:#7b8790}
 .animal{padding:15px}.animal-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.animal-name{font-weight:900;font-size:1.05rem}.animal-info{border-top:1px solid var(--borda);margin-top:10px;padding-top:9px;font-size:.8rem;line-height:1.6;color:#4b5563}
 .alert{padding:13px;border-radius:11px;background:#fff;margin-bottom:9px;border-left:6px solid;box-shadow:0 2px 6px rgba(0,0,0,.05);font-size:.83rem}
 .alert.red{border-color:var(--vermelho)}.alert.orange{border-color:var(--laranja)}.alert.blue{border-color:var(--azul)}.alert.gray{border-color:var(--cinza)}
@@ -74,8 +74,6 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 .small{font-size:.72rem;color:var(--muted)}.danger-text{color:var(--vermelho);font-weight:800}.success-text{color:var(--verde2);font-weight:800}
 .file-label{display:block;text-align:center;padding:14px;border-radius:10px;background:var(--verde2);color:#fff;font-weight:900;margin-bottom:10px}
 .hidden{display:none!important}
-.lock{min-height:70vh;display:flex;align-items:center;justify-content:center}.lock-card{text-align:center;max-width:520px;width:100%}
-.pro-box{border:2px solid #f0b429;background:#fff8df}
 .kpi-line{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--borda);font-size:.8rem}
 @media(min-width:700px){.menu-btn{min-height:105px}.container{padding:20px}.day-checks{grid-template-columns:repeat(7,1fr)}}
 </style>
@@ -89,7 +87,6 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 
 <main class="container">
 <section id="screen_home" class="screen active">
-  <div id="testBanner"></div>
   <div class="grid-2">
     <div class="stat"><span class="value" id="kpiToday">0,0 L</span><span class="label">Hoje (Ordenha)</span></div>
     <div class="stat"><span class="value" id="kpiMonthDelivery">0,0 L</span><span class="label">Mês (Entrega)</span></div>
@@ -182,29 +179,20 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 </section>
 
 <section id="screen_config" class="screen">
-<button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
-<div class="card pro-box">
- <h2>Licença</h2><div id="licensePanel"></div>
-</div>
-<div class="card">
- <h2>Alertas de secagem</h2>
- <label>Receber aviso a partir de</label>
- <div class="row"><input type="number" min="0" max="12" id="dryMonths"><input type="number" min="0" max="30" id="dryDays"></div>
- <p class="small">O cálculo considera meses aproximados de 30,44 dias. O padrão é 7 meses e 15 dias (aprox. 225 dias).</p>
- <button class="btn btn-green btn-block" onclick="saveSettings()">💾 SALVAR CONFIGURAÇÕES</button>
-</div>
-<div class="card">
- <h2>Dias de medição individual</h2>
- <p class="small">Nos dias selecionados, a tela Produção permitirá lançar manhã e tarde por vaca.</p>
- <div class="day-checks" id="measurementDays"></div>
- <button class="btn btn-green btn-block" onclick="saveMeasurementDays()">💾 SALVAR DIAS DE MEDIÇÃO</button>
-</div>
-<div class="card">
- <h2>Informações da instalação</h2>
- <div class="kpi-line"><span>ID da instalação</span><b id="configInstallId">—</b></div>
- <div class="kpi-line"><span>Instalado em</span><b id="configInstallDate">—</b></div>
- <div class="kpi-line"><span>Status</span><b id="configStatus">—</b></div>
-</div>
+ <button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+ <div class="card">
+  <h2>Alertas de secagem</h2>
+  <label>Receber aviso a partir de</label>
+  <div class="row"><input type="number" min="0" max="12" id="dryMonths"><input type="number" min="0" max="30" id="dryDays"></div>
+  <p class="small">O cálculo considera meses aproximados de 30,44 dias. O padrão é 7 meses e 15 dias (aprox. 225 dias).</p>
+  <button class="btn btn-green btn-block" onclick="saveSettings()">💾 SALVAR CONFIGURAÇÕES</button>
+ </div>
+ <div class="card">
+  <h2>Dias de medição individual</h2>
+  <p class="small">Nos dias selecionados, a tela Produção permitirá lançar manhã e tarde por vaca. Você também pode não selecionar nenhum dia para usar somente a produção geral.</p>
+  <div class="day-checks" id="measurementDays"></div>
+  <button class="btn btn-green btn-block" onclick="saveMeasurementDays()">💾 SALVAR DIAS DE MEDIÇÃO</button>
+ </div>
 </section>
 
 <section id="screen_manual" class="screen">
@@ -219,8 +207,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <h3>Entregas</h3><p>Registre os litros vendidos por dia, preço líquido do mês e acompanhe faturamento, média diária até a data atual e média por entrega.</p>
  <h3>Agenda</h3><p>Cadastre compromissos. Para descarte de leite, informe os dias e o sistema cria alertas durante o período.</p>
  <h3>Novilhas</h3><p>Acompanhe nascimento, idade, inseminação e gestação. Ao registrar o primeiro parto, a novilha é transferida para o rebanho principal.</p>
- <h3>Configurações e PRO</h3><p>Consulte o ID, ative o PRO, configure a secagem e escolha os dias de medição individual. O PRO custa R$ 32,90 em pagamento único e é vitalício.</p>
- <h3>Backup</h3><p>O backup inclui todo o banco, inclusive licença. O arquivo é validado por assinatura antes da restauração. Um lembrete semanal é exibido para recomendar o backup.</p>
+ <h3>Configurações</h3><p>Configure os alertas de secagem e escolha os dias de medição individual. Se nenhum dia for selecionado, a produção será registrada de forma geral.</p>
+ <h3>Backup</h3><p>O backup inclui todos os dados do aplicativo. O arquivo é validado por assinatura antes da restauração. Um lembrete semanal é exibido para recomendar o backup.</p>
 </div>
 </section>
 
@@ -233,7 +221,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <div style="height:10px"></div>
  <label class="file-label" for="backupFile">📂 RESTAURAR VIA ARQUIVO</label>
  <input id="backupFile" class="hidden" type="file" accept=".json,application/json" onchange="restoreBackupFile(event)">
- <p class="small">O arquivo contém os dados do aplicativo e a licença. Se a assinatura não corresponder ao conteúdo, a restauração será recusada.</p>
+ <p class="small">O arquivo contém os dados do aplicativo. Se a assinatura não corresponder ao conteúdo, a restauração será recusada.</p>
 </div>
 </section>
 </main>
@@ -258,9 +246,6 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
    ========================= */
 const DB_KEY='gestao_rebanho_pro_db_v1';
 const APP_VERSION='1.0.0';
-const TRIAL_DAYS=40;
-const PRICE_TEXT='R$ 32,90';
-const WHATSAPP_NUMBER='554298508930';
 
 function defaultDB(){
  return {
@@ -327,75 +312,10 @@ function ensureLicense(){
 }
 ensureLicense();
 
-function installDate(){
- return new Date(db.licenca.dataInstalacao);
-}
-function trialElapsed(){
- return Math.floor((Date.now()-installDate().getTime())/86400000);
-}
-function licenseState(){
- if(db.licenca.isPro) return {state:'pro',days:Infinity,remaining:Infinity};
- const days=trialElapsed();
- return days<TRIAL_DAYS?{state:'trial',days,remaining:TRIAL_DAYS-days}:{state:'blocked',days,remaining:0};
-}
-function expectedKey(){
- const id=Number(db.licenca.idInstalacao);
- return Math.floor((id*17)+2026+(id/2)).toString();
-}
-function validateKey(value){return String(value||'').replace(/\D/g,'')===expectedKey();}
-function activatePro(){
- const input=document.getElementById('activationKey');
- if(!input) return;
- if(validateKey(input.value)){
-  db.licenca.isPro=true; saveDB(false); alert('PRO ativado com sucesso! Acesso vitalício liberado.'); renderAll(); navigate('home');
- }else alert('Chave inválida para este ID de instalação.');
-}
-function canUseApp(){
- const s=licenseState();
- return s.state!=='blocked';
-}
-function guard(screen){
- if(canUseApp()) navigate(screen); else showWall();
-}
-function showWall(){
- currentScreen='wall';
- document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
- let wall=document.getElementById('screen_wall');
- if(!wall){
-  wall=document.createElement('section');wall.id='screen_wall';wall.className='screen';
-  wall.innerHTML=`<div class="lock"><div class="card lock-card pro-box">
-   <h1>🔒 TESTE ENCERRADO</h1><p>Seu período gratuito de 40 dias terminou.</p>
-   <p>O aplicativo custa <b>${PRICE_TEXT}</b>, pagamento único, com acesso PRO vitalício.</p>
-   <div class="kpi-line"><span>ID da instalação</span><b>${db.licenca.idInstalacao}</b></div>
-   <button class="btn btn-dark btn-block" onclick="copyInstallId()">📋 COPIAR ID</button><div style="height:8px"></div>
-   <button class="btn btn-green btn-block" onclick="openWhatsApp()">🛒 COMPRAR PRO — ${PRICE_TEXT}</button><div style="height:8px"></div>
-   <label>Chave de ativação</label><input id="wallKey" inputmode="numeric" placeholder="Digite a chave">
-   <button class="btn btn-blue btn-block" onclick="activateWallPro()">🔑 ATIVAR PRO</button>
-  </div></div>`;
-  document.querySelector('main').appendChild(wall);
- }
- wall.classList.add('active');window.scrollTo(0,0);
-}
-function activateWallPro(){
- const k=document.getElementById('wallKey').value;
- if(validateKey(k)){db.licenca.isPro=true;saveDB(false);alert('PRO ativado com sucesso!');renderAll();navigate('home')}
- else alert('Chave inválida para este ID.');
-}
-function copyInstallId(){
- const txt=String(db.licenca.idInstalacao);
- if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(txt).then(()=>toast('ID copiado.'));
- else {const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('ID copiado.')}
-}
-function openWhatsApp(){
- const msg=encodeURIComponent('Olá! Quero comprar o Gestão Rebanho Pro. Meu ID de instalação é '+db.licenca.idInstalacao+'.');
- window.open('https://wa.me/'+WHATSAPP_NUMBER+'?text='+msg,'_blank');
-}
-
 /* =========================
    NAVEGAÇÃO E UTILITÁRIOS
    ========================= */
 function navigate(screen){
- if(screen!=='home' && screen!=='manual' && screen!=='config' && screen!=='backup' && !canUseApp()) {showWall();return}
  const el=document.getElementById('screen_'+screen);
  if(!el)return;
  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
@@ -441,7 +361,7 @@ function renderHome(){
  const avg=daysWithProduction&&lact.length?entries.monthProductionTotal()/daysWithProduction/lact.length:0;
  document.getElementById('kpiAvgCow').textContent=fmtNumber(avg)+' L';
  document.getElementById('kpiLactation').textContent=`${lact.length} / ${db.vacas.length}`;
- renderChart();renderHomeAlerts();renderTrialBanner();
+ renderChart();renderHomeAlerts();
 }
 function productionTotal(p){
  if(!p)return 0;
@@ -493,12 +413,6 @@ function renderHomeAlerts(){
  if(!out)out='<div class="empty">Nenhum aviso para hoje.</div>';
  box.innerHTML=out;
 }
-function renderTrialBanner(){
- const b=document.getElementById('testBanner'),s=licenseState();
- if(s.state==='pro'){b.innerHTML='<div class="notice pro-box"><b>USUÁRIO PRO</b> — acesso vitalício.</div>'}
- else if(s.state==='trial'){b.innerHTML=`<div class="notice"><b>Teste gratuito:</b> ${s.remaining} ${s.remaining===1?'dia restante':'dias restantes'}.</div>`}
- else b.innerHTML='';
-}
 function dryThresholdDays(){return Math.max(0,Number(db.configuracoes.secagem.meses||0)*30.44+Number(db.configuracoes.secagem.dias||0))}
 
 /* =========================
@@ -532,7 +446,6 @@ function calcProduction(){
  const n=db.vacas.filter(v=>v.status==='lactacao').length;document.getElementById('prodTotal').textContent=fmtNumber(total);document.getElementById('prodAvg').textContent=fmtNumber(n?total/n:0);
 }
 function saveProduction(){
- if(!canUseApp())return showWall();
  const date=document.getElementById('prodDate').value;if(!date)return alert('Informe a data.');
  if(isMeasurementDay(date)){
   db.producao[date]={individual:readIndividual(),m:0,t:0,medicaoIndividual:true};
@@ -663,12 +576,8 @@ function calfParturition(id){
    CONFIGURAÇÕES / PRO
    ========================= */
 function renderConfig(){
- const s=licenseState(),panel=document.getElementById('licensePanel');
- document.getElementById('configInstallId').textContent=db.licenca.idInstalacao;document.getElementById('configInstallDate').textContent=new Date(db.licenca.dataInstalacao).toLocaleString('pt-BR');document.getElementById('configStatus').textContent=s.state==='pro'?'USUÁRIO PRO':s.state==='trial'?`TESTE — ${s.remaining} dias restantes`:'BLOQUEADO';
- if(s.state==='pro')panel.innerHTML='<div class="notice pro-box"><b>USUÁRIO PRO</b><br>Acesso vitalício, sem renovação e sem expiração.</div>';
- else panel.innerHTML=`<div class="notice"><b>ID da instalação:</b> ${db.licenca.idInstalacao}<br><span class="small">Teste: ${s.state==='trial'?s.remaining+' dias restantes':'encerrado'}</span></div><button class="btn btn-dark btn-block" onclick="copyInstallId()">📋 COPIAR ID</button><div style="height:8px"></div><label>Chave de ativação</label><input id="activationKey" inputmode="numeric" placeholder="Digite a chave recebida"><button class="btn btn-green btn-block" onclick="activatePro()">🔑 ATIVAR PRO</button><div style="height:8px"></div><button class="btn btn-blue btn-block" onclick="openWhatsApp()">🛒 COMPRAR PRO — ${PRICE_TEXT}</button>`;
- document.getElementById('dryMonths').value=db.configuracoes.secagem.meses;document.getElementById('dryDays').value=db.configuracoes.secagem.dias;
- const names=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];document.getElementById('measurementDays').innerHTML=names.map((n,i)=>`<label class="day-check"><input type="checkbox" value="${i}" ${db.configuracoes.diasMedicao.includes(i)?'checked':''}>${n}</label>`).join('');
+  document.getElementById('dryMonths').value=db.configuracoes.secagem.meses;document.getElementById('dryDays').value=db.configuracoes.secagem.dias;
+  const names=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];document.getElementById('measurementDays').innerHTML=names.map((n,i)=>`<label class="day-check"><input type="checkbox" value="${i}" ${db.configuracoes.diasMedicao.includes(i)?'checked':''}>${n}</label>`).join('');
 }
 function saveSettings(){db.configuracoes.secagem.meses=Math.max(0,Number(document.getElementById('dryMonths').value||0));db.configuracoes.secagem.dias=Math.max(0,Number(document.getElementById('dryDays').value||0));saveDB(false);alert('Configurações salvas.');renderAll()}
 function saveMeasurementDays(){const vals=[...document.querySelectorAll('#measurementDays input:checked')].map(x=>Number(x.value));db.configuracoes.diasMedicao=vals;saveDB(false);alert(vals.length?'Dias de medição salvos.':'Nenhum dia de medição individual selecionado. A produção será registrada de forma geral.');if(currentScreen==='producao')loadProductionDay()}
@@ -708,12 +617,10 @@ function renderBackup(){
    RENDER / INICIALIZAÇÃO
    ========================= */
 function renderAll(){
- if(!canUseApp() && currentScreen!=='config' && currentScreen!=='manual' && currentScreen!=='backup')showWall();
  renderHome();renderCowList();renderAgenda();renderHeifers();renderConfig();renderBackup();
 }
 document.getElementById('prodDate').value=isoToday();document.getElementById('agendaDate').value=isoToday();
 renderAll();
-if(!canUseApp())showWall();
 setInterval(()=>{if(currentScreen==='home')renderHome();},60000);
 </script>
 <script>
