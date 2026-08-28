@@ -92,6 +92,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
     <div class="stat"><span class="value" id="kpiMonthDelivery">0,0 L</span><span class="label">Mês (Entrega)</span></div>
     <div class="stat"><span class="value" id="kpiAvgCow">0,0 L</span><span class="label">Média/Vaca Mês</span></div>
     <div class="stat"><span class="value" id="kpiLactation">0 / 0</span><span class="label">Lactação / Rebanho</span></div>
+ <div class="stat"><span class="value" id="kpiHeifers">0</span><span class="label">Novilhas</span></div>
   </div>
   <div class="chart"><div class="chart-title">Tendência — últimos 7 dias</div><div class="bars" id="chartBars"></div></div>
   <div class="menu">
@@ -245,7 +246,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
    BANCO CENTRAL E LICENÇA
    ========================= */
 const DB_KEY='gestao_rebanho_pro_db_v1';
-const APP_VERSION='1.0.0';
+const APP_VERSION='3.0.0';
 
 function defaultDB(){
  return {
@@ -274,6 +275,13 @@ function normalizeDB(raw){
  if(!raw || typeof raw!=='object') return base;
  const n=Object.assign(base,raw);
  n.vacas=Array.isArray(raw.vacas)?raw.vacas:[];
+ // V3: registra quando uma vaca passou a participar da lactação atual.
+ // Dados antigos sem este campo continuam válidos e representam vacas
+ // já existentes antes do histórico disponível.
+ n.vacas.forEach(v=>{
+  if(!Object.prototype.hasOwnProperty.call(v,'dataEntradaLactacao'))v.dataEntradaLactacao=null;
+  if(!Object.prototype.hasOwnProperty.call(v,'dataSaidaLactacao'))v.dataSaidaLactacao=null;
+ });
  n.producao=raw.producao&&typeof raw.producao==='object'?raw.producao:{};
  n.entregas=raw.entregas&&typeof raw.entregas==='object'?raw.entregas:{};
  n.agenda=Array.isArray(raw.agenda)?raw.agenda.map(a=>Object.assign({},a,{texto:a.texto??a.text??''})):[];
@@ -357,10 +365,10 @@ function renderHome(){
  const entries=monthDeliveryStats(month);
  document.getElementById('kpiMonthDelivery').textContent=fmtNumber(entries.total)+' L';
  const lact=db.vacas.filter(v=>v.status==='lactacao');
- const daysWithProduction=Object.keys(db.producao).filter(k=>k.startsWith(month)&&productionTotal(db.producao[k])>0).length;
- const avg=daysWithProduction&&lact.length?entries.monthProductionTotal()/daysWithProduction/lact.length:0;
+ const avg=monthGeneralAverage(month);
  document.getElementById('kpiAvgCow').textContent=fmtNumber(avg)+' L';
  document.getElementById('kpiLactation').textContent=`${lact.length} / ${db.vacas.length}`;
+ document.getElementById('kpiHeifers').textContent=String(db.novilhas.length);
  renderChart();renderHomeAlerts();
 }
 function productionTotal(p){
@@ -378,6 +386,42 @@ function productionPeriodTotals(p){
   let m=0,t=0;Object.values(p.individual).forEach(x=>{m+=Number(x.m||0);t+=Number(x.t||0)});return {m,t};
  }
  return {m:Number(p.m||0),t:Number(p.t||0)};
+}
+function productionDayComplete(p){
+ if(!p)return false;
+ const totals=productionPeriodTotals(p);
+ return totals.m>0 && totals.t>0;
+}
+function cowParticipatesOnDate(cow,date){
+ if(!cow)return false;
+ if(cow.dataEntradaLactacao && String(date)<String(cow.dataEntradaLactacao))return false;
+ if(cow.dataSaidaLactacao && String(date)>=String(cow.dataSaidaLactacao))return false;
+ if(cow.status!=='lactacao' && !cow.dataSaidaLactacao)return false;
+ return true;
+}
+function historicalCowCountForDate(date){
+ return lactatingCowsOnDate(date).length;
+}
+function ensureProductionCowCount(p,date){
+ if(!p || !productionDayComplete(p))return;
+ const n=historicalCowCountForDate(date);
+ if(n>0 && (!Number.isFinite(Number(p.vacasAtivas)) || Number(p.vacasAtivas)<=0))p.vacasAtivas=n;
+}
+function lactatingCowsOnDate(date){
+ return db.vacas.filter(v=>cowParticipatesOnDate(v,date));
+}
+function monthGeneralAverage(month){
+ let total=0,cowDays=0;
+ Object.keys(db.producao).forEach(date=>{
+  if(!date.startsWith(month))return;
+  const p=db.producao[date];
+  if(!productionDayComplete(p))return;
+  const divisor=Number(p.vacasAtivas)>0?Number(p.vacasAtivas):historicalCowCountForDate(date);
+  if(divisor<=0)return;
+  total+=productionTotal(p);
+  cowDays+=divisor;
+ });
+ return cowDays?total/cowDays:0;
 }
 function renderChart(){
  const box=document.getElementById('chartBars');box.innerHTML='';
@@ -432,7 +476,8 @@ function loadProductionDay(){
  calcProduction();
 }
 function renderIndividualInputs(existing){
- const cows=db.vacas.filter(v=>v.status==='lactacao');
+ const date=document.getElementById('prodDate').value||isoToday();
+ const cows=lactatingCowsOnDate(date);
  const box=document.getElementById('individualFields');
  if(!cows.length){box.innerHTML='<div class="empty">Cadastre vacas em lactação para fazer a medição individual.</div>';return}
  box.innerHTML='<label>Produção por vaca</label>'+cows.map(v=>{const x=existing[v.id]||{};return `<div class="card" style="padding:12px;background:#f8faf9"><b>${escapeHTML(v.nome)}</b><div class="row"><div><label>Manhã</label><input type="number" min="0" step="0.1" data-cow="${v.id}" data-turn="m" value="${x.m??''}" oninput="calcProduction()"></div><div><label>Tarde</label><input type="number" min="0" step="0.1" data-cow="${v.id}" data-turn="t" value="${x.t??''}" oninput="calcProduction()"></div></div></div>`}).join('');
@@ -443,14 +488,16 @@ function readIndividual(){
 function calcProduction(){
  let total=0;if(isMeasurementDay(document.getElementById('prodDate').value||isoToday())){const x=readIndividual();Object.values(x).forEach(v=>total+=Number(v.m||0)+Number(v.t||0))}
  else total=Number(document.getElementById('prodMorning').value||0)+Number(document.getElementById('prodAfternoon').value||0);
- const n=db.vacas.filter(v=>v.status==='lactacao').length;document.getElementById('prodTotal').textContent=fmtNumber(total);document.getElementById('prodAvg').textContent=fmtNumber(n?total/n:0);
+ const date=document.getElementById('prodDate').value||isoToday();
+ const n=lactatingCowsOnDate(date).length;document.getElementById('prodTotal').textContent=fmtNumber(total);document.getElementById('prodAvg').textContent=fmtNumber(n?total/n:0);
 }
 function saveProduction(){
  const date=document.getElementById('prodDate').value;if(!date)return alert('Informe a data.');
+ const divisor=lactatingCowsOnDate(date).length;
  if(isMeasurementDay(date)){
-  db.producao[date]={individual:readIndividual(),m:0,t:0,medicaoIndividual:true};
+  db.producao[date]={individual:readIndividual(),m:0,t:0,medicaoIndividual:true,vacasAtivas:divisor};
  }else{
-  db.producao[date]={m:Number(document.getElementById('prodMorning').value||0),t:Number(document.getElementById('prodAfternoon').value||0),medicaoIndividual:false};
+  db.producao[date]={m:Number(document.getElementById('prodMorning').value||0),t:Number(document.getElementById('prodAfternoon').value||0),medicaoIndividual:false,vacasAtivas:divisor};
  }
  saveDB(false);alert('Produção salva.');renderAll();
 }
@@ -459,9 +506,19 @@ function saveProduction(){
    REBANHO
    ========================= */
 function cowIndividualStats(id){
- let vals=[];Object.keys(db.producao).forEach(date=>{const p=db.producao[date];if(p&&p.individual&&p.individual[id]){const x=p.individual[id];const total=Number(x.m||0)+Number(x.t||0);if(total>0)vals.push({date,total})}});
- if(!vals.length)return null;
- const avg=vals.reduce((s,x)=>s+x.total,0)/vals.length;const record=Math.max(...vals.map(x=>x.total));return {avg,record,count:vals.length};
+ const cow=db.vacas.find(v=>v.id===id);if(!cow)return null;
+ const today=isoToday(),cutoffDate=new Date();cutoffDate.setHours(12,0,0,0);cutoffDate.setDate(cutoffDate.getDate()-29);const cutoff=localISO(cutoffDate);
+ let recent=[],all=[];
+ Object.keys(db.producao).forEach(date=>{
+  const p=db.producao[date];if(!p||!p.individual||!p.individual[id])return;
+  if(cow.dataEntradaLactacao&&date<cow.dataEntradaLactacao)return;
+  const x=p.individual[id],total=Number(x.m||0)+Number(x.t||0);if(total<=0)return;
+  const item={date,total};all.push(item);if(date>=cutoff&&date<=today)recent.push(item);
+ });
+ if(!all.length)return null;
+ const avg=recent.length?recent.reduce((s,x)=>s+x.total,0)/recent.length:0;
+ const record=Math.max(...all.map(x=>x.total));
+ return {avg,record,count:recent.length};
 }
 function resetCowForm(){
  document.getElementById('cowFormTitle').textContent='Cadastrar animal';['cowEditId','cowName','cowCalving','cowInsemination','heiferName'].forEach(id=>document.getElementById(id).value='');
@@ -471,15 +528,46 @@ function resetCowForm(){
 }
 document.getElementById('registerHeifer').addEventListener('change',()=>document.getElementById('heiferNameWrap').classList.toggle('hidden',!document.getElementById('registerHeifer').checked));
 document.getElementById('cowCalving').addEventListener('change',()=>document.getElementById('heiferFields').classList.toggle('hidden',!document.getElementById('cowCalving').value));
+function freezeMissingHistoricalDivisors(beforeDate){
+ Object.keys(db.producao).forEach(date=>{
+  if(String(date)>=String(beforeDate))return;
+  const p=db.producao[date];
+  if(!p || !productionDayComplete(p))return;
+  if(!Number.isFinite(Number(p.vacasAtivas)) || Number(p.vacasAtivas)<=0){
+   const n=historicalCowCountForDate(date);
+   if(n>0)p.vacasAtivas=n;
+  }
+ });
+}
 function saveCow(){
  const name=document.getElementById('cowName').value.trim();if(!name)return alert('Informe o nome/brinco.');
  const edit=document.getElementById('cowEditId').value;const calving=document.getElementById('cowCalving').value;
  const old=edit?db.vacas.find(v=>v.id===Number(edit)):null;
+ const newStatus=document.getElementById('cowStatus').value;
+ const today=isoToday();
+ let dataEntradaLactacao=null,dataSaidaLactacao=null;
+ if(old){
+  dataEntradaLactacao=old.dataEntradaLactacao||null;
+  dataSaidaLactacao=old.dataSaidaLactacao||null;
+  // Ao secar uma vaca, congela os divisores dos dias anteriores antes de
+  // alterar o status. Assim a mudança passa a valer somente a partir de hoje.
+  if(old.status==='lactacao' && newStatus==='seca'){
+   freezeMissingHistoricalDivisors(today);
+   dataSaidaLactacao=today;
+  }else if(old.status==='seca' && newStatus==='lactacao'){
+   dataEntradaLactacao=today;
+   dataSaidaLactacao=null;
+  }else if(newStatus==='lactacao'){
+   dataSaidaLactacao=null;
+  }
+ }else if(newStatus==='lactacao'){
+  dataEntradaLactacao=today;
+ }
  let inseminacao=document.getElementById('cowInsemination').value;
  // Ao registrar um novo parto em uma vaca já existente, a gestação anterior termina.
  // Porém, se o usuário informar uma nova inseminação no mesmo salvamento, ela é preservada.
  if(old && calving && calving!==old.parto && (!inseminacao || inseminacao===old.inseminacao)) inseminacao='';
- const obj={id:edit?Number(edit):Date.now(),nome:name,parto:calving,inseminacao,status:document.getElementById('cowStatus').value};
+ const obj={id:edit?Number(edit):Date.now(),nome:name,parto:calving,inseminacao,status:newStatus,dataEntradaLactacao,dataSaidaLactacao};
  if(edit){const i=db.vacas.findIndex(v=>v.id===Number(edit));if(i>=0)db.vacas[i]=obj}
  else db.vacas.push(obj);
  if(calving&&document.getElementById('registerHeifer').checked){
@@ -563,12 +651,13 @@ function saveHeifer(){
 }
 function renderHeifers(){
  const box=document.getElementById('heiferList');
- box.innerHTML=db.novilhas.length?db.novilhas.map(h=>{const age=daysBetween(h.nascimento);const gest=h.inseminacao?daysBetween(h.inseminacao):null;return `<div class="card animal"><div class="animal-head"><span class="animal-name">${escapeHTML(h.nome)}</span><span class="badge" style="background:${gest!==null&&gest>=255?'var(--vermelho)':'var(--verde2)'}">${gest!==null?monthsDays(gest):'Sem inseminação'}</span></div><div class="animal-info"><b>Nascimento:</b> ${fmtDate(h.nascimento)}<br><b>Idade:</b> ${monthsDays(age)}${h.mae?`<br><b>Mãe:</b> ${escapeHTML(h.mae)}`:''}<br><b>Inseminação:</b> ${h.inseminacao?fmtDate(h.inseminacao):'Não registrada'}${gest!==null?`<br><b>Gestação:</b> ${monthsDays(gest)}`:''}</div><div class="row" style="margin-top:10px"><button class="btn btn-light" onclick="editHeifer(${h.id})">✏️ EDITAR</button><button class="btn btn-green" onclick="calfParturition(${h.id})">👶 REGISTRAR PARTO</button></div></div>`}).join(''):'<div class="empty">Nenhuma novilha cadastrada.</div>';
+ const sorted=[...db.novilhas].sort((a,b)=>String(a.nascimento||'').localeCompare(String(b.nascimento||'')));
+ box.innerHTML=sorted.length?sorted.map(h=>{const age=daysBetween(h.nascimento);const gest=h.inseminacao?daysBetween(h.inseminacao):null;return `<div class="card animal"><div class="animal-head"><span class="animal-name">${escapeHTML(h.nome)}</span><span class="badge" style="background:${gest!==null&&gest>=255?'var(--vermelho)':'var(--verde2)'}">${gest!==null?monthsDays(gest):'Sem inseminação'}</span></div><div class="animal-info"><b>Nascimento:</b> ${fmtDate(h.nascimento)}<br><b>Idade:</b> ${monthsDays(age)}${h.mae?`<br><b>Mãe:</b> ${escapeHTML(h.mae)}`:''}<br><b>Inseminação:</b> ${h.inseminacao?fmtDate(h.inseminacao):'Não registrada'}${gest!==null?`<br><b>Gestação:</b> ${monthsDays(gest)}`:''}</div><div class="row" style="margin-top:10px"><button class="btn btn-light" onclick="editHeifer(${h.id})">✏️ EDITAR</button><button class="btn btn-green" onclick="calfParturition(${h.id})">👶 REGISTRAR PARTO</button></div></div>`}).join(''):'<div class="empty">Nenhuma novilha cadastrada.</div>';
 }
 function calfParturition(id){
  const h=db.novilhas.find(x=>x.id===id);if(!h)return;const date=prompt('Data do parto (AAAA-MM-DD):',isoToday());if(!date)return;
  const name=prompt('Nome/brinco da vaca que entrará no rebanho:',h.nome);if(!name)return;
- db.vacas.push({id:Date.now(),nome:name,parto:date,inseminacao:h.inseminacao||'',status:'lactacao'});
+ db.vacas.push({id:Date.now(),nome:name,parto:date,inseminacao:h.inseminacao||'',status:'lactacao',dataEntradaLactacao:date,dataSaidaLactacao:null});
  db.novilhas=db.novilhas.filter(x=>x.id!==id);saveDB(false);alert('Novilha transferida para o Rebanho Principal.');renderAll();
 }
 
