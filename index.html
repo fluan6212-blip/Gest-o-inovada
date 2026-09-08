@@ -73,15 +73,28 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 .login-modal{align-items:center;padding:18px;background:rgba(0,0,0,.68);z-index:5000}.login-box{border-radius:18px;max-height:90vh}.login-modal .btn{margin-top:2px}
 .modal-box{background:#fff;width:100%;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}
 .small{font-size:.72rem;color:var(--muted)}.danger-text{color:var(--vermelho);font-weight:800}.success-text{color:var(--verde2);font-weight:800}
+.batch-list{display:flex;flex-direction:column;gap:10px}.batch-animal{border:1px solid var(--borda);border-radius:12px;padding:13px;background:#fafcfb}.batch-animal h3{margin:0 0 12px;font-size:.95rem}.batch-animal .row{align-items:flex-start}.batch-actions{position:sticky;bottom:0;background:#fff;padding-top:10px;margin-top:4px;border-top:1px solid var(--borda)}
 .file-label{display:block;text-align:center;padding:14px;border-radius:10px;background:var(--verde2);color:#fff;font-weight:900;margin-bottom:10px}
 .hidden{display:none!important}
+.date-mode{display:flex;gap:7px;align-items:center;margin:-5px 0 8px}.date-mode button{flex:1;padding:7px 8px;border:1px solid var(--borda);border-radius:8px;background:#eef3f1;color:var(--cinza);font-size:.72rem;font-weight:800}.date-mode button.active{background:var(--verde);color:#fff;border-color:var(--verde)}
 .kpi-line{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--borda);font-size:.8rem}
 @media(min-width:700px){.menu-btn{min-height:105px}.container{padding:20px}.day-checks{grid-template-columns:repeat(7,1fr)}}
+
+.finance-kpi{background:var(--card);border-radius:15px;padding:16px;box-shadow:var(--sombra);margin-bottom:14px;border-left:5px solid var(--verde)}
+.finance-kpi .big{font-size:1.7rem;font-weight:900;color:var(--topo)}
+.finance-kpi .sub{font-size:.72rem;color:var(--muted);margin-top:3px}
+.finance-tabs{display:flex;gap:8px;margin-bottom:12px}.finance-tabs button{flex:1}
+.finance-section-title{font-weight:900;font-size:.9rem;text-transform:uppercase;margin:16px 0 10px;border-left:4px solid var(--topo);padding-left:8px}
+.finance-card{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:13px;margin-bottom:9px}
+.finance-card-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.finance-card h4{margin:0 0 5px;font-size:.9rem}.finance-card p{margin:4px 0;font-size:.78rem}
+.finance-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.finance-actions .btn{padding:8px 10px;font-size:.72rem}
+.receipt-box{background:#eef7ef;border-radius:12px;padding:13px;margin:12px 0}.receipt-box .kpi-line:last-child{border-bottom:0}
+.finance-help summary{cursor:pointer;font-weight:900}.finance-help p{font-size:.78rem;line-height:1.5}.muted-box{background:#f5f7f6;border-radius:10px;padding:11px;font-size:.78rem}
 </style>
 </head>
 <body>
 <header class="header">
-  <button class="brand" onclick="navigate('home')"><strong>GESTÃO REBANHO PRO</strong><small>Gestão simples do seu rebanho</small></button>
+  <button class="brand" onclick="navigate('home')"><strong>GESTÃO REBANHO PRO</strong><small>Gestão simples do seu rebanho · V6</small></button>
   <button class="icon-btn" onclick="navigate('manual')">📖 MANUAL</button>
   <button class="icon-btn" onclick="navigate('config')">⚙️</button>
 </header>
@@ -93,7 +106,10 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
     <div class="stat"><span class="value" id="kpiMonthDelivery">0,0 L</span><span class="label">Mês (Entrega)</span></div>
     <div class="stat"><span class="value" id="kpiAvgCow">0,0 L</span><span class="label">Média/Vaca Mês</span></div>
     <div class="stat"><span class="value" id="kpiLactation">0 / 0</span><span class="label">Lactação / Rebanho</span></div>
- <div class="stat"><span class="value" id="kpiHeifers">0</span><span class="label">Novilhas</span></div>
+    <div class="stat"><span class="value" id="kpiDEL">0 dias</span><span class="label">DEL Médio</span></div>
+    <div class="stat"><span class="value" id="kpiHeifers">0</span><span class="label">Novilhas</span></div>
+    <div class="stat"><span class="value" id="kpiFeed">—</span><span class="label">Ração recomendada hoje</span></div>
+    <div class="stat"><span class="value" id="kpiMilkCost">—</span><span class="label">Custo do leite<br><span style="font-size:.58rem;font-weight:700;text-transform:none">Últimos 90 dias</span></span></div>
   </div>
   <div class="chart"><div class="chart-title">Tendência — últimos 7 dias</div><div class="bars" id="chartBars"></div></div>
   <div class="menu">
@@ -102,7 +118,9 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
     <button class="menu-btn m-blue" onclick="navigate('entregas')">🚚 ENTREGAS</button>
     <button class="menu-btn m-cyan" onclick="navigate('agenda')">📅 AGENDA</button>
     <button class="menu-btn m-orange" onclick="navigate('novilhas')">🐮 NOVILHAS</button>
+    <button class="menu-btn m-blue" onclick="navigate('retrospectiva')">📊 RETROSPECTIVA DO REBANHO</button>
     <button class="menu-btn m-gray" onclick="navigate('backup')">💾 BACKUP</button>
+    <button class="menu-btn m-green" onclick="navigate('financeiro')">💰 FINANCEIRO</button>
   </div>
   <div class="section-title">Avisos e tarefas</div>
   <div id="homeAlerts"></div>
@@ -129,14 +147,17 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
   <h2 id="cowFormTitle">Cadastrar animal</h2>
   <input type="hidden" id="cowEditId">
   <label>Nome / Brinco</label><input id="cowName" maxlength="60">
-  <div class="row"><div><label>Último parto</label><input type="date" id="cowCalving"></div><div><label>Inseminação</label><input type="date" id="cowInsemination"></div></div>
+  <div class="row"><div><label>Último parto</label><input type="date" id="cowCalving"><input class="hidden" type="text" id="cowCalvingManual" inputmode="numeric" maxlength="10" placeholder="DD/MM/AAAA" oninput="maskDateInput(this)"><div class="date-mode"><button type="button" id="cowCalvingCalendarBtn" class="active" onclick="setDateMode('cowCalving','cowCalvingManual','calendar')">📅 Calendário</button><button type="button" id="cowCalvingManualBtn" onclick="setDateMode('cowCalving','cowCalvingManual','manual')">⌨️ Digitar</button></div></div><div><label>Inseminação</label><input type="date" id="cowInsemination"><input class="hidden" type="text" id="cowInseminationManual" inputmode="numeric" maxlength="10" placeholder="DD/MM/AAAA" oninput="maskDateInput(this)"><div class="date-mode"><button type="button" id="cowInseminationCalendarBtn" class="active" onclick="setDateMode('cowInsemination','cowInseminationManual','calendar')">📅 Calendário</button><button type="button" id="cowInseminationManualBtn" onclick="setDateMode('cowInsemination','cowInseminationManual','manual')">⌨️ Digitar</button></div></div></div>
+  <div class="row"><div><label>Pai (opcional)</label><input id="cowFather" maxlength="60" placeholder="Nome do pai / sêmen"></div><div><label>Mãe (opcional)</label><input id="cowMother" maxlength="60" placeholder="Nome da mãe"></div></div>
+  <label>🐂 Reprodutor / Touro da inseminação (opcional)</label><input id="cowReproducer" maxlength="60" placeholder="Nome / identificação do reprodutor">
   <label>Status</label><select id="cowStatus"><option value="lactacao">Em Lactação</option><option value="seca">Seca</option></select>
   <div class="notice" id="heiferPrompt">Ao informar um novo parto, você poderá cadastrar a fêmea nascida no Rebanho de Novilhas.</div>
   <div id="heiferFields" class="hidden">
     <label><input type="checkbox" id="registerHeifer" style="width:auto;margin:0 5px 0 0"> Registrar a fêmea deste parto como novilha</label>
-    <div id="heiferNameWrap" class="hidden"><label>Nome / Brinco da novilha</label><input id="heiferName"></div>
+    <div id="heiferNameWrap" class="hidden"><label>Nome / Brinco da novilha</label><input id="heiferName" maxlength="60"><label>Pai da novilha (opcional)</label><input id="heiferFather" maxlength="60" placeholder="Nome do pai / sêmen"><div class="small muted" style="margin-top:4px">Se houver reprodutor informado na inseminação desta vaca, ele será preenchido automaticamente e poderá ser editado.</div></div>
   </div>
   <button class="btn btn-green btn-block" onclick="saveCow()">💾 SALVAR NO REBANHO</button>
+  <button class="btn btn-blue btn-block" onclick="openCowBatchModal()">➕ CADASTRAR NOVA REMESSA</button>
   <button class="btn btn-red btn-block hidden" id="deleteCowBtn" onclick="deleteCow()">🗑️ EXCLUIR ANIMAL</button>
   <button class="btn btn-light btn-block hidden" id="cancelCowBtn" onclick="resetCowForm()">✖️ CANCELAR EDIÇÃO</button>
 </div>
@@ -144,17 +165,26 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 </section>
 
 <section id="screen_entregas" class="screen">
-<button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
-<div class="card">
- <div class="month-nav"><button class="btn btn-light" onclick="changeMonth(-1)">⬅️ Anterior</button><strong id="deliveryMonth"></strong><button class="btn btn-light" onclick="changeMonth(1)">Próximo ➡️</button></div>
- <label>Preço líquido por litro (R$)</label><input type="number" min="0" step="0.0001" id="milkPrice" oninput="saveMilkPrice(this.value)">
- <div class="summary"><div class="summary-grid">
-  <div class="summary-item"><small>TOTAL LITROS</small><b id="deliveryTotal">0,0 L</b></div>
-  <div class="summary-item"><small>VALOR TOTAL</small><b id="deliveryValue">R$ 0,00</b></div>
-  <div class="summary-item"><small>MÉDIA/ENTREGA</small><b id="deliveryAvgEntry">0,0 L</b></div>
- </div></div>
- <div class="table-scroll"><table><thead><tr><th>Dia</th><th>Litros entregues</th></tr></thead><tbody id="deliveryTable"></tbody></table></div>
-</div>
+ <button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+ <div class="card">
+  <div class="month-nav"><button class="btn btn-light" onclick="changeMonth(-1)">⬅️ Anterior</button><strong id="deliveryMonth"></strong><button class="btn btn-light" onclick="changeMonth(1)">Próximo ➡️</button></div>
+  <label>Como informar o valor recebido?</label>
+  <select id="paymentMode" onchange="setPaymentMode(this.value)">
+   <option value="perLiter">Valor por litro</option>
+   <option value="total">Valor total recebido</option>
+  </select>
+  <div id="paymentPerLiterWrap"><label>Valor líquido recebido por litro (R$/L)</label><input type="number" min="0" step="0.0001" id="milkPrice" oninput="saveMilkPrice(this.value)"></div>
+  <div id="paymentTotalWrap" class="hidden"><label>Valor total realmente recebido (R$)</label><input type="number" min="0" step="0.01" id="milkTotalReceived" oninput="saveMilkTotal(this.value)"></div>
+  <div class="summary"><div class="summary-grid">
+   <div class="summary-item"><small>TOTAL LITROS</small><b id="deliveryTotal">0,0 L</b></div>
+   <div class="summary-item"><small>VALOR TOTAL</small><b id="deliveryValue">—</b></div>
+   <div class="summary-item"><small>MÉDIA/ENTREGA</small><b id="deliveryAvgEntry">0,0 L</b></div>
+  </div>
+  <div class="kpi-line" style="border-bottom:0;margin-top:5px"><b>Valor por litro</b><span id="deliveryPriceSummary">—</span></div>
+  <div class="kpi-line" style="border-bottom:0"><b>Recebimento</b><span id="deliveryReceiptStatus">Ainda não registrado</span></div>
+  </div>
+  <div class="table-scroll"><table><thead><tr><th>Dia</th><th>Litros entregues</th></tr></thead><tbody id="deliveryTable"></tbody></table></div>
+ </div>
 </section>
 
 <section id="screen_agenda" class="screen">
@@ -176,8 +206,58 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <h2>Rebanho de Novilhas</h2>
  <p class="small">Novilhas nascidas a partir de partos registrados podem ser acompanhadas até o primeiro parto.</p>
  <button class="btn btn-green btn-block" onclick="openNewHeiferModal()">➕ CADASTRAR NOVILHA</button>
+ <button class="btn btn-blue btn-block" onclick="openHeiferBatchModal()">➕ CADASTRAR NOVA REMESSA</button>
 </div>
 <div id="heiferList"></div>
+</section>
+
+<section id="screen_retrospectiva" class="screen">
+ <button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+ <div class="card"><h2>📊 Retrospectiva do Rebanho</h2><div id="retrospectivaPeriod"></div></div>
+ <div id="retrospectivaContent"></div>
+</section>
+
+<section id="screen_financeiro" class="screen">
+ <button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+ <div class="finance-kpi"><div class="small">🥛 CUSTO ATUAL DO LEITE</div><div class="big" id="financeMilkCost">—</div><div class="sub">Últimos 90 dias</div></div>
+ <div class="card">
+  <h2>💰 Financeiro do leite</h2>
+  <p class="small">Acompanhe o dinheiro recebido pelo leite, os gastos para produzir leite e o resultado de cada mês.</p>
+  <button class="btn btn-green btn-block" onclick="openExpenseForm()">➕ ADICIONAR GASTO</button>
+  <button class="btn btn-blue btn-block" onclick="openOtherIncomeForm()">💰 OUTRO VALOR RECEBIDO</button>
+ </div>
+ <div class="card">
+  <div class="month-nav"><button class="btn btn-light" onclick="changeFinanceMonth(-1)">⬅️ ANTERIOR</button><strong id="financeMonthLabel"></strong><button class="btn btn-light" onclick="changeFinanceMonth(1)">PRÓXIMO ➡️</button></div>
+  <div id="financeMonthlySummary"></div>
+ </div>
+ <div id="financeExpenseForm" class="card hidden">
+  <h3 id="expenseFormTitle">➕ Novo gasto</h3><input type="hidden" id="expenseEditId">
+  <label>Descrição</label><input id="expenseDescription" maxlength="100" placeholder="Ex.: Ração, silagem...">
+  <div class="row"><div><label>Valor total (R$)</label><input type="number" min="0" step="0.01" id="expenseValue"></div><div><label>Data em que começou</label><input type="date" id="expenseDate"></div></div>
+  <label>Categoria</label><select id="expenseCategory"><option>Ração</option><option>Insumos</option><option>Energia</option><option>Combustível</option><option>Medicamentos/remédios</option><option>Manutenção</option><option>Mão de obra</option><option>Outro</option></select>
+  <label>Esse gasto é para produzir leite?</label><select id="expenseForMilk"><option value="sim">SIM</option><option value="nao">NÃO</option></select>
+  <label>Esse gasto vai durar mais de um mês?</label><select id="expenseMultiMonth" onchange="toggleMultiMonthExpense(this.value)"><option value="nao">NÃO</option><option value="sim">SIM</option></select>
+  <div id="expensePeriodWrap" class="hidden"><label>Até quando você acha que vai durar?</label><input type="date" id="expenseEstimatedEnd"><div class="small">O aplicativo distribui o valor pelos dias do período informado para os cálculos.</div><label style="margin-top:10px">Quando realmente terminou? (opcional)</label><input type="date" id="expenseRealEnd"></div>
+  <div class="row" style="margin-top:10px"><button class="btn btn-light" onclick="closeExpenseForm()">CANCELAR</button><button class="btn btn-green" onclick="saveExpense()">💾 SALVAR</button></div>
+ </div>
+ <div id="financeOtherIncomeForm" class="card hidden">
+  <h3 id="otherIncomeFormTitle">💰 Outro valor recebido</h3><input type="hidden" id="otherIncomeEditId">
+  <label>Descrição</label><input id="otherIncomeDescription" maxlength="100" placeholder="Ex.: Venda de novilha">
+  <div class="row"><div><label>Valor recebido (R$)</label><input type="number" min="0" step="0.01" id="otherIncomeValue"></div><div><label>Data</label><input type="date" id="otherIncomeDate"></div></div>
+  <label>Tipo</label><select id="otherIncomeCategory"><option>Venda de novilha</option><option>Venda de vaca</option><option>Venda de bezerro</option><option>Venda de descarte</option><option>Outro</option></select>
+  <div class="row"><button class="btn btn-light" onclick="closeOtherIncomeForm()">CANCELAR</button><button class="btn btn-green" onclick="saveOtherIncome()">💾 SALVAR</button></div>
+ </div>
+ <div class="card"><div class="finance-section-title">🥛 EXTRATO DO LEITE</div><div id="financeExtract"></div></div>
+ <details class="card finance-help"><summary>❓ DÚVIDAS? COMO FUNCIONA O FINANCEIRO</summary>
+  <p><b>O que preciso preencher?</b><br>Registre o pagamento do leite em Entregas, os gastos e marque se cada gasto é para produzir leite. Se o gasto durar vários meses, informe o período. Outros valores relacionados à atividade leiteira podem ser registrados separadamente.</p>
+  <p><b>Preciso informar os litros novamente?</b><br>Não. O aplicativo já soma os litros das Entregas automaticamente.</p>
+  <p><b>Posso informar o valor por litro?</b><br>Sim. O aplicativo calcula o total automaticamente.</p>
+  <p><b>Posso informar o valor total?</b><br>Sim. O aplicativo calcula o valor por litro automaticamente.</p>
+  <p><b>Posso lançar um gasto de mês passado?</b><br>Sim. Basta informar a data em que o gasto aconteceu.</p>
+  <p><b>Posso editar um gasto antigo?</b><br>Sim, inclusive pelo extrato.</p>
+  <p><b>Por que o custo por litro muda?</b><br>Porque o cálculo considera os gastos relacionados ao leite dos últimos 90 dias.</p>
+  <p><b>Preciso esperar três meses?</b><br>Não. O aplicativo utiliza os dados reais disponíveis.</p>
+ </details>
 </section>
 
 <section id="screen_config" class="screen">
@@ -194,6 +274,13 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
   <button class="btn btn-green btn-block" onclick="saveSettings()">💾 SALVAR CONFIGURAÇÕES</button>
  </div>
  <div class="card">
+  <h2>🌾 Recomendação de ração</h2>
+  <p class="small">Defina quantos litros de leite correspondem a 1 kg de ração. Exemplo: 5 litros = 1 kg.</p>
+  <label>Litros de leite para 1 kg de ração</label>
+  <input type="number" id="feedLitersPerKg" min="0.1" step="0.1" inputmode="decimal" onkeydown="return allowNumericInput(event)" oninput="sanitizeNumericInput(this)">
+  <button class="btn btn-green btn-block" onclick="saveFeedSettings()">💾 SALVAR CONFIGURAÇÃO DE RAÇÃO</button>
+ </div>
+ <div class="card">
   <h2>Dias de medição individual</h2>
   <p class="small">Nos dias selecionados, a tela Produção permitirá lançar manhã e tarde por vaca. Você também pode não selecionar nenhum dia para usar somente a produção geral.</p>
   <div class="day-checks" id="measurementDays"></div>
@@ -204,17 +291,270 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 <section id="screen_manual" class="screen">
 <button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
 <div class="card">
- <h2 style="color:var(--topo)">Manual de Funções</h2>
+ <h2 style="color:var(--topo)">📖 Manual de Utilização — V6</h2>
  <p><b>Idealizado por:</b> Luan Ferreira</p><p><b>Instagram:</b> @luan122006</p><p><b>WhatsApp:</b> 42 9850-8930</p>
- <hr>
- <h3>Dashboard</h3><p>Mostra ordenha de hoje, entregas do mês, média por vaca em dias registrados e a quantidade de lactantes e animais do rebanho. O gráfico apresenta os últimos 7 dias.</p>
- <h3>Produção</h3><p>Registre manhã e tarde. Nos dias configurados para medição individual, informe os litros de cada vaca por turno. O aplicativo calcula o total e a média automaticamente.</p>
- <h3>Rebanho</h3><p>Cadastre vacas, parto, inseminação e status. O cartão mostra lactação, gestação e indicadores da medição individual. A lista prioriza quem mais produz e deixa as vacas secas por último.</p>
- <h3>Entregas</h3><p>Registre os litros vendidos por dia, preço líquido do mês e acompanhe faturamento, média diária até a data atual e média por entrega.</p>
- <h3>Agenda</h3><p>Cadastre compromissos. Para descarte de leite, informe os dias e o sistema cria alertas durante o período.</p>
- <h3>Novilhas</h3><p>Acompanhe nascimento, idade, inseminação e gestação. Ao registrar o primeiro parto, a novilha é transferida para o rebanho principal.</p>
- <h3>Configurações</h3><p>Configure os alertas de secagem, escolha os dias de medição individual e, opcionalmente, conecte uma conta do Supabase para sincronização automática na nuvem.</p>
- <h3>Backup</h3><p>O backup inclui todos os dados do aplicativo. O arquivo é validado por assinatura antes da restauração. Um lembrete semanal é exibido para recomendar o backup.</p>
+ <div class="notice"><b>Como usar este manual:</b> este guia foi feito para o produtor rural. Você não precisa entender de informática para usar o aplicativo. Cadastre os animais, registre a produção e as entregas e mantenha os gastos atualizados. O sistema usa esses registros para montar os indicadores, avisos, gráficos e cálculos automaticamente.</div>
+
+ <h3>🏠 DASHBOARD</h3>
+ <p>O Dashboard é a tela inicial. Ele reúne oito indicadores para você ter uma visão rápida do que está acontecendo no rebanho e na atividade leiteira. Os números não são preenchidos manualmente: eles são calculados a partir dos dados cadastrados nas áreas Produção, Rebanho, Entregas, Novilhas, Financeiro e Configurações.</p>
+
+ <h4>1. 🥛 Hoje (Ordenha)</h4>
+ <p><b>O que é:</b> é o total de leite registrado na produção de hoje.</p>
+ <p><b>De onde vem:</b> da tela <b>Produção</b>, usando o registro da data de hoje. O aplicativo soma a produção da manhã e da tarde. Nos dias de medição individual, ele soma os litros informados para cada vaca nos dois turnos.</p>
+ <p><b>Como calcula:</b> <b>Total do dia = manhã + tarde</b>. Na medição individual, o total é a soma de todos os valores individuais de manhã e tarde.</p>
+ <p><b>Exemplo:</b> 180 L pela manhã + 160 L à tarde = <b>340 L</b> no indicador Hoje.</p>
+ <p><b>Como interpretar:</b> mostra quanto foi produzido na ordenha de hoje. Ele é um indicador de <b>produção</b>, não de entrega ao comprador.</p>
+ <p><b>Para funcionar:</b> é preciso lançar a produção de hoje em Produção. Se ainda não houver produção registrada, o indicador aparece como <b>0,0 L</b>.</p>
+ <p><b>Quando aparecer 0,0 L:</b> significa que não há litros registrados para hoje, ou que os campos de produção ainda estão vazios.</p>
+
+ <h4>2. 🚚 Mês (Entrega)</h4>
+ <p><b>O que é:</b> é o total de litros registrados como entregues no mês atual.</p>
+ <p><b>De onde vem:</b> da tela <b>Entregas</b>. Cada litro lançado em um dia do mês é somado.</p>
+ <p><b>Como calcula:</b> <b>Total entregue no mês = soma dos litros de todos os dias do mês</b>.</p>
+ <p><b>Exemplo:</b> se foram entregues 1.000 L nos primeiros dias e mais 2.500 L depois, o indicador mostrará <b>3.500 L</b>.</p>
+ <p><b>Como interpretar:</b> acompanha o volume que foi <b>entregue</b>. Não deve ser confundido com o total produzido. Pode haver diferença porque parte do leite pode não ter sido entregue, pode ter sido descartada ou ainda não ter sido lançada em Entregas.</p>
+ <p><b>Para funcionar:</b> registre os litros entregues em cada dia na tela Entregas.</p>
+ <p><b>Quando aparecer 0,0 L:</b> nenhum litro foi registrado como entrega naquele mês.</p>
+
+ <h4>3. 🐄 Média/Vaca Mês</h4>
+ <p><b>O que é:</b> é a média de litros por vaca-dia calculada com a produção geral do mês.</p>
+ <p><b>De onde vem:</b> dos registros de <b>Produção</b> do mês. O aplicativo considera somente dias de produção completos e usa a quantidade de vacas ativas registrada para cada dia. Quando um registro histórico ainda não possui essa quantidade, o sistema usa a quantidade histórica de vacas correspondente àquele dia.</p>
+ <p><b>Como calcula:</b> <b>Média/Vaca Mês = produção total dos dias válidos ÷ soma dos divisores de vacas ativas desses dias</b>.</p>
+ <p><b>Exemplo:</b> em dois dias foram registrados 300 L com 30 vacas e 330 L com 30 vacas. A média é (300 + 330) ÷ (30 + 30) = <b>10,5 L/vaca-dia</b>.</p>
+ <p><b>Como interpretar:</b> ajuda a acompanhar a produtividade média das vacas nos dias realmente considerados no cálculo. Não é simplesmente o total do mês dividido pelo número atual de vacas.</p>
+ <p><b>Para funcionar:</b> registre a produção corretamente e mantenha o rebanho/status atualizado.</p>
+ <p><b>Quando aparecer 0,0 L:</b> não há dias completos com divisor válido suficientes para calcular a média.</p>
+
+ <h4>4. 🐄 Lactação / Rebanho</h4>
+ <p><b>O que é:</b> mostra quantas vacas estão em lactação em relação ao total de animais cadastrados no Rebanho principal.</p>
+ <p><b>Numerador:</b> quantidade de animais com status <b>Em Lactação</b>. <b>Denominador:</b> quantidade total de animais cadastrados em Rebanho.</p>
+ <p><b>Exemplo:</b> 25 vacas em lactação e 40 animais no rebanho = <b>25 / 40</b>.</p>
+ <p><b>Para que serve:</b> ajuda a perceber rapidamente qual é o tamanho do grupo que está efetivamente em produção em comparação com o rebanho principal.</p>
+ <p><b>Para funcionar:</b> cadastre os animais e mantenha o campo Status correto.</p>
+ <p><b>Quando aparecer 0 / 0:</b> não há animais cadastrados no Rebanho principal.</p>
+
+ <h4>5. 📅 DEL Médio</h4>
+ <p><b>O que significa DEL:</b> Dias em Lactação. Neste aplicativo, o indicador usa a quantidade de dias desde o <b>último parto</b> registrada para cada vaca em lactação.</p>
+ <p><b>De onde vem:</b> do campo <b>Último parto</b> do cadastro de cada vaca e do status Em Lactação.</p>
+ <p><b>Como calcula:</b> para cada vaca em lactação que possui data de parto válida, o aplicativo conta os dias desde o parto até hoje. Depois calcula a média desses valores e arredonda para dias inteiros.</p>
+ <p><b>Exemplo:</b> três vacas têm 60, 90 e 120 dias desde o parto. O DEL Médio será (60 + 90 + 120) ÷ 3 = <b>90 dias</b>.</p>
+ <p><b>Como interpretar:</b> mostra, de forma resumida, em que estágio da lactação o grupo de vacas está. É útil para acompanhar se o rebanho está mais no início, no meio ou mais avançado da lactação.</p>
+ <p><b>Para funcionar:</b> cadastre o último parto das vacas em lactação.</p>
+ <p><b>Quando aparecer —:</b> nenhuma vaca em lactação possui uma data de parto válida que possa ser usada no cálculo.</p>
+
+ <h4>6. 🐮 Novilhas</h4>
+ <p><b>O que é:</b> é a quantidade de novilhas cadastradas no módulo <b>Novilhas</b>.</p>
+ <p><b>De onde vem:</b> da lista de novilhas. O indicador conta os registros existentes nessa lista.</p>
+ <p><b>Exemplo:</b> se existem 8 novilhas cadastradas, o indicador mostra <b>8</b>.</p>
+ <p><b>Para que serve:</b> permite acompanhar rapidamente o tamanho da categoria de animais jovens que ainda não foram transferidos para o rebanho principal.</p>
+ <p><b>Para funcionar:</b> cadastre as novilhas e mantenha seus registros atualizados.</p>
+ <p><b>Quando aparecer 0:</b> não há novilhas cadastradas no módulo.</p>
+
+ <h4>7. 🌾 Ração recomendada hoje</h4>
+ <p><b>O que é:</b> é uma recomendação de quantidade de ração baseada na proporção de litros de leite por quilo de ração configurada pelo produtor.</p>
+ <p><b>De onde vem:</b> da configuração <b>Litros de leite para 1 kg de ração</b> e da última produção registrada <b>antes de hoje</b>.</p>
+ <p><b>Como calcula:</b> <b>ração recomendada (kg) = litros da última produção anterior a hoje ÷ litros por kg configurados</b>.</p>
+ <p><b>Exemplo:</b> configuração de 5 L/kg e última produção anterior de 300 L. A recomendação calculada será 300 ÷ 5 = <b>60 kg</b>.</p>
+ <p><b>Como interpretar:</b> é uma recomendação matemática baseada somente na proporção escolhida pelo usuário. Não é uma prescrição nutricional e não substitui a orientação de um profissional.</p>
+ <p><b>Como alterar:</b> entre em ⚙️ Configurações → Recomendação de ração, informe a quantidade de litros correspondente a 1 kg e salve.</p>
+ <p><b>Para funcionar:</b> é necessário configurar uma proporção válida e possuir alguma produção anterior a hoje.</p>
+ <p><b>Quando aparecer —:</b> a proporção não foi configurada. Quando estiver configurada, mas não houver produção anterior válida, o aplicativo informa que não há produção anterior disponível.</p>
+
+ <h4>8. 💰 CUSTO DO LEITE</h4>
+ <p><b>O que é:</b> é o custo médio estimado por litro de leite produzido/entregue para o período móvel dos últimos 90 dias, usando os gastos marcados como destinados à produção de leite e os litros registrados nas Entregas.</p>
+ <p><b>Período:</b> o aplicativo considera hoje e os 89 dias anteriores, formando uma janela de <b>90 dias</b>.</p>
+ <p><b>Entram:</b> somente despesas marcadas como <b>SIM</b> na pergunta “Esse gasto é para produzir leite?”. Se forem de vários meses, o valor é distribuído pelos dias do período informado.</p>
+ <p><b>Não entram:</b> gastos marcados como <b>NÃO</b> para produção de leite. Outras receitas, como venda de animais, também não entram como receita de leite nem são usadas para reduzir artificialmente o custo por litro.</p>
+ <p><b>Litros considerados:</b> os litros lançados na área <b>Entregas</b> dentro dos 90 dias.</p>
+ <p><b>Fórmula:</b> <b>Custo do leite = gastos destinados à produção de leite ÷ litros de leite no mesmo período</b>.</p>
+ <p><b>Exemplo:</b> R$ 54.600 de gastos para produzir leite ÷ 30.000 litros = <b>R$ 1,82/L</b>.</p>
+ <p><b>Como interpretar:</b> compare o custo por litro com o valor efetivamente recebido por litro para entender melhor a margem da atividade leiteira. É um indicador de gestão, não uma contabilidade geral da propriedade.</p>
+ <p><b>Atualização automática:</b> o valor pode mudar quando uma despesa é cadastrada, editada ou excluída, quando o término real de uma despesa é alterado ou quando os litros das Entregas são corrigidos.</p>
+ <p><b>Quando aparecer —:</b> não há litros e gastos válidos suficientes para formar um custo por litro. O aplicativo não inventa um valor.</p>
+
+ <h3>📊 GRÁFICO — TENDÊNCIA DOS ÚLTIMOS 7 DIAS</h3>
+ <p><b>O que representa:</b> o gráfico mostra a produção total de cada um dos últimos sete dias, incluindo hoje.</p>
+ <p><b>Cada barra:</b> representa um dia. A altura da barra é proporcional à produção daquele dia e o número sobre a barra mostra os litros quando há produção.</p>
+ <p><b>Como os valores são obtidos:</b> o aplicativo procura os registros de Produção correspondentes às sete datas e usa o mesmo cálculo de <b>produção total do dia</b>: manhã + tarde ou, na medição individual, a soma dos valores individuais dos turnos.</p>
+ <p><b>Por que 7 dias:</b> é uma janela curta para enxergar rapidamente a variação recente sem substituir o histórico completo.</p>
+ <p><b>Como interpretar:</b> barras subindo de forma repetida indicam aumento recente; barras descendo indicam queda. Uma única queda pode ser apenas um dia diferente. Quando vários dias consecutivos apontam na mesma direção, existe uma tendência mais clara.</p>
+ <p><b>Se corrigir uma produção:</b> ao alterar e salvar um registro, o gráfico é recalculado e a barra daquele dia passa a refletir o novo valor.</p>
+ <p><b>Exemplo:</b> se os últimos dias mostram 280, 290, 300, 310, 305, 320 e 330 L, há uma tendência geral de alta, mesmo com uma pequena queda no penúltimo valor.</p>
+
+ <h3>🔘 BOTÕES PRINCIPAIS</h3>
+ <h4>🥛 PRODUÇÃO</h4>
+ <p>Use para registrar quanto leite foi produzido em cada dia. Você informa manhã e tarde ou, nos dias de medição individual configurados, informa esses dois turnos por vaca. O aplicativo calcula o total e a média do dia e usa esses dados no Dashboard e no gráfico de sete dias.</p>
+ <p><b>Exemplo:</b> após a ordenha da manhã, registre o volume; depois registre a tarde e salve. Se precisar corrigir, abra a mesma data, altere o valor e salve novamente.</p>
+
+ <h4>🐄 REBANHO</h4>
+ <p>É o cadastro principal das vacas. Use para incluir, editar e, quando disponível, excluir animais. Registre nome/brinco, último parto, inseminação, pai, mãe, reprodutor e status. Também há recursos de genealogia e cadastro de novilha a partir de parto. Esses dados alimentam os cálculos de lactação, DEL, medição individual e avisos reprodutivos.</p>
+
+ <h4>🚚 ENTREGAS</h4>
+ <p>Use para registrar os litros entregues por dia e o pagamento referente ao mês do leite. Você pode informar <b>valor por litro</b> ou <b>valor total recebido</b>. O aplicativo converte automaticamente um valor no outro. O pagamento informado é considerado recebido imediatamente e permanece associado ao mês das entregas. Os dados de Entregas alimentam o Financeiro e a retrospectiva.</p>
+
+ <h4>📅 AGENDA</h4>
+ <p>Use para registrar compromissos e tarefas. Você pode informar data, descrição, animal e, quando necessário, quantidade de dias para descarte de leite. Os compromissos do dia e os períodos de descarte geram avisos na tela inicial.</p>
+
+ <h4>🐮 NOVILHAS</h4>
+ <p>Use para acompanhar as fêmeas jovens até o primeiro parto. Cadastre nascimento, filiação, inseminação e reprodutor. Acompanhe idade e gestação. Ao registrar o primeiro parto, a novilha pode ser transferida para o rebanho principal conforme o fluxo já existente.</p>
+
+ <h4>📊 RETROSPECTIVA DO REBANHO</h4>
+ <p>Use para olhar o histórico, e não apenas o dia atual. A tela reúne o melhor mês de entregas, histórico mensal, valores recebidos quando disponíveis, recordes individuais, médias individuais, tamanho atual do rebanho e situação reprodutiva.</p>
+
+ <h4>💾 BACKUP</h4>
+ <p>Use para baixar uma cópia dos dados do aplicativo. É recomendado fazer backups regularmente e guardar o arquivo em local seguro. A restauração verifica a integridade do arquivo antes de substituir os dados atuais.</p>
+
+ <h4>💰 FINANCEIRO</h4>
+ <p>Use para acompanhar especificamente o dinheiro da atividade leiteira: recebimentos do leite, gastos destinados ao leite, resultado mensal, outras receitas da atividade e custo por litro dos últimos 90 dias. Ele não é uma contabilidade geral de toda a propriedade.</p>
+
+ <h3>🥛 PRODUÇÃO</h3>
+ <p><b>Lançamento diário:</b> escolha a data e informe a produção da manhã e da tarde. O total é calculado automaticamente.</p>
+ <p><b>Manhã:</b> informe os litros obtidos na ordenha da manhã. <b>Tarde:</b> informe os litros da ordenha da tarde.</p>
+ <p><b>Total:</b> em produção geral, <b>Total = manhã + tarde</b>. Exemplo: 200 + 180 = 380 L.</p>
+ <p><b>Produção geral:</b> é usada nos dias que não foram selecionados para medição individual.</p>
+ <p><b>Medição individual:</b> nos dias definidos em Configurações, a tela passa a mostrar cada vaca em lactação com campos para manhã e tarde. O total individual é a soma dos litros de todas as vacas.</p>
+ <p><b>Dias de medição:</b> o aplicativo usa os dias selecionados em Configurações. O padrão existente é segunda, quarta e sexta. Também é possível não selecionar nenhum dia; nesse caso, a produção será registrada somente de forma geral.</p>
+ <p><b>Como lançar por vaca:</b> selecione uma data que seja dia de medição, confira as vacas exibidas e informe os litros de manhã e de tarde para cada uma. Salve a produção.</p>
+ <p><b>Como corrigir:</b> selecione novamente a data, altere o valor e salve. O Dashboard e o gráfico passam a usar o novo registro.</p>
+ <p><b>Impactos:</b> a produção diária influencia o indicador Hoje, o gráfico de sete dias, a média/vaca do mês e, quando houver produção anterior e configuração válida, a recomendação de ração. As Entregas são um registro separado.</p>
+
+ <h3>🐄 REBANHO</h3>
+ <p>Cadastre cada vaca com nome/brinco. O cadastro permite informar <b>último parto, inseminação, pai, mãe, reprodutor/touro da inseminação e status</b>.</p>
+ <p><b>Status:</b> “Em Lactação” indica que a vaca participa dos cálculos atuais de lactação. “Seca” indica que ela não está no grupo de vacas em lactação.</p>
+ <p><b>Parto:</b> a data do último parto é usada para mostrar o tempo de lactação e calcular o DEL Médio.</p>
+ <p><b>Inseminação:</b> é usada no acompanhamento da gestação e na geração de avisos, como retorno ao cio, secagem e parto.</p>
+ <p><b>Genealogia:</b> o aplicativo preserva a linhagem materna. Podem ser registrados <b>pai, mãe, avô materno, avó materna, bisavô materno e bisavó materna</b>. Também existe o campo de <b>reprodutor</b> ligado à inseminação.</p>
+ <p><b>Edição:</b> toque no cartão da vaca para abrir o cadastro e corrigir informações. A genealogia pode ser editada pelo botão de linhagem.</p>
+ <p><b>Exclusão:</b> quando a opção de exclusão aparece no cadastro, ela remove aquele animal do rebanho após a confirmação.</p>
+ <p><b>Avisos:</b> manter parto e inseminação corretos é importante porque essas datas alimentam os avisos automáticos. Se a informação estiver errada, o aviso também poderá ficar errado.</p>
+
+ <h3>🐮 NOVILHAS</h3>
+ <p>Cadastre a novilha informando nome/brinco e data de nascimento. Quando disponíveis, informe pai, mãe, linhagem materna, inseminação e reprodutor.</p>
+ <p>O aplicativo calcula a idade a partir do nascimento e acompanha a gestação quando existe uma inseminação registrada. Há cadastro individual e cadastro de nova remessa.</p>
+ <p><b>Primeiro parto:</b> use o botão de registrar parto quando a novilha tiver o primeiro parto. O fluxo existente permite transferi-la para o rebanho principal.</p>
+ <p><b>Importância:</b> dados atualizados ajudam a manter idade, gestação e avisos coerentes com a realidade da propriedade.</p>
+
+ <h3>🚚 ENTREGAS</h3>
+ <p>Na tela Entregas, use os botões de mês para navegar entre meses. Em cada mês, lance os litros entregues em cada dia.</p>
+ <p><b>Total mensal:</b> é a soma dos litros de todos os dias registrados naquele mês. A tela também mostra média por entrega e o valor por litro.</p>
+ <p><b>Pagamento por litro:</b> informe, por exemplo, R$ 2,10/L. Se o mês tiver 10.000 L, o total calculado será R$ 21.000.</p>
+ <p><b>Pagamento por valor total:</b> informe, por exemplo, R$ 21.000. Com 10.000 L, o aplicativo calcula R$ 2,10/L.</p>
+ <p><b>Conversão:</b> os dois campos representam o <b>mesmo pagamento</b>, não dois pagamentos. Ao trocar o modo, o aplicativo converte o valor usando os litros registrados no mês.</p>
+ <p><b>Recebimento:</b> quando um valor de pagamento é informado, ele é considerado recebido imediatamente. Não existe mais uma data separada de recebimento.</p>
+ <p><b>Correção:</b> para alterar um pagamento, volte ao mês correspondente e substitua o valor por litro ou o valor total. O aplicativo recalcula a outra medida e atualiza o Financeiro.</p>
+ <p><b>Diferença entre litros e dinheiro:</b> litros entregues representam volume; pagamento representa dinheiro. Um não deve ser confundido com o outro.</p>
+ <p><b>Relação com Financeiro:</b> o Financeiro lê os litros e o pagamento do mês diretamente de Entregas. Por isso, corrigir uma entrega ou pagamento também pode alterar os valores exibidos no Financeiro e o custo por litro quando os litros estiverem dentro da janela de 90 dias.</p>
+
+ <h3>💰 FINANCEIRO</h3>
+ <p>O Financeiro é voltado especificamente para a <b>atividade do leite</b>. Ele não foi feito para representar uma contabilidade geral da propriedade. A ideia é ajudar o produtor a enxergar quanto entrou pelo leite, quanto foi gasto para produzir leite e qual é o resultado.</p>
+
+ <h4>🥛 Extrato do Leite</h4>
+ <p>Use a navegação de meses para consultar o mês atual ou meses anteriores. O extrato mostra <b>litros entregues, valor recebido por litro, total recebido pelo leite, gastos do leite e outros valores da atividade</b>.</p>
+ <p><b>Receita do leite:</b> vem do pagamento informado em Entregas para aquele mês.</p>
+ <p><b>Resultado do leite:</b> representa o dinheiro recebido pelo leite menos os gastos destinados ao leite que foram alocados naquele mês.</p>
+ <p><b>Outras receitas:</b> aparecem separadas para que vendas de animais e outros recebimentos não sejam misturados com o preço recebido por litro de leite.</p>
+
+ <h4>🌾 Despesas</h4>
+ <p>Ao cadastrar um gasto, informe <b>descrição, valor, data, categoria</b> e responda se aquele gasto é para produzir leite.</p>
+ <p><b>Categorias atuais:</b> Ração; Insumos; Energia; Combustível; Medicamentos/remédios; Manutenção; Mão de obra; Outro.</p>
+ <p><b>“Esse gasto é para produzir leite?”</b> marque <b>SIM</b> quando o gasto estiver destinado à produção de leite. Somente esses gastos entram no cálculo do custo do leite.</p>
+ <p>Se marcar <b>NÃO</b>, o gasto pode continuar registrado no Financeiro, mas não será usado como custo de produção de leite.</p>
+ <p>Gastos podem ser editados e excluídos. Depois de uma alteração, os resumos e o custo do leite são recalculados.</p>
+
+ <h4>📆 Despesa de vários meses</h4>
+ <p>Se um gasto vai durar mais de um mês, marque essa opção. Informe o <b>valor total</b>, a <b>data de início</b> e o <b>término estimado</b>. O aplicativo distribui o valor pelos dias do período informado.</p>
+ <p><b>Exemplo:</b> uma despesa de R$ 3.000 que começa em 1º de janeiro e tem término estimado em 31 de março é distribuída pelos dias desse período. Assim, uma parte aparece em janeiro, outra em fevereiro e outra em março.</p>
+ <p><b>Término real:</b> se a despesa terminou antes ou depois do estimado, informe a data real. O aplicativo passa a usar o término real para a distribuição, alterando automaticamente os valores dos meses afetados.</p>
+ <p>Isso é importante porque o custo do leite deve acompanhar o período em que o gasto realmente existiu. Alterar a despesa também pode mudar o custo por litro dos últimos 90 dias.</p>
+
+ <h3>💵 OUTRAS RECEITAS</h3>
+ <p>Use “Outro valor recebido” para registrar receitas relacionadas à atividade que não são pagamento do leite.</p>
+ <p><b>Categorias atuais:</b> Venda de novilha; Venda de vaca; Venda de bezerro; Venda de descarte; Outro.</p>
+ <p>Essas receitas aparecem separadamente no Financeiro. Elas <b>não aumentam o valor recebido por litro de leite</b> e não devem reduzir ou aumentar artificialmente o custo do leite por litro.</p>
+ <p><b>Exemplo:</b> vender uma vaca por R$ 5.000 é uma receita da atividade, mas não significa que o preço do leite daquele mês aumentou. O valor permanece separado.</p>
+
+ <h3>📅 CUSTO DO LEITE — 90 DIAS</h3>
+ <p>O indicador usa uma <b>janela móvel</b>. Isso significa que, todos os dias, o aplicativo olha para hoje e para os 89 dias anteriores. Não existe “fechamento de período” e os registros antigos não são apagados quando saem da janela.</p>
+ <p><b>Entram no numerador:</b> despesas marcadas como destinadas à produção de leite, distribuídas conforme as regras das despesas pontuais ou de vários meses.</p>
+ <p><b>Entram no denominador:</b> litros registrados em Entregas dentro dos mesmos 90 dias.</p>
+ <p><b>Fórmula:</b> <b>Custo do leite = gastos destinados à produção de leite ÷ litros de leite no mesmo período</b>.</p>
+ <p><b>Exemplo:</b> R$ 54.600 ÷ 30.000 L = <b>R$ 1,82/L</b>.</p>
+ <p><b>Se editar uma despesa:</b> o valor alocado aos dias pode mudar e o custo é recalculado automaticamente.</p>
+ <p><b>Se corrigir uma entrega:</b> os litros da janela mudam e o custo por litro pode subir ou cair conforme a nova quantidade.</p>
+ <p>Quando não houver litros ou gastos válidos suficientes para produzir um custo, o aplicativo mostra <b>—</b> em vez de inventar um resultado.</p>
+
+ <h3>📊 RETROSPECTIVA DO REBANHO</h3>
+ <p>A retrospectiva serve para olhar a evolução histórica do rebanho e da atividade leiteira.</p>
+ <p><b>Melhor mês:</b> identifica, entre os meses com entregas registradas, aquele com maior volume de litros entregues.</p>
+ <p><b>Histórico mensal:</b> mostra os meses disponíveis, litros entregues e valor recebido quando houver informação de pagamento.</p>
+ <p><b>Recordes individuais:</b> mostra os maiores registros individuais de produção disponíveis.</p>
+ <p><b>Médias individuais:</b> mostra as maiores médias individuais calculadas nos últimos 30 dias disponíveis para cada vaca com dados individuais.</p>
+ <p><b>Tamanho do rebanho:</b> mostra vacas, novilhas e total atual de animais.</p>
+ <p><b>Situação reprodutiva:</b> organiza os animais com inseminação registrada em grupos de acompanhamento conforme os dias desde a inseminação. É uma indicação baseada nos registros, não uma confirmação veterinária de prenhez.</p>
+
+ <h3>🔔 AVISOS AUTOMÁTICOS</h3>
+ <p>Os avisos são gerados automaticamente a partir das datas e informações cadastradas. Eles aparecem na área de avisos da tela inicial quando a condição correspondente é atingida.</p>
+ <h4>📅 Compromisso de hoje</h4>
+ <p>Aparece quando existe uma tarefa da Agenda marcada para hoje. <b>O que fazer:</b> confira a descrição e o animal, quando houver, e realize a tarefa. O aviso deixa de aparecer quando não estiver mais dentro da condição de hoje.</p>
+ <h4>🥛 Descarte de leite</h4>
+ <p>Aparece quando um compromisso da Agenda possui dias de descarte e o dia atual está dentro do período calculado. O aviso mostra o início e o fim do período. <b>O que fazer:</b> respeite o período de descarte indicado. Ele deixa de aparecer quando o período termina.</p>
+ <h4>🤰 PARTO</h4>
+ <p>Aparece para vacas com inseminação registrada quando se passaram <b>270 dias ou mais</b>. <b>O que fazer:</b> acompanhar a vaca e registrar o parto quando ele ocorrer. O alerta deixa de aparecer quando o registro de inseminação deixa de representar a gestação pendente, conforme o cadastro atualizado.</p>
+ <h4>🌾 SECAR</h4>
+ <p>Aparece quando uma vaca em lactação atingiu o número de dias configurado para secagem após a inseminação. O padrão é 7 meses e 15 dias, calculado pelo aplicativo com meses aproximados de 30,44 dias. <b>O que fazer:</b> avaliar a secagem e atualizar o status para Seca quando isso realmente ocorrer. O aviso informa que desaparece ao mudar para Seca.</p>
+ <h4>🔄 OBSERVAR RETORNO AO CIO</h4>
+ <p>Aparece entre <b>18 e 25 dias após a inseminação</b>. <b>O que fazer:</b> observar se houve retorno ao cio. O próprio aplicativo orienta que a confirmação de prenhez deve seguir o método utilizado na propriedade.</p>
+ <h4>🐮 PARTO DE NOVILHA</h4>
+ <p>Aparece quando uma novilha inseminada atingiu <b>255 dias ou mais</b> de gestação. <b>O que fazer:</b> acompanhar a aproximação do parto e manter o cadastro atualizado.</p>
+ <h4>🎂 IDADE DA NOVILHA</h4>
+ <p>O aplicativo gera avisos quando uma novilha completa <b>40 dias, 90 dias, 6 meses ou 1 ano</b>. <b>O que fazer:</b> use o aviso como lembrete de acompanhamento e manejo. Ele aparece na data correspondente.</p>
+ <h4>💾 BACKUP</h4>
+ <p>Se nunca houver backup registrado ou se já tiver passado uma semana desde o último backup, o aplicativo recomenda fazer um novo. <b>O que fazer:</b> entre em Backup e baixe uma cópia.</p>
+ <p><b>Importante:</b> esses são os avisos atualmente implementados. O aplicativo não cria avisos adicionais apenas por existir um campo no cadastro.</p>
+
+ <h3>⚙️ CONFIGURAÇÕES</h3>
+ <h4>📅 Alertas de secagem</h4>
+ <p>Controla a partir de quando o aviso <b>SECAR</b> pode aparecer após a inseminação. Há dois campos: meses e dias. O padrão existente é <b>7 meses e 15 dias</b>. Para o cálculo, o aplicativo usa meses aproximados de 30,44 dias.</p>
+ <p><b>Como alterar:</b> informe os meses e dias desejados e toque em Salvar Configurações.</p>
+ <p><b>Exemplo:</b> se configurar 7 meses e 15 dias, o limite aproximado será 7 × 30,44 + 15 = <b>228,08 dias</b>; o aviso usa esse limite calculado pelo sistema.</p>
+ <p><b>Se deixar vazio:</b> os campos são convertidos para zero pelo aplicativo. Portanto, deixe um valor adequado se quiser manter um período de secagem configurado.</p>
+ <p><b>Quando alterar:</b> somente quando a regra de manejo da propriedade realmente for diferente da configuração atual.</p>
+
+ <h4>🌾 Recomendação de ração</h4>
+ <p>Define quantos litros de leite correspondem a 1 kg de ração. Exemplo: <b>5 L = 1 kg</b>. A recomendação usa a última produção anterior a hoje e divide os litros pela proporção configurada.</p>
+ <p><b>Como alterar:</b> informe um número maior que zero e salve. <b>Impacto:</b> altera a recomendação exibida no Dashboard e a recomendação individual quando houver dados individuais disponíveis.</p>
+ <p><b>Se não configurar:</b> o Dashboard mostra “Configure nas configurações” e não calcula a quantidade recomendada.</p>
+
+ <h4>📆 Dias de medição individual</h4>
+ <p>Define em quais dias da semana a tela Produção permitirá lançar manhã e tarde por vaca.</p>
+ <p><b>Como selecionar:</b> marque os dias desejados e salve. <b>Como alterar:</b> volte à configuração, marque/desmarque os dias e salve novamente.</p>
+ <p><b>Padrão existente:</b> segunda, quarta e sexta. <b>Nenhum dia:</b> é permitido. Nesse caso, a produção será registrada somente de forma geral.</p>
+ <p><b>Impacto:</b> essa configuração muda o modo de lançamento da tela Produção, mas não cria um novo banco nem altera os demais módulos.</p>
+
+ <h3>💾 BACKUP E RESTAURAÇÃO</h3>
+ <p><b>Para que serve:</b> cria uma cópia dos dados do aplicativo em um arquivo JSON. O backup é uma proteção importante caso você troque de aparelho, perca dados locais ou precise recuperar um estado anterior.</p>
+ <p><b>O que guarda:</b> o conteúdo do banco do aplicativo, incluindo registros de rebanho, novilhas, produção, entregas, agenda, financeiro, configurações, licença e informações de backup existentes no banco.</p>
+ <p><b>Quando fazer:</b> faça regularmente, especialmente antes de alterações importantes, troca de aparelho ou restauração.</p>
+ <p><b>Como restaurar:</b> entre em Backup, escolha o arquivo salvo e use “Restaurar via arquivo”. O aplicativo verifica a assinatura do arquivo antes de aceitar a restauração.</p>
+ <p><b>Cuidados:</b> restaure somente um arquivo que você reconheça e mantenha uma cópia segura antes de substituir os dados atuais. Se o arquivo estiver corrompido ou alterado, a restauração será recusada.</p>
+ <p><b>Importante:</b> fazer backup não apaga os dados atuais. Restaurar um backup é uma ação diferente e deve ser feita com cuidado.</p>
+
+ <h3>☁️ DADOS, SINCRONIZAÇÃO E LOGIN</h3>
+ <p><b>Login:</b> o aplicativo pode usar uma conta do Supabase para sincronizar os dados automaticamente na nuvem. O login é feito com e-mail e senha na tela apresentada pelo aplicativo.</p>
+ <p><b>Sessão:</b> depois de entrar, o aplicativo reconhece a conta e pode sincronizar os dados. Ao sair, os dados locais continuam no aparelho.</p>
+ <p><b>Salvamento:</b> as alterações são salvas localmente no aparelho. Quando houver conta conectada e internet, o aplicativo agenda a sincronização automática com a nuvem.</p>
+ <p><b>Sincronização:</b> ao iniciar, voltar ao aplicativo ou ficar online, o sistema pode verificar a nuvem e combinar os dados conforme a estrutura existente. Se não houver internet, o aplicativo continua funcionando e salvando localmente.</p>
+ <p><b>Recuperação:</b> a nuvem ajuda a recuperar os dados sincronizados em outro momento, enquanto o backup em arquivo oferece uma cópia independente para restauração.</p>
+ <p><b>Não é preciso entender a parte técnica:</b> mantenha a conta conectada quando quiser sincronização automática e faça backups em arquivo regularmente como camada extra de segurança.</p>
+
+ <h3>🧭 ROTINA RECOMENDADA DE USO</h3>
+ <p><b>Todos os dias:</b> registre a produção e as entregas que realmente ocorreram; confira os avisos e tarefas.</p>
+ <p><b>Quando houver reprodução:</b> registre inseminação e parto corretamente e mantenha pai, mãe e reprodutor atualizados.</p>
+ <p><b>Quando houver gasto:</b> registre descrição, valor, data, categoria e informe se o gasto é para produzir leite. Se durar vários meses, informe o período.</p>
+ <p><b>Quando receber pelo leite:</b> registre o pagamento no mês correspondente em Entregas. Informe por litro ou pelo total; o aplicativo converte o outro valor automaticamente e considera o pagamento recebido.</p>
+ <p><b>Regularmente:</b> confira o custo do leite dos últimos 90 dias e compare com o valor recebido por litro. Faça backups e guarde os arquivos em local seguro.</p>
+
+ <div class="notice"><b>Regra simples para lembrar:</b> Produção responde “quanto foi produzido”; Entregas responde “quanto foi entregue e quanto foi recebido pelo leite”; Financeiro responde “quanto entrou, quanto foi gasto e qual é o custo da atividade”; Rebanho e Novilhas mantêm os animais e a reprodução atualizados; Agenda e Avisos ajudam a lembrar o que precisa ser feito.</div>
 </div>
 </section>
 
@@ -245,14 +585,87 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  </div>
 </div>
 
+<div id="cowBatchModal" class="modal" onclick="if(event.target===this)closeCowBatchModal()">
+ <div class="modal-box">
+  <h2>Nova remessa de vacas</h2>
+  <div id="cowBatchQuantityBox">
+   <label>Quantidade de vacas</label>
+   <input type="number" id="cowBatchQuantity" min="1" max="100" step="1" value="1">
+   <button class="btn btn-blue btn-block" onclick="generateCowBatch()">GERAR CARTÕES</button>
+  </div>
+  <div id="cowBatchForm" class="hidden">
+   <div class="notice">Preencha os mesmos dados do cadastro individual. Cada cartão será salvo como uma vaca independente no rebanho.</div>
+   <div id="cowBatchCards" class="batch-list"></div>
+   <div class="row batch-actions"><button class="btn btn-light" onclick="closeCowBatchModal()">CANCELAR</button><button class="btn btn-green" onclick="saveCowBatch()">💾 SALVAR REMESSA</button></div>
+  </div>
+ </div>
+</div>
+
+<div id="heiferBatchModal" class="modal" onclick="if(event.target===this)closeHeiferBatchModal()">
+ <div class="modal-box">
+  <h2>Nova remessa de novilhas</h2>
+  <div id="heiferBatchQuantityBox">
+   <label>Quantidade de novilhas</label>
+   <input type="number" id="heiferBatchQuantity" min="1" max="100" step="1" value="1">
+   <button class="btn btn-blue btn-block" onclick="generateHeiferBatch()">GERAR CARTÕES</button>
+  </div>
+  <div id="heiferBatchForm" class="hidden">
+   <div class="notice">Preencha os mesmos dados do cadastro individual. Cada cartão será salvo como uma novilha independente no rebanho.</div>
+   <div id="heiferBatchCards" class="batch-list"></div>
+   <div class="row batch-actions"><button class="btn btn-light" onclick="closeHeiferBatchModal()">CANCELAR</button><button class="btn btn-green" onclick="saveHeiferBatch()">💾 SALVAR REMESSA</button></div>
+  </div>
+ </div>
+</div>
+
+<div id="calfParturitionModal" class="modal" onclick="if(event.target===this)closeCalfParturitionModal()">
+  <div class="modal-box">
+   <h2>👶 Registrar primeiro parto</h2>
+   <input type="hidden" id="calfParturitionId">
+   <label>Data do parto</label><input type="date" id="calfParturitionDate">
+   <label>Nome / Brinco da vaca</label><input id="calfParturitionName" maxlength="60">
+   <div class="row"><button class="btn btn-light" onclick="closeCalfParturitionModal()">CANCELAR</button><button class="btn btn-green" onclick="saveCalfParturition()">SALVAR</button></div>
+  </div>
+ </div>
+
+<div id="genealogyModal" class="modal" onclick="if(event.target===this)closeGenealogyModal()">
+ <div class="modal-box">
+  <h2>🌳 Linhagem materna</h2>
+  <div id="genealogyContent"></div>
+  <div id="genealogyEditForm" class="hidden">
+   <div class="card" style="margin-top:10px">
+    <h3 style="margin-top:0">✏️ Editar filiação</h3>
+    <div class="row">
+     <div><label>Pai (opcional)</label><input id="genealogyFather" maxlength="60" placeholder="Nome do pai / sêmen"></div>
+     <div><label>Mãe (opcional)</label><input id="genealogyMother" maxlength="60" placeholder="Nome da mãe"></div>
+    </div>
+    <h3 style="margin:14px 0 8px">🌿 Linhagem materna</h3>
+    <div class="row">
+     <div><label>Avô materno (opcional)</label><input id="genealogyMaternalGrandfather" maxlength="60" placeholder="Nome do avô materno"></div>
+     <div><label>Avó materna (opcional)</label><input id="genealogyMaternalGrandmother" maxlength="60" placeholder="Nome da avó materna"></div>
+    </div>
+    <div class="row">
+     <div><label>Bisavô materno (opcional)</label><input id="genealogyMaternalGreatGrandfather" maxlength="60" placeholder="Nome do bisavô materno"></div>
+     <div><label>Bisavó materna (opcional)</label><input id="genealogyMaternalGreatGrandmother" maxlength="60" placeholder="Nome da bisavó materna"></div>
+    </div>
+    <button class="btn btn-green btn-block" onclick="saveGenealogy()">💾 SALVAR GENEALOGIA</button>
+    <button class="btn btn-light btn-block" onclick="cancelGenealogyEdit()">CANCELAR EDIÇÃO</button>
+   </div>
+  </div>
+  <button class="btn btn-blue btn-block" id="genealogyEditBtn" onclick="startGenealogyEdit()">✏️ EDITAR FILIAÇÃO</button>
+  <button class="btn btn-light btn-block" onclick="closeGenealogyModal()">FECHAR</button>
+ </div>
+</div>
+
 <div id="heiferModal" class="modal" onclick="if(event.target===this)closeModal()">
  <div class="modal-box">
   <h2 id="heiferModalTitle">Nova novilha</h2>
   <input type="hidden" id="heiferEditId">
   <label>Nome / Brinco</label><input id="heiferNameModal">
   <label>Data de nascimento</label><input type="date" id="heiferBirthModal">
-  <label>Inseminação (opcional)</label><input type="date" id="heiferInsemModal">
-  <div class="row"><button class="btn btn-light" onclick="closeModal()">CANCELAR</button><button class="btn btn-green" onclick="saveHeifer()">SALVAR</button></div>
+  <label>Inseminação (opcional)</label><input type="date" id="heiferInsemModal"><input class="hidden" type="text" id="heiferInsemManual" inputmode="numeric" maxlength="10" placeholder="DD/MM/AAAA" oninput="maskDateInput(this)"><div class="date-mode"><button type="button" id="heiferInsemModalCalendarBtn" class="active" onclick="setDateMode('heiferInsemModal','heiferInsemManual','calendar')">📅 Calendário</button><button type="button" id="heiferInsemModalManualBtn" onclick="setDateMode('heiferInsemModal','heiferInsemManual','manual')">⌨️ Digitar</button></div>
+  <div class="row"><div><label>Pai (opcional)</label><input id="heiferFatherModal" maxlength="60"></div><div><label>Mãe (opcional)</label><input id="heiferMotherModal" maxlength="60"></div></div>
+  <label>🐂 Reprodutor / Touro da inseminação (opcional)</label><input id="heiferReproducerModal" maxlength="60" placeholder="Nome / identificação do reprodutor">
+  <button class="btn btn-red btn-block hidden" id="deleteHeiferBtn" onclick="deleteHeifer()" style="margin-bottom:8px">🗑️ EXCLUIR NOVILHA</button><div class="row"><button class="btn btn-light" onclick="closeModal()">CANCELAR</button><button class="btn btn-green" onclick="saveHeifer()">SALVAR</button></div>
  </div>
 </div>
 
@@ -265,7 +678,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
    ========================= */
 const DB_KEY='gestao_rebanho_pro_db_v1';
 const LEGACY_DB_KEYS=['rebanho_leiteiro_db_v2'];
-const APP_VERSION='5.0.0';
+const APP_VERSION='6.7';
 const CLOUD_SYNC_SNAPSHOT_KEY='gestao_rebanho_last_synced_v1';
 
 /* =========================
@@ -307,7 +720,30 @@ function initSupabase(){
 }
 
 function hasLocalData(data=db){
- return !!(data && ((data.vacas||[]).length||(data.novilhas||[]).length||Object.keys(data.producao||{}).length||Object.keys(data.entregas||{}).length||(data.agenda||[]).length));
+ if(!data||typeof data!=='object')return false;
+ const hasObjectEntries=o=>!!(o&&typeof o==='object'&&Object.keys(o).length);
+ const hasMeaningfulDelivery=e=>{
+  if(!e||typeof e!=='object')return false;
+  if(e.dias&&typeof e.dias==='object'&&Object.values(e.dias).some(v=>Number(v||0)>0))return true;
+  if(Number(e.preco||0)>0)return true;
+  const p=e.pagamento;
+  return !!(p&&typeof p==='object'&&Number(p.valor||0)>0);
+ };
+ const cfg=data.configuracoes||{};
+ const sec=cfg.secagem||{};
+ const days=Array.isArray(cfg.diasMedicao)?cfg.diasMedicao.map(Number).filter(x=>x>=0&&x<=6):[];
+ const defaultDays=[1,3,5],legacyDefaultDays=[2,4,6];
+ const isKnownDefaultDays=days.length===3&&(days.every((x,i)=>x===defaultDays[i])||days.every((x,i)=>x===legacyDefaultDays[i]));
+ const hasCustomConfig=Number(sec.meses)!==7||Number(sec.dias)!==15||Number(cfg.racaoLitrosPorKg||0)>0||!isKnownDefaultDays;
+ const hasFinance=!!(data.financeiro&&((Array.isArray(data.financeiro.gastos)&&data.financeiro.gastos.length)||(Array.isArray(data.financeiro.outrosRecebimentos)&&data.financeiro.outrosRecebimentos.length)));
+ return !!(
+  (Array.isArray(data.vacas)&&data.vacas.length)||
+  (Array.isArray(data.novilhas)&&data.novilhas.length)||
+  hasObjectEntries(data.producao)||
+  Object.values(data.entregas||{}).some(hasMeaningfulDelivery)||
+  (Array.isArray(data.agenda)&&data.agenda.length)||
+  hasFinance||hasCustomConfig
+ );
 }
 function cloneData(value){
  try{return JSON.parse(JSON.stringify(value));}catch(e){return value;}
@@ -555,6 +991,12 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('pageshow',()=>refreshCloudOnReturn('pageshow'));
 
 
+
+function migrateFinancialCompatibility(n){
+ n.financeiro=normalizeFinanceiro(n.financeiro);
+ Object.keys(n.entregas||{}).forEach(m=>{const e=n.entregas[m];if(!e||typeof e!=='object')return;if(!e.dias||typeof e.dias!=='object')e.dias={};if(!e.pagamento||typeof e.pagamento!=='object'){e.pagamento={modo:'perLiter',valor:Number(e.preco||0)};}else{if(!e.pagamento.modo)e.pagamento.modo='perLiter';if(!Object.prototype.hasOwnProperty.call(e.pagamento,'valor'))e.pagamento.valor=Number(e.preco||0);}if(!Number.isFinite(Number(e.preco)))e.preco=Number(e.pagamento.valor||0);});
+ return n;
+}
 function defaultDB(){
  return {
   version:APP_VERSION,
@@ -566,7 +1008,8 @@ function defaultDB(){
   financeiro:{},
   configuracoes:{
    secagem:{meses:7,dias:15},
-   diasMedicao:[1,3,5] // domingo=0 ... sábado=6; padrão: terça, quinta, sábado
+   diasMedicao:[1,3,5], // domingo=0 ... sábado=6; padrão: segunda, quarta, sexta
+   racaoLitrosPorKg:null
   },
   licenca:{idInstalacao:null,dataInstalacao:null,isPro:false},
   backup:{ultimoBackup:null},
@@ -574,6 +1017,7 @@ function defaultDB(){
  };
 }
 let db=loadDB();
+db=migrateFinancialCompatibility(db);
 let selectedMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let currentScreen='home';
 
@@ -588,15 +1032,22 @@ function normalizeDB(raw){
  n.vacas.forEach(v=>{
   if(!Object.prototype.hasOwnProperty.call(v,'dataEntradaLactacao'))v.dataEntradaLactacao=null;
   if(!Object.prototype.hasOwnProperty.call(v,'dataSaidaLactacao'))v.dataSaidaLactacao=null;
+  if(!Object.prototype.hasOwnProperty.call(v,'pai'))v.pai='';
+  if(!Object.prototype.hasOwnProperty.call(v,'mae'))v.mae='';
+  if(!Object.prototype.hasOwnProperty.call(v,'avoMaterna'))v.avoMaterna='';
+  if(!Object.prototype.hasOwnProperty.call(v,'bisavoMaterna'))v.bisavoMaterna='';
+  if(!Object.prototype.hasOwnProperty.call(v,'reprodutor'))v.reprodutor='';
  });
  n.producao=raw.producao&&typeof raw.producao==='object'?raw.producao:{};
  n.entregas=raw.entregas&&typeof raw.entregas==='object'?raw.entregas:{};
  n.agenda=Array.isArray(raw.agenda)?raw.agenda.map(a=>Object.assign({},a,{texto:a.texto??a.text??''})):[];
  n.novilhas=Array.isArray(raw.novilhas)?raw.novilhas:[];
- n.financeiro=raw.financeiro&&typeof raw.financeiro==='object'?raw.financeiro:{};
+ n.novilhas.forEach(h=>{if(!Object.prototype.hasOwnProperty.call(h,'pai'))h.pai='';if(!Object.prototype.hasOwnProperty.call(h,'mae'))h.mae='';if(!Object.prototype.hasOwnProperty.call(h,'avoMaterna'))h.avoMaterna='';if(!Object.prototype.hasOwnProperty.call(h,'bisavoMaterna'))h.bisavoMaterna='';if(!Object.prototype.hasOwnProperty.call(h,'reprodutor'))h.reprodutor='';});
+ n.financeiro=normalizeFinanceiro(raw.financeiro);
  n.configuracoes=Object.assign(base.configuracoes,raw.configuracoes||{});
  n.configuracoes.secagem=Object.assign(base.configuracoes.secagem,(raw.configuracoes&&raw.configuracoes.secagem)||{});
  n.configuracoes.diasMedicao=Array.isArray(raw.configuracoes&&raw.configuracoes.diasMedicao)?raw.configuracoes.diasMedicao.map(Number).filter(x=>x>=0&&x<=6):base.configuracoes.diasMedicao;
+ n.configuracoes.racaoLitrosPorKg=Number.isFinite(Number(raw.configuracoes&&raw.configuracoes.racaoLitrosPorKg))&&Number(raw.configuracoes.racaoLitrosPorKg)>0?Number(raw.configuracoes.racaoLitrosPorKg):null;
  n.licenca=Object.assign(base.licenca,raw.licenca||{});
  n.backup=Object.assign(base.backup,raw.backup||{});
  n.meta=Object.assign(base.meta,raw.meta||{});
@@ -681,6 +1132,8 @@ function navigate(screen){
  if(screen==='novilhas')renderHeifers();
  if(screen==='config')renderConfig();
  if(screen==='backup')renderBackup();
+ if(screen==='retrospectiva')renderRetrospectiva();
+  if(screen==='financeiro')renderFinanceiro();
  if(screen==='home')renderHome();
 }
 function toast(msg){
@@ -700,6 +1153,15 @@ function monthsDays(total){
  return `${months} ${months===1?'mês':'meses'}${days?` e ${days} ${days===1?'dia':'dias'}`:''}`;
 }
 function escapeHTML(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function maskDateInput(input){const digits=String(input.value||'').replace(/\D/g,'').slice(0,8);let out=digits.slice(0,2);if(digits.length>2)out+='/'+digits.slice(2,4);if(digits.length>4)out+='/'+digits.slice(4,8);input.value=out;}
+function manualToISO(value){const m=String(value||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(!m)return null;const day=Number(m[1]),month=Number(m[2]),year=Number(m[3]);if(year<1||month<1||month>12||day<1)return null;const d=new Date(year,month-1,day,12,0,0);if(d.getFullYear()!==year||d.getMonth()!==month-1||d.getDate()!==day)return null;const iso=localISO(d);return iso<=isoToday()?iso:null;}
+function validateISODate(value,label,allowBlank=true){if(!value&&allowBlank)return true;if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return alert(`${label}: informe uma data válida.`),false;const d=parseLocalDate(value);if(!d||localISO(d)!==value)return alert(`${label}: data inexistente.`),false;if(value>isoToday())return alert(`${label}: a data não pode ser futura.`),false;return true;}
+function getFlexibleDate(dateId,manualId,label,allowBlank=true){const manual=document.getElementById(manualId);if(manual&&!manual.classList.contains('hidden')){if(!manual.value&&allowBlank)return '';const value=manualToISO(manual.value);if(!value){alert(`${label}: informe uma data válida no formato DD/MM/AAAA e não use uma data futura.`);return null;}return value;}const value=document.getElementById(dateId)?.value||'';return validateISODate(value,label,allowBlank)?value:null;}
+function setDateMode(dateId,manualId,mode){const date=document.getElementById(dateId),manual=document.getElementById(manualId);if(!date||!manual)return;if(mode==='manual'){manual.value=date.value?fmtDate(date.value):'';date.classList.add('hidden');manual.classList.remove('hidden');}else{const iso=manual.value?manualToISO(manual.value):'';if(manual.value&&!iso)return alert('Informe uma data válida antes de voltar ao calendário.');date.value=iso||date.value||'';manual.classList.add('hidden');date.classList.remove('hidden');}const cb=document.getElementById(dateId+'CalendarBtn'),mb=document.getElementById(dateId+'ManualBtn');if(cb)cb.classList.toggle('active',mode==='calendar');if(mb)mb.classList.toggle('active',mode==='manual');}
+function dateBatchMarkup(type,index,label){const dateClass=type+'-date',manualClass=type+'-manual';return `<label>${label}</label><input type="date" class="${dateClass}" data-index="${index}"><input class="hidden ${manualClass}" type="text" inputmode="numeric" maxlength="10" placeholder="DD/MM/AAAA" data-index="${index}" oninput="maskDateInput(this)"><div class="date-mode"><button type="button" class="active" onclick="setBatchDateMode('${dateClass}',${index},'calendar')">📅 Calendário</button><button type="button" onclick="setBatchDateMode('${dateClass}',${index},'manual')">⌨️ Digitar</button></div>`;}
+function setBatchDateMode(dateClass,index,mode){const date=document.querySelector(`.${dateClass}[data-index="${index}"]`),manual=document.querySelector(`.${dateClass.replace('-date','-manual')}[data-index="${index}"]`);if(!date||!manual)return;if(mode==='manual'){manual.value=date.value?fmtDate(date.value):'';date.classList.add('hidden');manual.classList.remove('hidden');}else{const iso=manual.value?manualToISO(manual.value):'';if(manual.value&&!iso)return alert('Informe uma data válida antes de voltar ao calendário.');date.value=iso||date.value||'';manual.classList.add('hidden');date.classList.remove('hidden');}const buttons=manual.parentElement.querySelectorAll('.date-mode button');buttons[0].classList.toggle('active',mode==='calendar');buttons[1].classList.toggle('active',mode==='manual');}
+function getBatchDate(dateEl,manualEl,label,allowBlank=true){if(!manualEl.classList.contains('hidden')){if(!manualEl.value&&allowBlank)return '';const iso=manualToISO(manualEl.value);if(!iso){alert(`${label}: informe uma data válida no formato DD/MM/AAAA e não use uma data futura.`);return null;}return iso;}const value=dateEl.value||'';return validateISODate(value,label,allowBlank)?value:null;}
+
 
 /* =========================
    DASHBOARD / ALERTAS
@@ -714,7 +1176,13 @@ function renderHome(){
  const avg=monthGeneralAverage(month);
  document.getElementById('kpiAvgCow').textContent=fmtNumber(avg)+' L';
  document.getElementById('kpiLactation').textContent=`${lact.length} / ${db.vacas.length}`;
+ const delValues=lact.map(v=>v.parto?daysBetween(v.parto):null).filter(d=>Number.isFinite(d)&&d>=0);
+ const delAvg=delValues.length?Math.round(delValues.reduce((sum,d)=>sum+d,0)/delValues.length):0;
+ document.getElementById('kpiDEL').textContent=delValues.length?`${delAvg} dias`:'—';
  document.getElementById('kpiHeifers').textContent=String(db.novilhas.length);
+ const feed=getFeedRecommendation();
+ document.getElementById('kpiFeed').textContent=feed.configured&&feed.hasProduction?fmtNumber(feed.total)+' kg':(feed.configured?'Sem produção anterior':'Configure nas configurações');
+ const cost=calculateMilkCost90Days();document.getElementById('kpiMilkCost').textContent=cost?money(cost)+'/L':'—';
  renderChart();renderHomeAlerts();
 }
 function productionTotal(p){
@@ -774,6 +1242,13 @@ function renderChart(){
  const arr=[];let max=1;for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const val=productionTotal(db.producao[localISO(d)]);arr.push({day:d.getDate(),val});if(val>max)max=val}
  arr.forEach(x=>{const h=Math.max(2,x.val/max*100);box.innerHTML+=`<div class="bar-wrap"><div class="bar" style="height:${h}%">${x.val>0?`<span class="bar-val">${fmtNumber(x.val,0)}</span>`:''}</div><span class="bar-day">${x.day}</span></div>`});
 }
+function sameCalendarDateAfter(baseISO, months=0, years=0){
+ const base=parseLocalDate(baseISO);if(!base)return false;
+ const target=new Date(base);
+ target.setFullYear(target.getFullYear()+years);
+ target.setMonth(target.getMonth()+months);
+ return localISO(target)===isoToday();
+}
 function renderHomeAlerts(){
  const box=document.getElementById('homeAlerts');let out='';
  const today=isoToday();
@@ -795,8 +1270,21 @@ function renderHomeAlerts(){
    out+=`<div class="alert orange"><b>SECAR:</b> ${escapeHTML(v.nome)} — ${days} dias de gestação. O alerta desaparece ao mudar para Seca.</div>`;
   }
  });
+ db.vacas.forEach(v=>{
+  if(!v.inseminacao)return;
+  const days=daysBetween(v.inseminacao);
+  if(days>=18&&days<=25)out+=`<div class="alert orange"><b>OBSERVAR RETORNO AO CIO:</b> ${escapeHTML(v.nome)} — ${days} dias após a inseminação. Observe se houve retorno ao cio. A confirmação de prenhez deve seguir o método utilizado na propriedade.</div>`;
+ });
  db.novilhas.forEach(h=>{
   if(h.inseminacao){const days=daysBetween(h.inseminacao);if(days>=255)out+=`<div class="alert red"><b>PARTO DE NOVILHA:</b> ${escapeHTML(h.nome)} — ${days} dias de gestação. Parto previsto próximo.</div>`}
+ });
+ db.novilhas.forEach(h=>{
+  if(!h.nascimento)return;
+  const age=daysBetween(h.nascimento);
+  if(age===40)out+=`<div class="alert blue"><b>IDADE DA NOVILHA:</b> ${escapeHTML(h.nome)} completou 40 dias hoje.</div>`;
+  else if(age===90)out+=`<div class="alert blue"><b>IDADE DA NOVILHA:</b> ${escapeHTML(h.nome)} completou 90 dias hoje.</div>`;
+  else if(sameCalendarDateAfter(h.nascimento,6,0))out+=`<div class="alert blue"><b>IDADE DA NOVILHA:</b> ${escapeHTML(h.nome)} completou 6 meses hoje.</div>`;
+  else if(sameCalendarDateAfter(h.nascimento,0,1))out+=`<div class="alert blue"><b>IDADE DA NOVILHA:</b> ${escapeHTML(h.nome)} completou 1 ano hoje.</div>`;
  });
  const week=7*86400000,last=db.backup.ultimoBackup?new Date(db.backup.ultimoBackup).getTime():0;
  if(!last || Date.now()-last>=week)out+=`<div class="alert gray"><b>BACKUP:</b> Está na hora de fazer um backup semanal dos seus dados. <button class="btn btn-light" style="float:right;padding:5px" onclick="navigate('backup')">FAZER</button></div>`;
@@ -804,6 +1292,66 @@ function renderHomeAlerts(){
  box.innerHTML=out;
 }
 function dryThresholdDays(){return Math.max(0,Number(db.configuracoes.secagem.meses||0)*30.44+Number(db.configuracoes.secagem.dias||0))}
+
+/* =========================
+   RAÇÃO
+   ========================= */
+function allowNumericInput(e){
+ const k=e.key;
+ if(['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Home','End','Enter'].includes(k))return true;
+ if(e.ctrlKey||e.metaKey)return true;
+ return /[0-9.,]/.test(k);
+}
+function sanitizeNumericInput(input){
+ input.value=String(input.value||'').replace(/[^0-9.,]/g,'').replace(',', '.');
+ const parts=input.value.split('.');
+ if(parts.length>2)input.value=parts[0]+'.'+parts.slice(1).join('');
+}
+function renderFeedConfig(){
+ const el=document.getElementById('feedLitersPerKg');
+ if(el)el.value=db.configuracoes.racaoLitrosPorKg??'';
+}
+function saveFeedSettings(){
+ const el=document.getElementById('feedLitersPerKg');
+ const value=Number(String(el?.value||'').replace(',','.'));
+ if(!Number.isFinite(value)||value<=0)return alert('Informe uma quantidade válida de litros maior que zero.');
+ db.configuracoes.racaoLitrosPorKg=value;
+ saveDB(false);
+ alert('Configuração de ração salva.');
+ renderAll();
+}
+function lastProductionBeforeToday(){
+ const today=isoToday();
+ const dates=Object.keys(db.producao||{}).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<today&&db.producao[d]);
+ if(!dates.length)return null;
+ dates.sort();
+ const date=dates[dates.length-1];
+ const p=db.producao[date];
+ const total=productionTotal(p);
+ return {date,p,total};
+}
+function getFeedRecommendation(){
+ const ratio=Number(db.configuracoes.racaoLitrosPorKg);
+ if(!Number.isFinite(ratio)||ratio<=0)return {configured:false,hasProduction:false,total:0};
+ const last=lastProductionBeforeToday();
+ if(!last||last.total<=0)return {configured:true,hasProduction:false,total:0};
+ return {configured:true,hasProduction:true,date:last.date,total:last.total/ratio,liters:last.total};
+}
+function feedRecommendationForCow(id){
+ const ratio=Number(db.configuracoes.racaoLitrosPorKg);
+ if(!Number.isFinite(ratio)||ratio<=0)return null;
+ const today=isoToday();
+ const dates=Object.keys(db.producao||{}).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<=today);
+ dates.sort().reverse();
+ for(const date of dates){
+  const p=db.producao[date];
+  const x=p&&p.individual&&p.individual[id];
+  if(!x)continue;
+  const liters=Number(x.m||0)+Number(x.t||0);
+  if(liters>0)return {kg:liters/ratio,liters,date};
+ }
+ return null;
+}
 
 /* =========================
    PRODUÇÃO
@@ -867,13 +1415,23 @@ function cowIndividualStats(id){
  return {avg,record,count:recent.length};
 }
 function resetCowForm(){
- document.getElementById('cowFormTitle').textContent='Cadastrar animal';['cowEditId','cowName','cowCalving','cowInsemination','heiferName'].forEach(id=>document.getElementById(id).value='');
+ document.getElementById('cowFormTitle').textContent='Cadastrar animal';['cowEditId','cowName','cowCalving','cowInsemination','cowCalvingManual','cowInseminationManual','cowFather','cowMother','cowReproducer','heiferName','heiferFather'].forEach(id=>document.getElementById(id).value='');setDateMode('cowCalving','cowCalvingManual','calendar');setDateMode('cowInsemination','cowInseminationManual','calendar');
  document.getElementById('cowStatus').value='lactacao';document.getElementById('deleteCowBtn').classList.add('hidden');document.getElementById('cancelCowBtn').classList.add('hidden');
  document.getElementById('heiferFields').classList.add('hidden');document.getElementById('registerHeifer').checked=false;document.getElementById('heiferNameWrap').classList.add('hidden');
  renderCowList();
 }
+function updateCowHeiferFields(){
+ const manual=document.getElementById('cowCalvingManual');
+ const calendar=document.getElementById('cowCalving');
+ const calving=manual&&!manual.classList.contains('hidden')?manualToISO(manual.value):(calendar?.value||'');
+ const hasCalving=!!calving;
+ document.getElementById('heiferFields').classList.toggle('hidden',!hasCalving);
+ if(!hasCalving){document.getElementById('registerHeifer').checked=false;document.getElementById('heiferNameWrap').classList.add('hidden');}
+}
 document.getElementById('registerHeifer').addEventListener('change',()=>document.getElementById('heiferNameWrap').classList.toggle('hidden',!document.getElementById('registerHeifer').checked));
-document.getElementById('cowCalving').addEventListener('change',()=>document.getElementById('heiferFields').classList.toggle('hidden',!document.getElementById('cowCalving').value));
+document.getElementById('cowCalving').addEventListener('change',updateCowHeiferFields);
+document.getElementById('cowCalvingManual').addEventListener('input',updateCowHeiferFields);
+document.getElementById('cowCalvingManual').addEventListener('blur',updateCowHeiferFields);
 function freezeMissingHistoricalDivisors(beforeDate){
  Object.keys(db.producao).forEach(date=>{
   if(String(date)>=String(beforeDate))return;
@@ -885,9 +1443,61 @@ function freezeMissingHistoricalDivisors(beforeDate){
   }
  });
 }
+function findAnimalByName(name){
+ const n=String(name||'').trim().toLowerCase();
+ if(!n)return null;
+ return [...db.vacas,...db.novilhas].find(a=>String(a.nome||'').trim().toLowerCase()===n)||null;
+}
+function maternalLineageFor(name, fallbackGrandmother='', fallbackGrandfather='', fallbackGreatGrandmother='', fallbackGreatGrandfather=''){
+ const mother=findAnimalByName(name);
+ return {
+  grandmother:String(fallbackGrandmother||mother?.mae||'').trim(),
+  grandfather:String(fallbackGrandfather||mother?.pai||'').trim(),
+  greatGrandmother:String(fallbackGreatGrandmother||mother?.avoMaterna||'').trim(),
+  greatGrandfather:String(fallbackGreatGrandfather||mother?.avoMaterno||'').trim()
+ };
+}
+function openGenealogy(id,type){
+ const list=type==='cow'?db.vacas:db.novilhas; const a=list.find(x=>x.id===id); if(!a)return;
+ window.__genealogyRef={id,type};
+ const line=maternalLineageFor(a.mae,a.avoMaterna,a.avoMaterno,a.bisavoMaterna,a.bisavoMaterno);
+ document.getElementById('genealogyContent').innerHTML=`<div class="card" style="margin-bottom:10px"><h3 style="margin-top:0">🐄 ${escapeHTML(a.nome||'Animal')}</h3><div class="kpi-line"><b>Pai</b><span>${escapeHTML(a.pai||'Não informado')}</span></div><div class="kpi-line"><b>Mãe</b><span>${escapeHTML(a.mae||'Não informado')}</span></div></div><div class="card"><h3 style="margin-top:0">🌿 Linhagem materna</h3><div class="kpi-line"><b>Mãe</b><span>${escapeHTML(a.mae||'Não informado')}</span></div><div class="kpi-line"><b>Avô materno</b><span>${escapeHTML(line.grandfather||'Não informado')}</span></div><div class="kpi-line"><b>Avó materna</b><span>${escapeHTML(line.grandmother||'Não informado')}</span></div><div class="kpi-line"><b>Bisavô materno</b><span>${escapeHTML(line.greatGrandfather||'Não informado')}</span></div><div class="kpi-line"><b>Bisavó materna</b><span>${escapeHTML(line.greatGrandmother||'Não informado')}</span></div><p class="small" style="margin-bottom:0">Os nomes são opcionais. Quando a mãe já está cadastrada no rebanho, as informações disponíveis podem ser aproveitadas automaticamente.</p></div>`;
+ document.getElementById('genealogyEditForm').classList.add('hidden');
+ document.getElementById('genealogyEditBtn').classList.remove('hidden');
+ document.getElementById('genealogyModal').classList.add('open');
+}
+function closeGenealogyModal(){document.getElementById('genealogyModal').classList.remove('open');document.getElementById('genealogyEditForm').classList.add('hidden');document.getElementById('genealogyEditBtn').classList.remove('hidden');window.__genealogyRef=null;}
+function startGenealogyEdit(){
+ const ref=window.__genealogyRef;if(!ref)return;
+ const list=ref.type==='cow'?db.vacas:db.novilhas;const a=list.find(x=>x.id===ref.id);if(!a)return;
+ const line=maternalLineageFor(a.mae,a.avoMaterna,a.avoMaterno,a.bisavoMaterna,a.bisavoMaterno);
+ document.getElementById('genealogyFather').value=a.pai||'';
+ document.getElementById('genealogyMother').value=a.mae||'';
+ document.getElementById('genealogyMaternalGrandfather').value=line.grandfather||'';
+ document.getElementById('genealogyMaternalGrandmother').value=line.grandmother||'';
+ document.getElementById('genealogyMaternalGreatGrandfather').value=line.greatGrandfather||'';
+ document.getElementById('genealogyMaternalGreatGrandmother').value=line.greatGrandmother||'';
+ document.getElementById('genealogyEditForm').classList.remove('hidden');
+ document.getElementById('genealogyEditBtn').classList.add('hidden');
+}
+function cancelGenealogyEdit(){document.getElementById('genealogyEditForm').classList.add('hidden');document.getElementById('genealogyEditBtn').classList.remove('hidden');}
+function saveGenealogy(){
+ const ref=window.__genealogyRef;if(!ref)return;
+ const list=ref.type==='cow'?db.vacas:db.novilhas;const i=list.findIndex(x=>x.id===ref.id);if(i<0)return;
+ const a=list[i];
+ a.pai=document.getElementById('genealogyFather').value.trim();
+ a.mae=document.getElementById('genealogyMother').value.trim();
+ a.avoMaterno=document.getElementById('genealogyMaternalGrandfather').value.trim();
+ a.avoMaterna=document.getElementById('genealogyMaternalGrandmother').value.trim();
+ a.bisavoMaterno=document.getElementById('genealogyMaternalGreatGrandfather').value.trim();
+ a.bisavoMaterna=document.getElementById('genealogyMaternalGreatGrandmother').value.trim();
+ saveDB(false);alert('Genealogia salva.');openGenealogy(ref.id,ref.type);renderAll();
+}
+function editFromGenealogy(){startGenealogyEdit();}
+
 function saveCow(){
  const name=document.getElementById('cowName').value.trim();if(!name)return alert('Informe o nome/brinco.');
- const edit=document.getElementById('cowEditId').value;const calving=document.getElementById('cowCalving').value;
+ const edit=document.getElementById('cowEditId').value;const calving=getFlexibleDate('cowCalving','cowCalvingManual','Último parto');if(calving===null)return;const inseminacaoInput=getFlexibleDate('cowInsemination','cowInseminationManual','Inseminação');if(inseminacaoInput===null)return;
  const old=edit?db.vacas.find(v=>v.id===Number(edit)):null;
  const newStatus=document.getElementById('cowStatus').value;
  const today=isoToday();
@@ -909,18 +1519,85 @@ function saveCow(){
  }else if(newStatus==='lactacao'){
   dataEntradaLactacao=today;
  }
- let inseminacao=document.getElementById('cowInsemination').value;
+ let inseminacao=inseminacaoInput;
  // Ao registrar um novo parto em uma vaca já existente, a gestação anterior termina.
  // Porém, se o usuário informar uma nova inseminação no mesmo salvamento, ela é preservada.
  if(old && calving && calving!==old.parto && (!inseminacao || inseminacao===old.inseminacao)) inseminacao='';
- const obj={id:edit?Number(edit):Date.now(),nome:name,parto:calving,inseminacao,status:newStatus,dataEntradaLactacao,dataSaidaLactacao};
+ const currentReproducer=document.getElementById('cowReproducer').value.trim();
+ const birthReproducer=old&&calving&&calving!==old.parto?(old.reprodutor||''):currentReproducer;
+ const motherName=document.getElementById('cowMother').value.trim();
+ const maternalLine=old?{grandmother:old.avoMaterna||'',grandfather:old.avoMaterno||'',greatGrandmother:old.bisavoMaterna||'',greatGrandfather:old.bisavoMaterno||''}:maternalLineageFor(motherName);
+ const obj={id:edit?Number(edit):Date.now(),nome:name,parto:calving,inseminacao,status:newStatus,dataEntradaLactacao,dataSaidaLactacao,pai:document.getElementById('cowFather').value.trim(),mae:motherName,avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,reprodutor:calving&&old&&calving!==old.parto&&!inseminacao?'':currentReproducer};
  if(edit){const i=db.vacas.findIndex(v=>v.id===Number(edit));if(i>=0)db.vacas[i]=obj}
  else db.vacas.push(obj);
  if(calving&&document.getElementById('registerHeifer').checked){
   const hn=document.getElementById('heiferName').value.trim();if(!hn)return alert('Informe o nome/brinco da novilha.');
-  db.novilhas.push({id:Date.now()+1,nome:hn,nascimento:calving,mae:name,inseminacao:'',parto:null,transferida:false});
+  db.novilhas.push({id:generateUniqueAnimalId(),nome:hn,nascimento:calving,pai:document.getElementById('heiferFather').value.trim()||birthReproducer,mae:name,avoMaterna:old?.mae||'',avoMaterno:old?.pai||'',bisavoMaterna:old?.avoMaterna||'',bisavoMaterno:old?.avoMaterno||'',inseminacao:'',reprodutor:'',parto:null,transferida:false});
  }
  saveDB(false);alert('Animal salvo.');resetCowForm();renderAll();
+}
+function generateUniqueAnimalId(){
+ const used=new Set([...db.vacas,...db.novilhas].map(x=>Number(x.id)).filter(Number.isFinite));
+ let id=Math.max(Date.now(),Number(window.__lastGeneratedAnimalId||0)+1);
+ while(used.has(id))id++;
+ window.__lastGeneratedAnimalId=id;
+ return id;
+}
+function openCowBatchModal(){
+ document.getElementById('cowBatchQuantity').value=1;
+ document.getElementById('cowBatchQuantityBox').classList.remove('hidden');
+ document.getElementById('cowBatchForm').classList.add('hidden');
+ document.getElementById('cowBatchCards').innerHTML='';
+ document.getElementById('cowBatchModal').classList.add('open');
+}
+function closeCowBatchModal(){document.getElementById('cowBatchModal').classList.remove('open')}
+function generateCowBatch(){
+ const qty=Number(document.getElementById('cowBatchQuantity').value);
+ if(!Number.isInteger(qty)||qty<1||qty>100)return alert('Informe uma quantidade entre 1 e 100.');
+ const today=isoToday(),cards=[];
+ for(let i=1;i<=qty;i++){
+  cards.push(`<div class="batch-animal">
+   <h3>🐄 Vaca ${i}</h3>
+   <label>Nome / Brinco</label><input class="cow-batch-name" maxlength="60" data-index="${i}">
+   <div class="row"><div>${dateBatchMarkup('cow-batch-calving',i,'Último parto')}</div><div>${dateBatchMarkup('cow-batch-insem',i,'Inseminação')}</div></div><div class="row"><div><label>Pai (opcional)</label><input class="cow-batch-father" maxlength="60" data-index="${i}"></div><div><label>Mãe (opcional)</label><input class="cow-batch-mother" maxlength="60" data-index="${i}"></div></div><label>🐂 Reprodutor / Touro da inseminação (opcional)</label><input class="cow-batch-reproducer" maxlength="60" data-index="${i}" placeholder="Nome / identificação do reprodutor">
+   <label>Status</label><select class="cow-batch-status" data-index="${i}"><option value="lactacao">Em Lactação</option><option value="seca">Seca</option></select>
+   <div class="notice cow-batch-heifer-prompt">Ao informar um novo parto, você poderá cadastrar a fêmea nascida no Rebanho de Novilhas.</div>
+   <div class="hidden cow-batch-heifer-fields" id="cowBatchHeiferFields${i}">
+    <label><input type="checkbox" class="cow-batch-register-heifer" data-index="${i}" onchange="toggleCowBatchHeifer(${i})" style="width:auto;margin:0 5px 0 0"> Registrar a fêmea deste parto como novilha</label>
+    <div class="hidden" id="cowBatchHeiferNameWrap${i}"><label>Nome / Brinco da novilha</label><input class="cow-batch-heifer-name" maxlength="60" data-index="${i}"><label>Pai da novilha (opcional)</label><input class="cow-batch-heifer-father" maxlength="60" data-index="${i}"></div>
+   </div>
+  </div>`);
+ }
+ document.getElementById('cowBatchCards').innerHTML=cards.join('');
+ document.querySelectorAll('.cow-batch-calving-date').forEach(el=>el.addEventListener('change',()=>{
+  const i=el.dataset.index,fields=document.getElementById('cowBatchHeiferFields'+i);
+  fields.classList.toggle('hidden',!el.value);
+  if(!el.value){document.querySelector(`.cow-batch-register-heifer[data-index="${i}"]`).checked=false;document.getElementById('cowBatchHeiferNameWrap'+i).classList.add('hidden');}
+ }));
+ document.getElementById('cowBatchQuantityBox').classList.add('hidden');
+ document.getElementById('cowBatchForm').classList.remove('hidden');
+}
+function toggleCowBatchHeifer(i){
+ const checked=document.querySelector(`.cow-batch-register-heifer[data-index="${i}"]`).checked;
+ document.getElementById('cowBatchHeiferNameWrap'+i).classList.toggle('hidden',!checked);
+}
+function saveCowBatch(){
+ const names=[...document.querySelectorAll('.cow-batch-name')],calvings=[...document.querySelectorAll('.cow-batch-calving-date')],calvingManual=[...document.querySelectorAll('.cow-batch-calving-manual')],insem=[...document.querySelectorAll('.cow-batch-insem-date')],insemManual=[...document.querySelectorAll('.cow-batch-insem-manual')],statuses=[...document.querySelectorAll('.cow-batch-status')],fathers=[...document.querySelectorAll('.cow-batch-father')],mothers=[...document.querySelectorAll('.cow-batch-mother')],reproducers=[...document.querySelectorAll('.cow-batch-reproducer')],regs=[...document.querySelectorAll('.cow-batch-register-heifer')],heiferNames=[...document.querySelectorAll('.cow-batch-heifer-name')],heiferFathers=[...document.querySelectorAll('.cow-batch-heifer-father')];
+ if(!names.length)return alert('Gere os cartões da remessa primeiro.');
+ const records=[],heifers=[];
+ for(let i=0;i<names.length;i++){
+  const name=names[i].value.trim(),calving=getBatchDate(calvings[i],calvingManual[i],`Último parto da Vaca ${i+1}`),inseminacao=getBatchDate(insem[i],insemManual[i],`Inseminação da Vaca ${i+1}`),status=statuses[i].value;
+  if(calving===null||inseminacao===null)return;if(!name)return alert(`Informe o nome/brinco da Vaca ${i+1}.`);
+  if(calving&&regs[i].checked&&!heiferNames[i].value.trim())return alert(`Informe o nome/brinco da novilha da Vaca ${i+1}.`);
+  const today=isoToday();
+  const reproducer=reproducers[i].value.trim();
+  const maternalLine=maternalLineageFor(mothers[i].value.trim());
+  records.push({id:generateUniqueAnimalId(),nome:name,parto:calving,inseminacao,status,dataEntradaLactacao:status==='lactacao'?today:null,dataSaidaLactacao:null,pai:fathers[i].value.trim(),mae:mothers[i].value.trim(),avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,reprodutor:reproducer});
+  if(calving&&regs[i].checked)heifers.push({id:generateUniqueAnimalId(),nome:heiferNames[i].value.trim(),nascimento:calving,pai:heiferFathers[i].value.trim()||reproducer,mae:name,avoMaterna:mothers[i].value.trim(),avoMaterno:fathers[i].value.trim(),bisavoMaterna:maternalLine.grandmother,bisavoMaterno:maternalLine.grandfather,inseminacao:'',reprodutor:'',parto:null,transferida:false});
+ }
+ db.vacas.push(...records);
+ if(heifers.length)db.novilhas.push(...heifers);
+ saveDB(false);closeCowBatchModal();alert(`${records.length} ${records.length===1?'animal salvo':'animais salvos'} no rebanho${heifers.length?` e ${heifers.length} ${heifers.length===1?'novilha':'novilhas'} cadastrada${heifers.length===1?'':'s'}.`:'.'}`);renderAll();resetCowForm();
 }
 function renderCowList(){
  const box=document.getElementById('cowList');
@@ -931,12 +1608,12 @@ function renderCowList(){
  box.innerHTML=sorted.length?sorted.map(v=>{
   const lac=v.parto?monthsDays(daysBetween(v.parto)):'Não informado';const ges=v.inseminacao?monthsDays(daysBetween(v.inseminacao)):'Não informada';const st=cowIndividualStats(v.id);
   return `<div class="card animal" onclick="editCow(${v.id})"><div class="animal-head"><span class="animal-name">${escapeHTML(v.nome)}</span><span class="badge ${v.status==='lactacao'?'badge-lac':'badge-seca'}">${v.status==='lactacao'?'Em Lactação':'Seca'}</span></div>
-  <div class="animal-info"><b>Tempo de lactação:</b> ${lac}<br><b>Gestação:</b> ${ges}<br><b>Média individual:</b> ${st?fmtNumber(st.avg)+' L':'Sem dados para cálculo'}<br><b>Recorde individual:</b> ${st?fmtNumber(st.record)+' L':'Sem dados para cálculo'}${!v.inseminacao?'<br><span class="danger-text">⚠ Inseminação não registrada</span>':''}</div></div>`
+  <div class="animal-info"><b>Tempo de lactação:</b> ${lac}<br><b>Gestação:</b> ${ges}<br><b>Média individual:</b> ${st?fmtNumber(st.avg)+' L':'Sem dados para cálculo'}<br><b>Recorde individual:</b> ${st?fmtNumber(st.record)+' L':'Sem dados para cálculo'}<br><b>Pai:</b> ${escapeHTML(v.pai||'Não informado')}<br><b>Mãe:</b> ${escapeHTML(v.mae||'Não informado')}<br><b>Reprodutor:</b> ${escapeHTML(v.reprodutor||'Não informado')}${(()=>{const fr=feedRecommendationForCow(v.id);return fr?`<br><b>🌾 Ração recomendada:</b> ${fmtNumber(fr.kg)} kg`:(db.configuracoes.racaoLitrosPorKg?'':'<br><span class="small">🌾 Configure a ração nas configurações</span>')})()}${!v.inseminacao?'<br><span class="danger-text">⚠ Inseminação não registrada</span>':''}</div><button class="btn btn-light btn-block" onclick="event.stopPropagation();openGenealogy(${v.id},'cow')">🌳 VER LINHAGEM MATERNA</button></div>`
  }).join(''):'<div class="empty">Nenhum animal cadastrado.</div>';
 }
 function editCow(id){
  const v=db.vacas.find(x=>x.id===id);if(!v)return;
- document.getElementById('cowFormTitle').textContent='Editar animal';document.getElementById('cowEditId').value=v.id;document.getElementById('cowName').value=v.nome;document.getElementById('cowCalving').value=v.parto||'';document.getElementById('cowInsemination').value=v.inseminacao||'';document.getElementById('cowStatus').value=v.status||'lactacao';document.getElementById('heiferFields').classList.add('hidden');document.getElementById('deleteCowBtn').classList.remove('hidden');document.getElementById('cancelCowBtn').classList.remove('hidden');window.scrollTo(0,0);
+ document.getElementById('cowFormTitle').textContent='Editar animal';document.getElementById('cowEditId').value=v.id;document.getElementById('cowName').value=v.nome;document.getElementById('cowCalving').value=v.parto||'';document.getElementById('cowInsemination').value=v.inseminacao||'';document.getElementById('cowCalvingManual').value='';document.getElementById('cowInseminationManual').value='';setDateMode('cowCalving','cowCalvingManual','calendar');setDateMode('cowInsemination','cowInseminationManual','calendar');document.getElementById('cowFather').value=v.pai||'';document.getElementById('cowMother').value=v.mae||'';document.getElementById('cowReproducer').value=v.reprodutor||'';document.getElementById('cowStatus').value=v.status||'lactacao';document.getElementById('registerHeifer').checked=false;document.getElementById('heiferNameWrap').classList.add('hidden');updateCowHeiferFields();document.getElementById('deleteCowBtn').classList.remove('hidden');document.getElementById('cancelCowBtn').classList.remove('hidden');window.scrollTo(0,0);
 }
 function deleteCow(){
  const id=Number(document.getElementById('cowEditId').value);if(!id)return;if(!confirm('Excluir este animal?'))return;
@@ -944,26 +1621,119 @@ function deleteCow(){
 }
 
 /* =========================
+   RETROSPECTIVA DO REBANHO
+   ========================= */
+function retrospectivaMonths(){
+ return [...new Set(Object.keys(db.entregas||{}).filter(m=>/^\d{4}-\d{2}$/.test(m)))].sort().reverse();
+}
+function renderRetrospectiva(){
+ const period=document.getElementById('retrospectivaPeriod'),box=document.getElementById('retrospectivaContent');
+ if(!period||!box)return;
+ period.innerHTML='<div class="notice"><b>Período analisado:</b> todo o histórico disponível no módulo Entregas.</div>';
+ const months=retrospectivaMonths(); let html='';
+ if(!months.length) html+='<div class="card"><div class="empty">Sem dados de entregas registrados.</div></div>';
+ else{
+  const stats=months.map(month=>({month,st:monthDeliveryStats(month)}));
+  const best=stats.reduce((a,b)=>b.st.total>a.st.total?b:a,stats[0]);
+  html+=`<div class="card"><h3>🏆 Melhor mês de leite entregue</h3><div class="summary"><div class="summary-item"><small>MÊS</small><b>${escapeHTML(formatMonthLabel(best.month))}</b><br><b>${fmtNumber(best.st.total)} L</b></div></div></div>`;
+  html+='<div class="card"><h3>🥛 Histórico mensal</h3><div class="table-scroll"><table><thead><tr><th>Mês</th><th>Litros</th><th>Valor recebido</th></tr></thead><tbody>';
+  stats.forEach(x=>{const value=x.st.preco>0&&x.st.total>0?money(x.st.total*x.st.preco):'Sem dados';html+=`<tr><td>${escapeHTML(formatMonthLabel(x.month))}</td><td>${fmtNumber(x.st.total)} L</td><td>${value}</td></tr>`});
+  html+='</tbody></table></div></div>';
+ }
+ const ranked=db.vacas.map(v=>({v,st:cowIndividualStats(v.id)})).filter(x=>x.st&&Number.isFinite(x.st.record)).sort((a,b)=>b.st.record-a.st.record).slice(0,3);
+ html+='<div class="card"><h3>🏆 Maiores recordes individuais</h3>'+ (ranked.length?ranked.map((x,i)=>`<div class="kpi-line"><b>${i+1}º — ${escapeHTML(x.v.nome)}</b><span>${fmtNumber(x.st.record)} L</span></div>`).join(''):'<div class="empty">Sem dados</div>')+'</div>';
+ const avgRank=db.vacas.map(v=>({v,st:cowIndividualStats(v.id)})).filter(x=>x.st&&x.st.count>0&&Number.isFinite(x.st.avg)).sort((a,b)=>b.st.avg-a.st.avg).slice(0,3);
+ html+='<div class="card"><h3>📈 Maiores médias — últimos 30 dias</h3>'+ (avgRank.length?avgRank.map((x,i)=>`<div class="kpi-line"><b>${i+1}º — ${escapeHTML(x.v.nome)}</b><span>${fmtNumber(x.st.avg)} L/dia</span></div>`).join(''):'<div class="empty">Sem dados</div>')+'</div>';
+ let possible=0,confirm=0,noInfo=0;
+ db.vacas.forEach(v=>{if(!v.inseminacao){noInfo++;return}const days=daysBetween(v.inseminacao);if(days>25)possible++;else if(days>=0)confirm++});
+ db.novilhas.forEach(h=>{if(!h.inseminacao)return;const days=daysBetween(h.inseminacao);if(days>25)possible++;else if(days>=0)confirm++});
+ html+=`<div class="card"><h3>🤰 Situação reprodutiva</h3><div class="kpi-line"><b>Possivelmente prenhes</b><span>${possible}</span></div><div class="kpi-line"><b>A confirmar</b><span>${confirm}</span></div><div class="kpi-line"><b>Sem informação</b><span>${noInfo}</span></div><p class="small" style="margin-bottom:0">Possivelmente prenhes: mais de 25 dias após a inseminação. A confirmar: até 25 dias após a inseminação. Sem informação: somente vacas sem inseminação registrada.</p></div>`;
+ html='<div class="card"><h3>🐄 Tamanho atual do rebanho</h3><div class="summary-grid"><div class="summary-item"><small>VACAS</small><b>'+db.vacas.length+'</b></div><div class="summary-item"><small>NOVILHAS</small><b>'+db.novilhas.length+'</b></div><div class="summary-item"><small>TOTAL DE ANIMAIS</small><b>'+(db.vacas.length+db.novilhas.length)+'</b></div></div></div>'+html;
+ box.innerHTML=html;
+}
+/* =========================
    ENTREGAS
    ========================= */
 function monthKey(d=selectedMonth){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function ensureDeliveryMonth(m){if(!db.entregas[m])db.entregas[m]={preco:0,dias:{}};if(!db.entregas[m].dias||typeof db.entregas[m].dias!=='object')db.entregas[m].dias={};return db.entregas[m]}
+function ensurePaymentForMonth(m){const ent=ensureDeliveryMonth(m);if(!ent.pagamento||typeof ent.pagamento!=='object')ent.pagamento={};if(!ent.pagamento.modo)ent.pagamento.modo='perLiter';if(!Object.prototype.hasOwnProperty.call(ent.pagamento,'valor'))ent.pagamento.valor=Number(ent.preco||0);return ent.pagamento}
+function readDeliveryMonth(m){const ent=db.entregas&&db.entregas[m];return ent&&typeof ent==='object'?ent:null}
+function readPaymentForMonth(m){const ent=readDeliveryMonth(m),p=ent&&ent.pagamento&&typeof ent.pagamento==='object'?ent.pagamento:{};return {modo:p.modo||'perLiter',valor:Object.prototype.hasOwnProperty.call(p,'valor')?Number(p.valor||0):Number(ent?.preco||0)}
+}
 function monthDeliveryStats(month){
- const ent=db.entregas[month]||{preco:0,dias:{}};let total=0,count=0;
- Object.values(ent.dias||{}).forEach(v=>{const n=Number(v||0);if(n>0){total+=n;count++}});
- const parts=month.split('-').map(Number),daysInMonth=new Date(parts[0],parts[1],0).getDate();
- return {total,count,avgEntry:count?total/count:0,preco:Number(ent.preco||0),daysInMonth,monthProductionTotal(){let s=0;Object.keys(db.producao).filter(k=>k.startsWith(month)).forEach(k=>s+=productionTotal(db.producao[k]));return s}};
+ const ent=readDeliveryMonth(month)||{},days=ent.dias&&typeof ent.dias==='object'?ent.dias:{};let total=0,count=0;Object.values(days).forEach(v=>{const n=Number(v||0);if(n>0){total+=n;count++}});
+ const parts=month.split('-').map(Number),daysInMonth=new Date(parts[0],parts[1],0).getDate(),p=readPaymentForMonth(month);
+ let preco=0,totalReceived=0;if(p.modo==='total'){totalReceived=Number(p.valor||0);preco=total>0?totalReceived/total:0}else{preco=Number(p.valor||0);totalReceived=total>0&&preco>0?total*preco:0}
+ return {total,count,avgEntry:count?total/count:0,preco,totalReceived,daysInMonth,modo:p.modo,monthProductionTotal(){let s=0;Object.keys(db.producao).filter(k=>k.startsWith(month)).forEach(k=>s+=productionTotal(db.producao[k]));return s}};
 }
 function renderDeliveries(){
- const m=monthKey();const ent=db.entregas[m]||{preco:0,dias:{}};const st=monthDeliveryStats(m);
- document.getElementById('deliveryMonth').textContent=selectedMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});document.getElementById('milkPrice').value=ent.preco||'';
- document.getElementById('deliveryTotal').textContent=fmtNumber(st.total)+' L';document.getElementById('deliveryValue').textContent=money(st.total*st.preco);document.getElementById('deliveryAvgEntry').textContent=fmtNumber(st.avgEntry)+' L';
- let rows='';for(let i=1;i<=st.daysInMonth;i++){const ds=`${m}-${String(i).padStart(2,'0')}`;rows+=`<tr><td>${i}</td><td><input type="number" min="0" step="0.1" value="${ent.dias[ds]??''}" style="margin:0;padding:9px" oninput="updateDelivery('${ds}',this.value)"></td></tr>`}
- document.getElementById('deliveryTable').innerHTML=rows;
+ const m=monthKey(),ent=readDeliveryMonth(m)||{preco:0,dias:{}},st=monthDeliveryStats(m),p=readPaymentForMonth(m);
+ document.getElementById('deliveryMonth').textContent=selectedMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ document.getElementById('paymentMode').value=p.modo||'perLiter';document.getElementById('milkPrice').value=p.modo==='perLiter'&&p.valor?p.valor:'';document.getElementById('milkTotalReceived').value=p.modo==='total'&&p.valor?p.valor:'';setPaymentMode(p.modo||'perLiter',true);
+ document.getElementById('deliveryTotal').textContent=fmtNumber(st.total)+' L';document.getElementById('deliveryPriceSummary').textContent=st.preco>0?money(st.preco)+'/L':'—';document.getElementById('deliveryValue').textContent=st.totalReceived>0?money(st.totalReceived):'—';document.getElementById('deliveryAvgEntry').textContent=fmtNumber(st.avgEntry)+' L';document.getElementById('deliveryReceiptStatus').textContent=st.totalReceived>0?'Recebido':'Ainda não registrado';
+ let rows='';for(let i=1;i<=st.daysInMonth;i++){const ds=`${m}-${String(i).padStart(2,'0')}`;rows+=`<tr><td>${i}</td><td><input type="number" min="0" step="0.1" value="${ent.dias[ds]??''}" style="margin:0;padding:9px" oninput="updateDelivery('${ds}',this.value)"></td></tr>`}document.getElementById('deliveryTable').innerHTML=rows;
 }
 function changeMonth(dir){selectedMonth=new Date(selectedMonth.getFullYear(),selectedMonth.getMonth()+dir,1);renderDeliveries()}
-function saveMilkPrice(v){const m=monthKey();if(!db.entregas[m])db.entregas[m]={preco:0,dias:{}};db.entregas[m].preco=Number(v||0);saveDB(false);updateDeliverySummary()}
-function updateDelivery(date,v){const m=date.slice(0,7);if(!db.entregas[m])db.entregas[m]={preco:0,dias:{}};const n=Number(v||0);if(n>0)db.entregas[m].dias[date]=n;else delete db.entregas[m].dias[date];saveDB(false);updateDeliverySummary()}
-function updateDeliverySummary(){const st=monthDeliveryStats(monthKey());document.getElementById('deliveryTotal').textContent=fmtNumber(st.total)+' L';document.getElementById('deliveryValue').textContent=money(st.total*st.preco);document.getElementById('deliveryAvgEntry').textContent=fmtNumber(st.avgEntry)+' L'}
+function setPaymentMode(mode,silent=false){document.getElementById('paymentPerLiterWrap').classList.toggle('hidden',mode!=='perLiter');document.getElementById('paymentTotalWrap').classList.toggle('hidden',mode!=='total');if(!silent){const m=monthKey(),p=ensurePaymentForMonth(m),st=monthDeliveryStats(m);if(mode==='total'){const currentPerLiter=p.modo==='perLiter'?Number(p.valor||0):(st.preco||0);p.valor=st.total>0?st.total*currentPerLiter:Number(p.valor||0);}else{const currentTotal=p.modo==='total'?Number(p.valor||0):(st.total>0?st.total*Number(p.valor||0):0);p.valor=st.total>0?currentTotal/st.total:Number(p.valor||0);}p.modo=mode;ensureDeliveryMonth(m).preco=p.modo==='perLiter'?p.valor:(st.total>0?p.valor/st.total:0);saveDB(false);renderDeliveries();renderFinanceiro();renderHome()}}
+function saveMilkPrice(v){const m=monthKey(),p=ensurePaymentForMonth(m);p.modo='perLiter';p.valor=Number(v||0);ensureDeliveryMonth(m).preco=p.valor;saveDB(false);updateDeliverySummary()}
+function saveMilkTotal(v){const m=monthKey(),p=ensurePaymentForMonth(m);p.modo='total';p.valor=Number(v||0);const st=monthDeliveryStats(m);ensureDeliveryMonth(m).preco=st.total>0?p.valor/st.total:0;saveDB(false);updateDeliverySummary()}
+function updateDelivery(date,v){const m=date.slice(0,7),ent=ensureDeliveryMonth(m),n=Number(v||0);if(n>0)ent.dias[date]=n;else delete ent.dias[date];const st=monthDeliveryStats(m);ent.preco=st.preco;saveDB(false);updateDeliverySummary()}
+function updateDeliverySummary(){const st=monthDeliveryStats(monthKey());document.getElementById('deliveryTotal').textContent=fmtNumber(st.total)+' L';document.getElementById('deliveryPriceSummary').textContent=st.preco>0?money(st.preco)+'/L':'—';document.getElementById('deliveryValue').textContent=st.totalReceived>0?money(st.totalReceived):'—';document.getElementById('deliveryAvgEntry').textContent=fmtNumber(st.avgEntry)+' L';document.getElementById('deliveryReceiptStatus').textContent=st.totalReceived>0?'Recebido':'Ainda não registrado';renderFinanceiro();renderHome()}
+
+/* =========================
+   FINANCEIRO DO LEITE
+   ========================= */
+function normalizeFinanceiro(raw){
+ const f=raw&&typeof raw==='object'?raw:{};return {gastos:Array.isArray(f.gastos)?f.gastos:[],outrosRecebimentos:Array.isArray(f.outrosRecebimentos)?f.outrosRecebimentos:[]};
+}
+function financeId(){return 'fin_'+Date.now()+'_'+Math.random().toString(36).slice(2,9)}
+function dateDiffInclusive(a,b){const da=parseLocalDate(a),dbd=parseLocalDate(b);if(!da||!dbd||dbd<da)return 0;return Math.floor((dbd-da)/86400000)+1}
+function effectiveExpenseEnd(g){return g.multiMonth?((g.terminoReal||g.terminoEstimado||g.data)||g.data):g.data}
+function expenseAllocationOnDate(g,date){
+ if(!g||g.paraLeite!=='sim'||!g.data)return 0;
+ if(!g.multiMonth)return g.data===date?Number(g.valor||0):0;
+ const end=effectiveExpenseEnd(g);if(date<g.data||date>end)return 0;const days=dateDiffInclusive(g.data,end);return days>0?Number(g.valor||0)/days:0;
+}
+function monthMilkExpenseTotal(month){let total=0;const parts=month.split('-').map(Number),days=new Date(parts[0],parts[1],0).getDate();for(let i=1;i<=days;i++){const ds=`${month}-${String(i).padStart(2,'0')}`;db.financeiro.gastos.forEach(g=>{total+=expenseAllocationOnDate(g,ds)})}return total}
+function milkLitersInRange(start,end){let total=0;const s=parseLocalDate(start),e=parseLocalDate(end);if(!s||!e)return 0;Object.entries(db.entregas||{}).forEach(([m,ent])=>Object.entries(ent?.dias||{}).forEach(([date,v])=>{const d=parseLocalDate(date);if(d&&d>=s&&d<=e)total+=Number(v||0)}));return total}
+function milkExpenseInRange(start,end){let total=0;const s=parseLocalDate(start),e=parseLocalDate(end);if(!s||!e)return 0;for(let d=new Date(s);d<=e;d.setDate(d.getDate()+1)){const ds=localISO(d);db.financeiro.gastos.forEach(g=>{total+=expenseAllocationOnDate(g,ds)})}return total}
+function calculateMilkCost90Days(){const end=parseLocalDate(isoToday()),start=new Date(end);start.setDate(start.getDate()-89);const liters=milkLitersInRange(localISO(start),isoToday()),expenses=milkExpenseInRange(localISO(start),isoToday());return liters>0&&expenses>0?expenses/liters:null}
+function receivedMilkForMonth(month){const st=monthDeliveryStats(month);return st.totalReceived>0?st.totalReceived:0}
+function formatMonthLabel(month){const [y,m]=month.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}
+function financeMonths(){const set=new Set([monthKey(financeSelectedMonth)]);Object.keys(db.entregas||{}).forEach(m=>set.add(m));db.financeiro.gastos.forEach(g=>g.data&&set.add(g.data.slice(0,7)));db.financeiro.outrosRecebimentos.forEach(x=>x.data&&set.add(x.data.slice(0,7)));return [...set].sort()}
+let financeSelectedMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+function changeFinanceMonth(dir){financeSelectedMonth=new Date(financeSelectedMonth.getFullYear(),financeSelectedMonth.getMonth()+dir,1);renderFinanceiro()}
+function renderFinanceiro(){
+ const m=monthKey(financeSelectedMonth),label=document.getElementById('financeMonthLabel');if(!label)return;label.textContent=financeSelectedMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ const cost=calculateMilkCost90Days();document.getElementById('financeMilkCost').textContent=cost?money(cost)+'/L':'—';
+ const st=monthDeliveryStats(m),received=receivedMilkForMonth(m),expenses=monthMilkExpenseTotal(m),others=db.financeiro.outrosRecebimentos.filter(x=>String(x.data||'').startsWith(m));
+ document.getElementById('financeMonthlySummary').innerHTML=`<div class="finance-section-title">RESUMO DO MÊS</div><div class="kpi-line"><b>Litros entregues</b><span>${fmtNumber(st.total)} L</span></div><div class="kpi-line"><b>Dinheiro recebido pelo leite</b><span>${received?money(received):'—'}</span></div><div class="kpi-line"><b>Gastos do leite</b><span>${expenses?money(expenses):'—'}</span></div><div class="kpi-line"><b>Resultado do leite</b><span>${received||expenses?money(received-expenses):'—'}</span></div>${others.length?`<div class="finance-section-title">OUTROS VALORES DA ATIVIDADE</div>${others.map(renderOtherIncomeCard).join('')}`:''}`;
+ renderFinanceExtract(m);renderExpenseFormState();renderOtherIncomeFormState();
+}
+function renderOtherIncomeCard(x){return `<div class="finance-card"><div class="finance-card-head"><div><h4>${escapeHTML(x.descricao||x.categoria||'Outro')}</h4><p>${fmtDate(x.data)} · ${escapeHTML(x.categoria||'Outro')}</p></div><b>${money(x.valor)}</b></div><div class="finance-actions"><button class="btn btn-light" onclick="editOtherIncome('${x.id}')">✏️ EDITAR</button><button class="btn btn-red" onclick="deleteOtherIncome('${x.id}')">🗑️ EXCLUIR</button></div></div>`}
+function renderFinanceExtract(month){
+ const box=document.getElementById('financeExtract'),st=monthDeliveryStats(month),received=receivedMilkForMonth(month),expenses=db.financeiro.gastos.filter(g=>String(g.data||'').startsWith(month)||g.multiMonth&&g.data&&effectiveExpenseEnd(g)>=month+'-01'&&g.data<=month+'-31');
+ let html=`<div class="finance-section-title">RECEBIMENTO DO LEITE</div><div class="finance-card"><div class="kpi-line"><b>Litros entregues</b><span>${fmtNumber(st.total)} L</span></div><div class="kpi-line"><b>Valor recebido por litro</b><span>${st.preco>0?money(st.preco)+'/L':'—'}</span></div><div class="kpi-line"><b>Total recebido</b><span>${received?money(received):'—'}</span></div></div>`;
+ html+=`<div class="finance-section-title">GASTOS DO LEITE</div>`;const monthG=db.financeiro.gastos.filter(g=>g.paraLeite==='sim'&&monthExpenseRelevant(g,month));html+=monthG.length?monthG.map(renderExpenseCard).join(''):'<div class="empty">Nenhum gasto do leite neste mês.</div>';
+ html+=`<div class="finance-section-title">OUTROS VALORES RECEBIDOS</div>`;const others=db.financeiro.outrosRecebimentos.filter(x=>String(x.data||'').startsWith(month));html+=others.length?others.map(renderOtherIncomeCard).join(''):'<div class="empty">Nenhum outro valor registrado neste mês.</div>';box.innerHTML=html;
+}
+function monthExpenseRelevant(g,month){if(!g||!g.data)return false;if(!g.multiMonth)return g.data.startsWith(month);const start=month+'-01',end=month+'-'+new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate();return g.data<=end&&effectiveExpenseEnd(g)>=start}
+function renderExpenseCard(g){const end=effectiveExpenseEnd(g),multi=g.multiMonth;return `<div class="finance-card"><div class="finance-card-head"><div><h4>${escapeHTML(g.descricao||'Gasto')}</h4><p>${escapeHTML(g.categoria||'Outro')} · ${fmtDate(g.data)}${multi?' até '+fmtDate(end):''}</p></div><b>${money(monthlyExpenseDisplay(g,monthKey(financeSelectedMonth)))}</b></div><p>${g.paraLeite==='sim'?'🥛 Entra no custo do leite':'Não entra no custo do leite'}${multi?' · gasto distribuído pelo período':''}</p><div class="finance-actions"><button class="btn btn-light" onclick="editExpense('${g.id}')">✏️ EDITAR</button><button class="btn btn-red" onclick="deleteExpense('${g.id}')">🗑️ EXCLUIR</button></div></div>`}
+function monthlyExpenseDisplay(g,month){return monthExpenseRelevant(g,month)?monthMilkExpenseTotal(month) && g.paraLeite==='sim'?monthExpenseSpecific(g,month):0:Number(g.valor||0)}
+function monthExpenseSpecific(g,month){const parts=month.split('-').map(Number),days=new Date(parts[0],parts[1],0).getDate();let total=0;for(let i=1;i<=days;i++)total+=expenseAllocationOnDate(g,`${month}-${String(i).padStart(2,'0')}`);return total}
+function openExpenseForm(){document.getElementById('financeExpenseForm').classList.remove('hidden');document.getElementById('financeOtherIncomeForm').classList.add('hidden');document.getElementById('expenseFormTitle').textContent='➕ Novo gasto';document.getElementById('expenseEditId').value='';document.getElementById('expenseDescription').value='';document.getElementById('expenseValue').value='';document.getElementById('expenseDate').value=isoToday();document.getElementById('expenseCategory').value='Ração';document.getElementById('expenseForMilk').value='sim';document.getElementById('expenseMultiMonth').value='nao';document.getElementById('expenseEstimatedEnd').value='';document.getElementById('expenseRealEnd').value='';toggleMultiMonthExpense('nao');document.getElementById('financeExpenseForm').scrollIntoView({behavior:'smooth',block:'start'})}
+function closeExpenseForm(){document.getElementById('financeExpenseForm').classList.add('hidden')}
+function renderExpenseFormState(){}
+function toggleMultiMonthExpense(v){document.getElementById('expensePeriodWrap').classList.toggle('hidden',v!=='sim')}
+function saveExpense(){const id=document.getElementById('expenseEditId').value,descricao=document.getElementById('expenseDescription').value.trim(),valor=Number(document.getElementById('expenseValue').value||0),data=document.getElementById('expenseDate').value,categoria=document.getElementById('expenseCategory').value,paraLeite=document.getElementById('expenseForMilk').value,multiMonth=document.getElementById('expenseMultiMonth').value==='sim',terminoEstimado=document.getElementById('expenseEstimatedEnd').value,terminoReal=document.getElementById('expenseRealEnd').value;if(!descricao||valor<=0||!data)return alert('Informe descrição, valor e data.');if(multiMonth&&(!terminoEstimado||terminoEstimado<data))return alert('Informe um término estimado válido.');if(multiMonth&&terminoReal&&(terminoReal<data))return alert('O término real não pode ser anterior ao início.');let g=id?db.financeiro.gastos.find(x=>String(x.id)===String(id)):null;if(!g){g={id:financeId()};db.financeiro.gastos.push(g)}Object.assign(g,{descricao,valor,data,categoria,paraLeite,multiMonth,terminoEstimado:multiMonth?terminoEstimado:'',terminoReal:multiMonth?terminoReal:''});saveDB(false);closeExpenseForm();renderFinanceiro();renderHome();toast('Gasto salvo.')}
+function editExpense(id){const g=db.financeiro.gastos.find(x=>String(x.id)===String(id));if(!g)return;openExpenseForm();document.getElementById('expenseFormTitle').textContent='✏️ Editar gasto';document.getElementById('expenseEditId').value=g.id;document.getElementById('expenseDescription').value=g.descricao||'';document.getElementById('expenseValue').value=g.valor??'';document.getElementById('expenseDate').value=g.data||'';document.getElementById('expenseCategory').value=g.categoria||'Outro';document.getElementById('expenseForMilk').value=g.paraLeite==='nao'?'nao':'sim';document.getElementById('expenseMultiMonth').value=g.multiMonth?'sim':'nao';document.getElementById('expenseEstimatedEnd').value=g.terminoEstimado||'';document.getElementById('expenseRealEnd').value=g.terminoReal||'';toggleMultiMonthExpense(g.multiMonth?'sim':'nao');document.getElementById('financeExpenseForm').scrollIntoView({behavior:'smooth',block:'start'})}
+function deleteExpense(id){if(!confirm('Excluir somente este gasto?'))return;db.financeiro.gastos=db.financeiro.gastos.filter(x=>String(x.id)!==String(id));saveDB(false);renderFinanceiro();renderHome();toast('Gasto excluído.')}
+function openOtherIncomeForm(){document.getElementById('financeOtherIncomeForm').classList.remove('hidden');document.getElementById('financeExpenseForm').classList.add('hidden');document.getElementById('otherIncomeFormTitle').textContent='💰 Outro valor recebido';document.getElementById('otherIncomeEditId').value='';document.getElementById('otherIncomeDescription').value='';document.getElementById('otherIncomeValue').value='';document.getElementById('otherIncomeDate').value=isoToday();document.getElementById('otherIncomeCategory').value='Venda de novilha';document.getElementById('financeOtherIncomeForm').scrollIntoView({behavior:'smooth',block:'start'})}
+function closeOtherIncomeForm(){document.getElementById('financeOtherIncomeForm').classList.add('hidden')}
+function renderOtherIncomeFormState(){}
+function saveOtherIncome(){const id=document.getElementById('otherIncomeEditId').value,descricao=document.getElementById('otherIncomeDescription').value.trim(),valor=Number(document.getElementById('otherIncomeValue').value||0),data=document.getElementById('otherIncomeDate').value,categoria=document.getElementById('otherIncomeCategory').value;if(valor<=0||!data)return alert('Informe valor e data.');let x=id?db.financeiro.outrosRecebimentos.find(v=>String(v.id)===String(id)):null;if(!x){x={id:financeId()};db.financeiro.outrosRecebimentos.push(x)}Object.assign(x,{descricao:descricao||categoria,valor,data,categoria});saveDB(false);closeOtherIncomeForm();renderFinanceiro();renderHome();toast('Valor salvo.')}
+function editOtherIncome(id){const x=db.financeiro.outrosRecebimentos.find(v=>String(v.id)===String(id));if(!x)return;openOtherIncomeForm();document.getElementById('otherIncomeFormTitle').textContent='✏️ Editar outro valor';document.getElementById('otherIncomeEditId').value=x.id;document.getElementById('otherIncomeDescription').value=x.descricao||'';document.getElementById('otherIncomeValue').value=x.valor??'';document.getElementById('otherIncomeDate').value=x.data||'';document.getElementById('otherIncomeCategory').value=x.categoria||'Outro'}
+function deleteOtherIncome(id){if(!confirm('Excluir somente este valor?'))return;db.financeiro.outrosRecebimentos=db.financeiro.outrosRecebimentos.filter(x=>String(x.id)!==String(id));saveDB(false);renderFinanceiro();renderHome();toast('Valor excluído.')}
 
 /* =========================
    AGENDA
@@ -983,28 +1753,66 @@ function deleteAgenda(id){if(!confirm('Excluir este compromisso?'))return;db.age
    NOVILHAS
    ========================= */
 function openNewHeiferModal(){
- document.getElementById('heiferEditId').value='';document.getElementById('heiferModalTitle').textContent='Nova novilha';document.getElementById('heiferNameModal').value='';document.getElementById('heiferBirthModal').value=isoToday();document.getElementById('heiferInsemModal').value='';document.getElementById('heiferModal').classList.add('open');
+ document.getElementById('heiferEditId').value='';document.getElementById('heiferModalTitle').textContent='Nova novilha';document.getElementById('heiferNameModal').value='';document.getElementById('heiferBirthModal').value=isoToday();document.getElementById('heiferInsemModal').value='';document.getElementById('heiferInsemManual').value='';document.getElementById('heiferFatherModal').value='';document.getElementById('heiferMotherModal').value='';document.getElementById('heiferReproducerModal').value='';document.getElementById('deleteHeiferBtn').classList.add('hidden');setDateMode('heiferInsemModal','heiferInsemManual','calendar');document.getElementById('heiferModal').classList.add('open');
 }
 function editHeifer(id){
- const h=db.novilhas.find(x=>x.id===id);if(!h)return;document.getElementById('heiferEditId').value=h.id;document.getElementById('heiferModalTitle').textContent='Editar novilha';document.getElementById('heiferNameModal').value=h.nome;document.getElementById('heiferBirthModal').value=h.nascimento;document.getElementById('heiferInsemModal').value=h.inseminacao||'';document.getElementById('heiferModal').classList.add('open');
+ const h=db.novilhas.find(x=>x.id===id);if(!h)return;document.getElementById('heiferEditId').value=h.id;document.getElementById('heiferModalTitle').textContent='Editar novilha';document.getElementById('heiferNameModal').value=h.nome;document.getElementById('heiferBirthModal').value=h.nascimento;document.getElementById('heiferInsemModal').value=h.inseminacao||'';document.getElementById('heiferInsemManual').value='';document.getElementById('heiferFatherModal').value=h.pai||'';document.getElementById('heiferMotherModal').value=h.mae||'';document.getElementById('heiferReproducerModal').value=h.reprodutor||'';document.getElementById('deleteHeiferBtn').classList.remove('hidden');setDateMode('heiferInsemModal','heiferInsemManual','calendar');document.getElementById('heiferModal').classList.add('open');
 }
 function closeModal(){document.getElementById('heiferModal').classList.remove('open')}
 function saveHeifer(){
- const name=document.getElementById('heiferNameModal').value.trim(),birth=document.getElementById('heiferBirthModal').value;if(!name||!birth)return alert('Informe nome e nascimento.');
- const edit=document.getElementById('heiferEditId').value,obj={id:edit?Number(edit):Date.now(),nome:name,nascimento:birth,mae:'',inseminacao:document.getElementById('heiferInsemModal').value,parto:null,transferida:false};
- if(edit){const i=db.novilhas.findIndex(x=>x.id===Number(edit));if(i>=0)obj.mae=db.novilhas[i].mae||'',db.novilhas[i]=obj}else db.novilhas.push(obj);
+ const name=document.getElementById('heiferNameModal').value.trim(),birth=document.getElementById('heiferBirthModal').value,inseminacao=getFlexibleDate('heiferInsemModal','heiferInsemManual','Inseminação');if(!name||!birth)return alert('Informe nome e nascimento.');if(!validateISODate(birth,'Data de nascimento',false)||inseminacao===null)return;
+ const edit=document.getElementById('heiferEditId').value;const motherName=document.getElementById('heiferMotherModal').value.trim();const old=edit?db.novilhas.find(x=>x.id===Number(edit)):null;const maternalLine=old?{grandmother:old.avoMaterna||'',grandfather:old.avoMaterno||'',greatGrandmother:old.bisavoMaterna||'',greatGrandfather:old.bisavoMaterno||''}:maternalLineageFor(motherName);const obj={id:edit?Number(edit):generateUniqueAnimalId(),nome:name,nascimento:birth,pai:document.getElementById('heiferFatherModal').value.trim(),mae:motherName,avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,inseminacao,reprodutor:document.getElementById('heiferReproducerModal').value.trim(),parto:null,transferida:false};
+ if(edit){const i=db.novilhas.findIndex(x=>x.id===Number(edit));if(i>=0)db.novilhas[i]=obj}else db.novilhas.push(obj);
  saveDB(false);closeModal();renderHeifers();renderHomeAlerts();
+}
+function openHeiferBatchModal(){
+ document.getElementById('heiferBatchQuantity').value=1;
+ document.getElementById('heiferBatchQuantityBox').classList.remove('hidden');
+ document.getElementById('heiferBatchForm').classList.add('hidden');
+ document.getElementById('heiferBatchCards').innerHTML='';
+ document.getElementById('heiferBatchModal').classList.add('open');
+}
+function closeHeiferBatchModal(){document.getElementById('heiferBatchModal').classList.remove('open')}
+function generateHeiferBatch(){
+ const qty=Number(document.getElementById('heiferBatchQuantity').value);
+ if(!Number.isInteger(qty)||qty<1||qty>100)return alert('Informe uma quantidade entre 1 e 100.');
+ const today=isoToday(),cards=[];
+ for(let i=1;i<=qty;i++)cards.push(`<div class="batch-animal"><h3>🐮 Novilha ${i}</h3><label>Nome / Brinco</label><input class="heifer-batch-name" maxlength="60" data-index="${i}"><div class="row"><div><label>Pai (opcional)</label><input class="heifer-batch-father" maxlength="60" data-index="${i}"></div><div><label>Mãe (opcional)</label><input class="heifer-batch-mother" maxlength="60" data-index="${i}"></div></div><label>Data de nascimento</label><input type="date" class="heifer-batch-birth" data-index="${i}" value="${today}">${dateBatchMarkup('heifer-batch-insem',i,'Inseminação (opcional)')}<label>🐂 Reprodutor / Touro da inseminação (opcional)</label><input class="heifer-batch-reproducer" maxlength="60" data-index="${i}" placeholder="Nome / identificação do reprodutor"></div>`);
+ document.getElementById('heiferBatchCards').innerHTML=cards.join('');
+ document.getElementById('heiferBatchQuantityBox').classList.add('hidden');
+ document.getElementById('heiferBatchForm').classList.remove('hidden');
+}
+function saveHeiferBatch(){
+ const names=[...document.querySelectorAll('.heifer-batch-name')],births=[...document.querySelectorAll('.heifer-batch-birth')],insem=[...document.querySelectorAll('.heifer-batch-insem-date')],insemManual=[...document.querySelectorAll('.heifer-batch-insem-manual')],fathers=[...document.querySelectorAll('.heifer-batch-father')],mothers=[...document.querySelectorAll('.heifer-batch-mother')],reproducers=[...document.querySelectorAll('.heifer-batch-reproducer')];
+ if(!names.length)return alert('Gere os cartões da remessa primeiro.');
+ const records=[];
+ for(let i=0;i<names.length;i++){
+  const name=names[i].value.trim(),birth=births[i].value,inseminacao=getBatchDate(insem[i],insemManual[i],`Inseminação da Novilha ${i+1}`);
+  if(inseminacao===null)return;if(!name)return alert(`Informe o nome/brinco da Novilha ${i+1}.`);
+  if(!birth)return alert(`Informe a data de nascimento da Novilha ${i+1}.`);
+  if(!validateISODate(birth,`Data de nascimento da Novilha ${i+1}`,false))return;const maternalLine=maternalLineageFor(mothers[i].value.trim());
+  records.push({id:generateUniqueAnimalId(),nome:name,nascimento:birth,pai:fathers[i].value.trim(),mae:mothers[i].value.trim(),avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,inseminacao,reprodutor:reproducers[i].value.trim(),parto:null,transferida:false});
+ }
+ db.novilhas.push(...records);saveDB(false);closeHeiferBatchModal();alert(`${records.length} ${records.length===1?'novilha salva':'novilhas salvas'} no rebanho.`);renderAll();
 }
 function renderHeifers(){
  const box=document.getElementById('heiferList');
  const sorted=[...db.novilhas].sort((a,b)=>String(a.nascimento||'').localeCompare(String(b.nascimento||'')));
- box.innerHTML=sorted.length?sorted.map(h=>{const age=daysBetween(h.nascimento);const gest=h.inseminacao?daysBetween(h.inseminacao):null;return `<div class="card animal"><div class="animal-head"><span class="animal-name">${escapeHTML(h.nome)}</span><span class="badge" style="background:${gest!==null&&gest>=255?'var(--vermelho)':'var(--verde2)'}">${gest!==null?monthsDays(gest):'Sem inseminação'}</span></div><div class="animal-info"><b>Nascimento:</b> ${fmtDate(h.nascimento)}<br><b>Idade:</b> ${monthsDays(age)}${h.mae?`<br><b>Mãe:</b> ${escapeHTML(h.mae)}`:''}<br><b>Inseminação:</b> ${h.inseminacao?fmtDate(h.inseminacao):'Não registrada'}${gest!==null?`<br><b>Gestação:</b> ${monthsDays(gest)}`:''}</div><div class="row" style="margin-top:10px"><button class="btn btn-light" onclick="editHeifer(${h.id})">✏️ EDITAR</button><button class="btn btn-green" onclick="calfParturition(${h.id})">👶 REGISTRAR PARTO</button></div></div>`}).join(''):'<div class="empty">Nenhuma novilha cadastrada.</div>';
+ box.innerHTML=sorted.length?sorted.map(h=>{const age=daysBetween(h.nascimento);const gest=h.inseminacao?daysBetween(h.inseminacao):null;return `<div class="card animal"><div class="animal-head"><span class="animal-name">${escapeHTML(h.nome)}</span><span class="badge" style="background:${gest!==null&&gest>=255?'var(--vermelho)':'var(--verde2)'}">${gest!==null?monthsDays(gest):'Sem inseminação'}</span></div><div class="animal-info"><b>Nascimento:</b> ${fmtDate(h.nascimento)}<br><b>Idade:</b> ${monthsDays(age)}<br><b>Pai:</b> ${escapeHTML(h.pai||'Não informado')}<br><b>Mãe:</b> ${escapeHTML(h.mae||'Não informado')}<br><b>Inseminação:</b> ${h.inseminacao?fmtDate(h.inseminacao):'Não registrada'}<br><b>Reprodutor:</b> ${escapeHTML(h.reprodutor||'Não informado')}${gest!==null?`<br><b>Gestação:</b> ${monthsDays(gest)}`:''}</div><div class="row" style="margin-top:10px"><button class="btn btn-light" onclick="editHeifer(${h.id})">✏️ EDITAR</button><button class="btn btn-blue" onclick="openGenealogy(${h.id},'heifer')">🌳 LINHAGEM</button><button class="btn btn-green" onclick="calfParturition(${h.id})">👶 REGISTRAR PARTO</button></div></div>`}).join(''):'<div class="empty">Nenhuma novilha cadastrada.</div>';
 }
+function deleteHeifer(){const id=Number(document.getElementById('heiferEditId').value);if(!id)return;if(!confirm('Excluir esta novilha? Esta ação não poderá ser desfeita.'))return;db.novilhas=db.novilhas.filter(h=>h.id!==id);saveDB(false);closeModal();renderAll();}
 function calfParturition(id){
- const h=db.novilhas.find(x=>x.id===id);if(!h)return;const date=prompt('Data do parto (AAAA-MM-DD):',isoToday());if(!date)return;
- const name=prompt('Nome/brinco da vaca que entrará no rebanho:',h.nome);if(!name)return;
- db.vacas.push({id:Date.now(),nome:name,parto:date,inseminacao:h.inseminacao||'',status:'lactacao',dataEntradaLactacao:date,dataSaidaLactacao:null});
- db.novilhas=db.novilhas.filter(x=>x.id!==id);saveDB(false);alert('Novilha transferida para o Rebanho Principal.');renderAll();
+ const h=db.novilhas.find(x=>x.id===id);if(!h)return;
+ document.getElementById('calfParturitionId').value=h.id;document.getElementById('calfParturitionDate').value=isoToday();document.getElementById('calfParturitionName').value=h.nome;
+ document.getElementById('calfParturitionModal').classList.add('open');
+}
+function closeCalfParturitionModal(){document.getElementById('calfParturitionModal').classList.remove('open')}
+function saveCalfParturition(){
+ const id=Number(document.getElementById('calfParturitionId').value),h=db.novilhas.find(x=>x.id===id);if(!h)return;
+ const date=document.getElementById('calfParturitionDate').value,name=document.getElementById('calfParturitionName').value.trim();
+ if(!name)return alert('Informe o nome/brinco da vaca.');if(!validateISODate(date,'Data do parto',false))return;
+ db.vacas.push({id:generateUniqueAnimalId(),nome:name,parto:date,inseminacao:h.inseminacao||'',status:'lactacao',dataEntradaLactacao:date,dataSaidaLactacao:null,pai:h.pai||'',mae:h.mae||'',avoMaterna:h.avoMaterna||'',avoMaterno:h.avoMaterno||'',bisavoMaterna:h.bisavoMaterna||'',bisavoMaterno:h.bisavoMaterno||'',reprodutor:h.reprodutor||''});
+ db.novilhas=db.novilhas.filter(x=>x.id!==id);saveDB(false);closeCalfParturitionModal();alert('Novilha transferida para o Rebanho Principal.');renderAll();
 }
 
 /* =========================
@@ -1012,6 +1820,7 @@ function calfParturition(id){
    ========================= */
 function renderConfig(){
   document.getElementById('dryMonths').value=db.configuracoes.secagem.meses;document.getElementById('dryDays').value=db.configuracoes.secagem.dias;
+  renderFeedConfig();
   const names=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];document.getElementById('measurementDays').innerHTML=names.map((n,i)=>`<label class="day-check"><input type="checkbox" value="${i}" ${db.configuracoes.diasMedicao.includes(i)?'checked':''}>${n}</label>`).join('');
 }
 function saveSettings(){db.configuracoes.secagem.meses=Math.max(0,Number(document.getElementById('dryMonths').value||0));db.configuracoes.secagem.dias=Math.max(0,Number(document.getElementById('dryDays').value||0));saveDB(false);alert('Configurações salvas.');renderAll()}
@@ -1052,7 +1861,7 @@ function renderBackup(){
    RENDER / INICIALIZAÇÃO
    ========================= */
 function renderAll(){
- renderHome();renderCowList();renderAgenda();renderHeifers();renderConfig();renderBackup();renderCloudStatus();
+ renderHome();renderCowList();renderAgenda();renderHeifers();renderConfig();renderBackup();renderCloudStatus();renderFinanceiro();
 }
 document.getElementById('prodDate').value=isoToday();document.getElementById('agendaDate').value=isoToday();
 renderAll();
