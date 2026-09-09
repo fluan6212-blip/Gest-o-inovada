@@ -6,7 +6,7 @@
 // Sempre que publicar uma nova versão importante do aplicativo,
 // altere o número da versão abaixo.
 // Exemplo: v1 -> v2 -> v3
-const CACHE_NAME = 'rebanho-pro-v6';
+const CACHE_NAME = 'rebanho-pro-v7';
 
 const ASSETS = [
     './',
