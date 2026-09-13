@@ -122,14 +122,48 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 .photo-lightbox-caption{position:fixed;left:18px;right:18px;bottom:14px;text-align:center;color:#fff;font-size:.78rem;font-weight:800;text-shadow:0 1px 3px #000}
 @media(max-width:480px){.animal-info{padding-right:88px}.animal-photo{width:74px;height:74px;min-width:74px;top:18px}.photo-editor-preview{width:90px;height:90px;min-width:90px}.photo-lightbox{padding:10px}}
 
+
+/* =========================
+   ACESSO V8 — TESTE / TOLERÂNCIA / ANUAL
+   ========================= */
+.access-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px;z-index:9000}
+.access-overlay.open{display:flex}
+.access-box{background:#fff;width:min(520px,100%);border-radius:18px;padding:22px;box-shadow:0 14px 50px rgba(0,0,0,.35);text-align:center}
+.access-box h2{margin:0 0 10px;color:var(--topo);font-size:1.2rem}
+.access-box p{font-size:.84rem;line-height:1.5;margin:8px 0;color:#455a64}
+.access-box .access-price{font-size:.75rem;color:var(--muted);margin-top:9px}
+.access-box .access-email{font-size:.72rem;color:var(--muted);word-break:break-word;margin-top:10px}
+.access-warning{background:#fff8e8;border-left:5px solid var(--laranja);border-radius:11px;padding:11px;margin:10px 0 13px;font-size:.8rem;line-height:1.45}
+.access-status{font-weight:900}.access-status.teste{color:var(--azul)}.access-status.tolerancia{color:var(--laranja)}.access-status.anual{color:var(--verde2)}.access-status.vitalicio{color:var(--verde2)}.access-status.bloqueado{color:var(--vermelho)}
+.access-top-banner{display:none;background:#fff8e8;border-bottom:1px solid #efd79c;padding:9px 13px;text-align:center;font-size:.76rem;font-weight:800;color:#7a5200;position:sticky;top:58px;z-index:900}
+.access-top-banner.open{display:block}.access-top-banner button{border:0;background:transparent;color:var(--azul);font-weight:900;text-decoration:underline;padding:0 0 0 4px}
+.access-account-status{margin-top:9px;padding:10px 12px;border-radius:10px;background:#eef7ef;border-left:4px solid var(--verde2);font-size:.78rem;line-height:1.4}
+.access-account-status.teste{background:#eef5ff;border-left-color:var(--azul)}
+.access-account-status.tolerancia{background:#fff8e8;border-left-color:var(--laranja)}
+.access-account-status.bloqueado{background:#fff0f0;border-left-color:var(--vermelho)}
+.access-account-status.erro{background:#fff8e8;border-left-color:var(--laranja)}
+.access-account-status strong{font-weight:900}
+
+.btn:disabled{opacity:.65;cursor:wait;pointer-events:none}
 </style>
 </head>
 <body>
 <header class="header">
-  <button class="brand" onclick="navigate('home')"><strong>GESTÃO REBANHO PRO</strong><small>Gestão simples do seu rebanho · V7</small></button>
+  <button class="brand" onclick="navigate('home')"><strong>GESTÃO REBANHO PRO</strong><small>Gestão simples do seu rebanho · V8</small></button>
   <button class="icon-btn" onclick="navigate('manual')">📖 MANUAL</button>
   <button class="icon-btn" onclick="navigate('config')">⚙️</button>
 </header>
+
+<div id="accessTopBanner" class="access-top-banner"></div>
+<div id="accessGate" class="access-overlay" role="dialog" aria-modal="true" aria-labelledby="accessGateTitle">
+ <div class="access-box">
+  <h2 id="accessGateTitle">🔒 Acesso ao Gestão Rebanho Pro</h2>
+  <div id="accessGateContent"></div>
+  <button id="accessBuyButton" class="btn btn-green btn-block" onclick="openCheckout()">💳 COMPRAR / RENOVAR ACESSO</button>
+  <div class="access-price">Pagamento seguro pela Kiwify · acesso anual por 1 ano</div>
+  <div id="accessGateEmail" class="access-email"></div>
+ </div>
+</div>
 
 <main class="container">
 <section id="screen_home" class="screen active">
@@ -194,7 +228,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
     <label><input type="checkbox" id="registerHeifer" style="width:auto;margin:0 5px 0 0"> Registrar a fêmea deste parto como novilha</label>
     <div id="heiferNameWrap" class="hidden"><label>Nome / Brinco da novilha</label><input id="heiferName" maxlength="60"><label>Pai da novilha (opcional)</label><input id="heiferFather" maxlength="60" placeholder="Nome do pai / sêmen"><div class="small muted" style="margin-top:4px">Se houver reprodutor informado na inseminação desta vaca, ele será preenchido automaticamente e poderá ser editado.</div></div>
   </div>
-  <button class="btn btn-green btn-block" onclick="saveCow()">💾 SALVAR NO REBANHO</button>
+  <button id="saveCowBtn" class="btn btn-green btn-block" onclick="saveCow()">💾 SALVAR NO REBANHO</button>
   <button class="btn btn-blue btn-block" onclick="openCowBatchModal()">➕ CADASTRAR NOVA REMESSA</button>
   <button class="btn btn-red btn-block hidden" id="deleteCowBtn" onclick="deleteCow()">🗑️ EXCLUIR ANIMAL</button>
   <button class="btn btn-light btn-block hidden" id="cancelCowBtn" onclick="resetCowForm()">✖️ CANCELAR EDIÇÃO</button>
@@ -211,8 +245,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
    <option value="perLiter">Valor por litro</option>
    <option value="total">Valor total recebido</option>
   </select>
-  <div id="paymentPerLiterWrap"><label>Valor líquido recebido por litro (R$/L)</label><input type="number" min="0" step="0.0001" id="milkPrice" oninput="saveMilkPrice(this.value)"></div>
-  <div id="paymentTotalWrap" class="hidden"><label>Valor total realmente recebido (R$)</label><input type="number" min="0" step="0.01" id="milkTotalReceived" oninput="saveMilkTotal(this.value)"></div>
+  <div id="paymentPerLiterWrap"><label>Valor líquido recebido por litro (R$/L)</label><input type="number" min="0" step="0.0001" id="milkPrice" onblur="saveMilkPrice(this.value)"></div>
+  <div id="paymentTotalWrap" class="hidden"><label>Valor total realmente recebido (R$)</label><input type="number" min="0" step="0.01" id="milkTotalReceived" onblur="saveMilkTotal(this.value)"></div>
   <div class="summary"><div class="summary-grid">
    <div class="summary-item"><small>TOTAL LITROS</small><b id="deliveryTotal">0,0 L</b></div>
    <div class="summary-item"><small>VALOR TOTAL</small><b id="deliveryValue">—</b></div>
@@ -252,6 +286,10 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 <section id="screen_retrospectiva" class="screen">
  <button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
  <div class="card"><h2>📊 Retrospectiva do Rebanho</h2><div id="retrospectivaPeriod"></div></div>
+ <div class="card">
+  <button class="btn btn-green btn-block" onclick="generateMilkReportPDF()">📄 GERAR RELATÓRIO PDF — ÚLTIMOS 12 MESES</button>
+  <div class="small" style="text-align:center;margin-top:7px">O relatório abre pronto para imprimir ou salvar em PDF.</div>
+ </div>
  <div id="retrospectivaContent"></div>
 </section>
 
@@ -329,7 +367,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 <section id="screen_manual" class="screen">
 <button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
 <div class="card">
- <h2 style="color:var(--topo)">📖 Manual de Utilização — V7</h2>
+ <h2 style="color:var(--topo)">📖 Manual de Utilização — V8</h2>
  <p><b>Idealizado por:</b> Luan Ferreira</p><p><b>Instagram:</b> @luan122006</p><p><b>WhatsApp:</b> 42 9850-8930</p>
  <div class="notice"><b>Como usar este manual:</b> este guia foi feito para o produtor rural. Você não precisa entender de informática para usar o aplicativo. Cadastre os animais, registre a produção e as entregas e mantenha os gastos atualizados. O sistema usa esses registros para montar os indicadores, avisos, gráficos e cálculos automaticamente.</div>
 
@@ -536,19 +574,21 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <p>Aparece quando existe uma tarefa da Agenda marcada para hoje. <b>O que fazer:</b> confira a descrição e o animal, quando houver, e realize a tarefa. O aviso deixa de aparecer quando não estiver mais dentro da condição de hoje.</p>
  <h4>🥛 Descarte de leite</h4>
  <p>Aparece quando um compromisso da Agenda possui dias de descarte e o dia atual está dentro do período calculado. O aviso mostra o início e o fim do período. <b>O que fazer:</b> respeite o período de descarte indicado. Ele deixa de aparecer quando o período termina.</p>
- <h4>🤰 PARTO</h4>
- <p>Aparece para vacas com inseminação registrada quando se passaram <b>270 dias ou mais</b>. <b>O que fazer:</b> acompanhar a vaca e registrar o parto quando ele ocorrer. O alerta deixa de aparecer quando o registro de inseminação deixa de representar a gestação pendente, conforme o cadastro atualizado.</p>
+   <h4>🟠 PRÉ-PARTO</h4>
+  <p>Para vacas, aparece a partir de <b>264 dias</b> após a inseminação e fica até 269 dias. Para novilhas, aparece a partir de <b>264 dias</b> e fica até 269 dias, seguindo o limite de <b>270 dias</b> para o parto próximo da novilha. <b>O que fazer:</b> preparar o manejo para a aproximação do nascimento.</p>
+<h4>🤰 PARTO PRÓXIMO</h4>
+ <p>Aparece para vacas com inseminação registrada quando se passaram <b>270 dias ou mais</b>. Ele substitui o aviso de pré-parto. <b>O que fazer:</b> acompanhar a vaca e registrar o parto quando ele ocorrer.</p>
  <h4>🌾 SECAR</h4>
  <p>Aparece quando uma vaca em lactação atingiu o número de dias configurado para secagem após a inseminação. O padrão é 7 meses e 15 dias, calculado pelo aplicativo com meses aproximados de 30,44 dias. <b>O que fazer:</b> avaliar a secagem e atualizar o status para Seca quando isso realmente ocorrer. O aviso informa que desaparece ao mudar para Seca.</p>
  <h4>🔄 OBSERVAR RETORNO AO CIO</h4>
- <p>Aparece entre <b>18 e 25 dias após a inseminação</b>. <b>O que fazer:</b> observar se houve retorno ao cio. O próprio aplicativo orienta que a confirmação de prenhez deve seguir o método utilizado na propriedade.</p>
- <h4>🐮 PARTO DE NOVILHA</h4>
- <p>Aparece quando uma novilha inseminada atingiu <b>255 dias ou mais</b> de gestação. <b>O que fazer:</b> acompanhar a aproximação do parto e manter o cadastro atualizado.</p>
+ <p>Aparece para vacas e novilhas entre <b>18 e 25 dias após a inseminação</b>. <b>O que fazer:</b> observar se houve retorno ao cio. O próprio aplicativo orienta que a confirmação de prenhez deve seguir o método utilizado na propriedade.</p>
+ <h4>🐮 PARTO PRÓXIMO — NOVILHA</h4>
+ <p>Aparece quando uma novilha inseminada atingiu <b>270 dias ou mais</b> de gestação. <b>O que fazer:</b> acompanhar a aproximação do parto e manter o cadastro atualizado.</p>
  <h4>🎂 IDADE DA NOVILHA</h4>
  <p>O aplicativo gera avisos quando uma novilha completa <b>40 dias, 90 dias, 6 meses ou 1 ano</b>. <b>O que fazer:</b> use o aviso como lembrete de acompanhamento e manejo. Ele aparece na data correspondente.</p>
  <h4>💾 BACKUP</h4>
  <p>Se nunca houver backup registrado ou se já tiver passado uma semana desde o último backup, o aplicativo recomenda fazer um novo. <b>O que fazer:</b> entre em Backup e baixe uma cópia.</p>
- <p><b>Importante:</b> esses são os avisos atualmente implementados. O aplicativo não cria avisos adicionais apenas por existir um campo no cadastro.</p>
+ <p><b>Importante:</b> os avisos de pré-parto, parto próximo e retorno ao cio são calculados automaticamente a partir da data de inseminação. Eles não exigem cadastro de campos novos.</p>
 
  <h3>⚙️ CONFIGURAÇÕES</h3>
  <h4>📅 Alertas de secagem</h4>
@@ -591,6 +631,14 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <p><b>Sincronização:</b> ao iniciar, voltar ao aplicativo ou ficar online, o sistema pode verificar a nuvem e combinar os dados conforme a estrutura existente. Se não houver internet, o aplicativo continua funcionando e salvando localmente.</p>
  <p><b>Recuperação:</b> a nuvem ajuda a recuperar os dados sincronizados em outro momento, enquanto o backup em arquivo oferece uma cópia independente para restauração.</p>
  <p><b>Não é preciso entender a parte técnica:</b> mantenha a conta conectada quando quiser sincronização automática e faça backups em arquivo regularmente como camada extra de segurança.</p>
+
+ <h3>🔐 ACESSO E RENOVAÇÃO — V8</h3>
+ <p><b>Como funciona:</b> o aplicativo usa sua conta para identificar o tipo de acesso. Os primeiros 15 cadastros recebem acesso vitalício. A partir do 16º cadastro, o usuário recebe 40 dias de teste.</p>
+ <p><b>Depois do teste:</b> ao terminar os 40 dias, existe um período de tolerância de 15 dias. Durante a tolerância, o aplicativo continua disponível e mostra lembretes para renovação.</p>
+ <p><b>Se a tolerância terminar:</b> o aplicativo fica bloqueado para uso e mostra somente a opção de comprar ou renovar o acesso.</p>
+ <p><b>Compra:</b> o botão de compra abre o checkout da Kiwify. Use no checkout o mesmo e-mail da conta usada no aplicativo para que o pagamento seja identificado corretamente.</p>
+ <p><b>Acesso anual:</b> depois da aprovação do pagamento, o acesso fica válido por 1 ano. Uma nova compra anual feita antes do vencimento soma mais 1 ano ao período que ainda estiver ativo.</p>
+ <p><b>Dados:</b> o vencimento ou bloqueio do acesso não apaga os dados do aplicativo.</p>
 
  <h3>🧭 ROTINA RECOMENDADA DE USO</h3>
  <p><b>Todos os dias:</b> registre a produção e as entregas que realmente ocorreram; confira os avisos e tarefas.</p>
@@ -721,7 +769,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
   <label>Inseminação (opcional)</label><input type="date" id="heiferInsemModal"><input class="hidden" type="text" id="heiferInsemManual" inputmode="numeric" maxlength="10" placeholder="DD/MM/AAAA" oninput="maskDateInput(this)"><div class="date-mode"><button type="button" id="heiferInsemModalCalendarBtn" class="active" onclick="setDateMode('heiferInsemModal','heiferInsemManual','calendar')">📅 Calendário</button><button type="button" id="heiferInsemModalManualBtn" onclick="setDateMode('heiferInsemModal','heiferInsemManual','manual')">⌨️ Digitar</button></div>
   <div class="row"><div><label>Pai (opcional)</label><input id="heiferFatherModal" maxlength="60"></div><div><label>Mãe (opcional)</label><input id="heiferMotherModal" maxlength="60"></div></div>
   <label>🐂 Reprodutor / Touro da inseminação (opcional)</label><input id="heiferReproducerModal" maxlength="60" placeholder="Nome / identificação do reprodutor">
-  <button class="btn btn-red btn-block hidden" id="deleteHeiferBtn" onclick="deleteHeifer()" style="margin-bottom:8px">🗑️ EXCLUIR NOVILHA</button><div class="row"><button class="btn btn-light" onclick="closeModal()">CANCELAR</button><button class="btn btn-green" onclick="saveHeifer()">SALVAR</button></div>
+  <button class="btn btn-red btn-block hidden" id="deleteHeiferBtn" onclick="deleteHeifer()" style="margin-bottom:8px">🗑️ EXCLUIR NOVILHA</button><div class="row"><button class="btn btn-light" onclick="closeModal()">CANCELAR</button><button id="saveHeiferBtn" class="btn btn-green" onclick="saveHeifer()">SALVAR</button></div>
  </div>
 </div>
 
@@ -734,7 +782,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
    ========================= */
 const DB_KEY='gestao_rebanho_pro_db_v1';
 const LEGACY_DB_KEYS=['rebanho_leiteiro_db_v2'];
-const APP_VERSION='7.0';
+const APP_VERSION='8.0';
+const KIWIY_CHECKOUT_URL='https://pay.kiwify.com.br/IMvMh7p';
 const CLOUD_SYNC_SNAPSHOT_KEY='gestao_rebanho_last_synced_v1';
 
 /* =========================
@@ -748,6 +797,11 @@ let currentUser=null;
 let cloudSyncTimer=null;
 let cloudSyncRunning=false;
 let cloudSyncPending=false;
+let accessControl=null;
+let accessMode='verificando';
+let accessBlocked=false;
+let accessLoading=false;
+let accessLastNoticeKey='';
 
 /* =========================
    FOTOS — SUPABASE STORAGE PRIVADO
@@ -793,21 +847,29 @@ function initSupabase(){
     renderCloudStatus();
     if(currentUser){
      localStorage.setItem('gestao_rebanho_login_gate_version',APP_VERSION);
-     setTimeout(()=>syncWithCloud('login'),0);
+     setTimeout(()=>{loadAccessControl();syncWithCloud('login')},0);
+    }else{
+     accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();
+     showLoginGate();
     }
    });
-   supabaseClient.auth.getSession().then(({data})=>{
+   supabaseClient.auth.getSession().then(async({data})=>{
     currentUser=data.session?.user||null;
     renderCloudStatus();
     if(currentUser){
      localStorage.setItem('gestao_rebanho_login_gate_version',APP_VERSION);
+     await loadAccessControl();
      syncWithCloud('startup');
-    }else if(shouldShowLoginGate()){
+    }else{
+     accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();
      showLoginGate();
     }
-   }).catch(()=>{renderCloudStatus();if(shouldShowLoginGate())showLoginGate()});
-  }else renderCloudStatus('Biblioteca de nuvem indisponível no momento.');
- }catch(e){console.warn('Supabase não inicializado:',e);renderCloudStatus('Não foi possível inicializar a nuvem.');if(shouldShowLoginGate())showLoginGate()}
+   }).catch(()=>{renderCloudStatus();showLoginGate()});
+  }else{
+   renderCloudStatus('Biblioteca de nuvem indisponível no momento.');
+   showLoginGate();
+  }
+ }catch(e){console.warn('Supabase não inicializado:',e);renderCloudStatus('Não foi possível inicializar a nuvem.');showLoginGate()}
 }
 
 function hasLocalData(data=db){
@@ -1054,7 +1116,8 @@ async function signInEmailPassword(){
   currentUser=data?.user||currentUser;
   localStorage.setItem('gestao_rebanho_login_gate_version',APP_VERSION);
   hideLoginGate();
-  renderCloudStatus('Conta conectada. Sincronizando seus dados...');
+  renderCloudStatus('Conta conectada. Verificando seu acesso...');
+  await loadAccessControl();
   await syncWithCloud('login');
  }catch(e){
   if(errorBox)errorBox.textContent='Não foi possível entrar: '+(e?.message||'verifique seu e-mail e senha.');
@@ -1080,7 +1143,8 @@ async function signUpEmailPassword(){
    currentUser=data.user;
    localStorage.setItem('gestao_rebanho_login_gate_version',APP_VERSION);
    hideLoginGate();
-   renderCloudStatus('Conta criada. Sincronizando seus dados...');
+   renderCloudStatus('Conta criada. Verificando seu acesso...');
+   await loadAccessControl();
    await syncWithCloud('signup');
   }else{
    if(errorBox)errorBox.textContent='Conta criada! Verifique seu e-mail para confirmar a conta e depois entre com sua senha.';
@@ -1096,13 +1160,29 @@ async function signOutCloud(){
  if(!supabaseClient)return;
  const {error}=await supabaseClient.auth.signOut();
  if(error)alert('Não foi possível sair da conta: '+error.message);
+ else{currentUser=null;accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();showLoginGate();}
+}
+function renderAccessAccountStatus(){
+ if(!currentUser)return '';
+ if(accessMode==='verificando')return '<div class="access-account-status"><strong>🔐 Seu acesso:</strong><br>Verificando...</div>';
+ if(accessMode==='erro')return '<div class="access-account-status erro"><strong>🔐 Seu acesso:</strong><br>Não foi possível verificar agora.</div>';
+ if(!accessControl)return '<div class="access-account-status erro"><strong>🔐 Seu acesso:</strong><br>Aguardando confirmação.</div>';
+ const state=calculateAccessState(accessControl);
+ const type=String(accessControl.tipo_acesso||'').toLowerCase();
+ if(type==='beta')return '<div class="access-account-status"><strong>🔐 Seu acesso:</strong><br>Beta — acesso vitalício.</div>';
+ if(type==='vitalicio')return '<div class="access-account-status"><strong>🔐 Seu acesso:</strong><br>Acesso vitalício.</div>';
+ if(type==='teste')return `<div class="access-account-status teste"><strong>🔐 Seu acesso:</strong><br>Período de teste — ${state.daysLeft} dia(s) restante(s).<br>Termina em ${formatAccessDateTime(state.deadline)}.</div>`;
+ if(type==='anual'&&state.mode==='anual')return `<div class="access-account-status"><strong>🔐 Seu acesso:</strong><br>Plano Pró (anual) — ativo até ${formatAccessDateTime(state.deadline)}.</div>`;
+ if(type==='anual'&&state.mode==='tolerancia')return `<div class="access-account-status tolerancia"><strong>🔐 Seu acesso:</strong><br>Plano Pró (anual) — período de tolerância: ${state.daysLeft} dia(s) restante(s).</div>`;
+ if(type==='anual'&&state.mode==='bloqueado')return '<div class="access-account-status bloqueado"><strong>🔐 Seu acesso:</strong><br>Plano Pró (anual) — acesso bloqueado.</div>';
+ return `<div class="access-account-status erro"><strong>🔐 Seu acesso:</strong><br>${escapeHTML(state.label||'Acesso não configurado')}.</div>`;
 }
 function renderCloudStatus(message=''){
  const box=document.getElementById('cloudStatus');
  if(!box)return;
  if(currentUser){
   const email=escapeHTML(currentUser.email||'Conta conectada');
-  box.innerHTML=`<div class="notice"><b>☁️ Nuvem conectada</b><br>${email}<br><span class="small">${message||(navigator.onLine?'Sincronização automática ativa.':'Sem internet: salvando somente no aparelho.')}</span></div><div class="row"><button class="btn btn-blue" onclick="syncWithCloud('manual')">☁️ SINCRONIZAR AGORA</button><button class="btn btn-light" onclick="signOutCloud()">SAIR</button></div>`;
+  box.innerHTML=`<div class="notice"><b>☁️ Nuvem conectada</b><br>${email}<br><span class="small">${message||(navigator.onLine?'Sincronização automática ativa.':'Sem internet: salvando somente no aparelho.')}</span>${renderAccessAccountStatus()}</div><div class="row"><button class="btn btn-blue" onclick="syncWithCloud('manual')">☁️ SINCRONIZAR AGORA</button><button class="btn btn-light" onclick="signOutCloud()">SAIR</button></div>`;
  }else{
   box.innerHTML=`<div class="notice"><b>☁️ Backup automático na nuvem</b><br><span class="small">Entre com sua conta do Supabase uma vez. Depois disso, cada alteração será salva automaticamente na nuvem quando houver internet. Sem internet, o aplicativo continua funcionando e salvando localmente.</span></div><button class="btn btn-blue btn-block" onclick="showLoginGate()">🔐 ENTRAR NA CONTA</button>`;
  }
@@ -1115,7 +1195,7 @@ async function refreshCloudOnReturn(reason='foreground'){
  lastForegroundSync=now;
  await syncWithCloud(reason);
 }
-window.addEventListener('online',()=>{renderCloudStatus();if(currentUser)syncWithCloud('online')});
+window.addEventListener('online',()=>{renderCloudStatus();if(currentUser){loadAccessControl();syncWithCloud('online')}});
 window.addEventListener('offline',()=>renderCloudStatus());
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshCloudOnReturn('foreground')});
 window.addEventListener('pageshow',()=>refreshCloudOnReturn('pageshow'));
@@ -1249,9 +1329,129 @@ ensureLicense();
 setTimeout(initSupabase,0);
 
 /* =========================
+   ACESSO COMERCIAL V8
+   ========================= */
+const ACCESS_TOLERANCE_DAYS=15;
+
+function formatAccessDateTime(value){
+ if(!value)return '—';
+ const d=new Date(value);
+ return Number.isFinite(d.getTime())?d.toLocaleDateString('pt-BR'):'—';
+}
+function accessDeadline(row){
+ if(!row)return null;
+ if(row.tipo_acesso==='teste')return row.data_fim_teste?new Date(row.data_fim_teste):null;
+ if(row.tipo_acesso==='anual')return row.data_fim_acesso?new Date(row.data_fim_acesso):null;
+ return null;
+}
+function calculateAccessState(row){
+ if(!row)return {mode:'sem_acesso',label:'Acesso não encontrado',blocked:true};
+ const status=String(row.status_acesso||'').toLowerCase();
+ if(status==='bloqueado')return {mode:'bloqueado',label:'Acesso bloqueado',blocked:true};
+ const type=String(row.tipo_acesso||'').toLowerCase();
+ if(type==='beta'||type==='vitalicio')return {mode:'vitalicio',label:'Acesso vitalício',blocked:false,permanent:true};
+ const deadline=accessDeadline(row);
+ if(!deadline||!Number.isFinite(deadline.getTime()))return {mode:'sem_acesso',label:'Acesso não configurado',blocked:true};
+ const now=new Date();
+ if(now<=deadline){
+  const days=Math.max(0,Math.ceil((deadline-now)/86400000));
+  return {mode:type==='teste'?'teste':'anual',label:type==='teste'?'Período de teste':'Acesso anual',blocked:false,daysLeft:days,deadline};
+ }
+ const toleranceEnd=new Date(deadline);toleranceEnd.setDate(toleranceEnd.getDate()+ACCESS_TOLERANCE_DAYS);
+ if(now<=toleranceEnd){
+  const days=Math.max(0,Math.ceil((toleranceEnd-now)/86400000));
+  return {mode:'tolerancia',label:'Período de tolerância',blocked:false,daysLeft:days,deadline,toleranceEnd};
+ }
+ return {mode:'bloqueado',label:'Acesso bloqueado',blocked:true,deadline,toleranceEnd};
+}
+async function fetchAccessControl(){
+ if(!supabaseClient||!currentUser)return {data:null,error:new Error('Conta não conectada.')};
+ return await supabaseClient.from('controle_acesso').select('user_id,cadastro_numero,tipo_acesso,data_criacao,data_fim_teste,data_fim_acesso,status_acesso').eq('user_id',currentUser.id).maybeSingle();
+}
+async function loadAccessControl(){
+ if(!currentUser||!supabaseClient||accessLoading)return false;
+ accessLoading=true;accessMode='verificando';renderAccessState();
+ try{
+  let result;
+  for(let attempt=0;attempt<3;attempt++){
+   result=await fetchAccessControl();
+   if(result.error)throw result.error;
+   if(result.data)break;
+   await new Promise(r=>setTimeout(r,700));
+  }
+  if(!result?.data)throw new Error('Registro de acesso ainda não encontrado.');
+  accessControl=result.data;
+  applyAccessState();
+  return true;
+ }catch(e){
+  console.warn('Não foi possível consultar o acesso:',e);
+  accessControl=null;accessMode='erro';accessBlocked=false;hideAccessGate();
+  const banner=document.getElementById('accessTopBanner');
+  if(banner){banner.innerHTML='⚠️ Não foi possível verificar seu acesso agora. <button type="button" onclick="loadAccessControl()">TENTAR NOVAMENTE</button>';banner.classList.add('open');}
+  return false;
+ }finally{accessLoading=false;}
+}
+function applyAccessState(){
+ const state=calculateAccessState(accessControl);
+ accessMode=state.mode;accessBlocked=!!state.blocked;
+ renderAccessState();
+ renderCloudStatus();
+ if(accessBlocked)showAccessGate(state);else hideAccessGate();
+ if(state.mode==='teste'||state.mode==='anual'||state.mode==='tolerancia')renderAccessBanner(state);else hideAccessBanner();
+ if(state.mode==='tolerancia')scheduleAccessNotice(state);else accessLastNoticeKey='';
+}
+function renderAccessState(){
+ const content=document.getElementById('accessGateContent'),email=document.getElementById('accessGateEmail'),btn=document.getElementById('accessBuyButton');
+ if(email)email.textContent=currentUser?.email?`Conta: ${currentUser.email}`:'';
+ if(btn)btn.style.display=accessBlocked?'block':'none';
+ if(!content)return;
+ if(accessMode==='verificando'){content.innerHTML='<p>Verificando seu acesso...</p>';return;}
+ if(accessMode==='erro'){content.innerHTML='<p>Não foi possível verificar o acesso neste momento. Tente novamente quando houver internet.</p>';return;}
+ const state=calculateAccessState(accessControl);
+ if(state.mode==='bloqueado'){
+  content.innerHTML='<p class="access-status bloqueado">Seu período de acesso terminou.</p><p>Para continuar usando o aplicativo, faça a compra ou renovação pelo botão abaixo.</p><div class="access-warning"><b>Seus dados não foram apagados.</b><br>Depois do pagamento, o acesso volta e seus dados permanecem no aplicativo.</div>';
+ }else if(state.mode==='sem_acesso'){
+  content.innerHTML='<p class="access-status bloqueado">Não foi possível confirmar seu acesso.</p><p>Entre novamente na conta ou tente verificar o acesso.</p>';
+ }else content.innerHTML='<p>Seu acesso está ativo.</p>';
+}
+function showAccessGate(state){
+ const gate=document.getElementById('accessGate');if(!gate)return;
+ gate.classList.add('open');document.body.style.overflow='hidden';renderAccessState();
+}
+function hideAccessGate(){
+ const gate=document.getElementById('accessGate');if(gate)gate.classList.remove('open');
+ if(!document.querySelector('.modal.open'))document.body.style.overflow='';
+}
+function renderAccessBanner(state){
+ const b=document.getElementById('accessTopBanner');if(!b)return;
+ if(state.mode==='teste')b.innerHTML=`🟢 Teste gratuito: faltam <b>${state.daysLeft} dia(s)</b> para terminar.`;
+ else if(state.mode==='anual')b.innerHTML=`🟢 Acesso anual ativo até <b>${formatAccessDateTime(state.deadline)}</b>.`;
+ else b.innerHTML=`🟠 Seu acesso terminou. Você está no período de tolerância: <b>${state.daysLeft} dia(s)</b> restantes. <button type="button" onclick="openCheckout()">RENOVAR AGORA</button>`;
+ b.classList.add('open');
+}
+function hideAccessBanner(){const b=document.getElementById('accessTopBanner');if(b)b.classList.remove('open');}
+function openCheckout(){window.open(KIWIY_CHECKOUT_URL,'_blank','noopener,noreferrer');}
+function scheduleAccessNotice(state){
+ if(state.mode!=='tolerancia'||!state.deadline)return;
+ const elapsed=Math.max(0,Math.floor((Date.now()-state.deadline.getTime())/86400000));
+ const number=elapsed>=12?5:elapsed>=9?4:elapsed>=6?3:elapsed>=3?2:1;
+ if(number===accessLastNoticeKey)return;
+ accessLastNoticeKey=number;
+ const messages=[
+  'Seu acesso anual terminou. Você ainda tem 15 dias de tolerância para renovar.',
+  'Lembrete: seu acesso está no período de tolerância. Renove para continuar usando o aplicativo sem interrupção.',
+  'Seu período de tolerância está avançando. Faça a renovação para manter o acesso.',
+  'Faltam poucos dias para o fim da tolerância. Renove agora para continuar usando o Gestão Rebanho Pro.',
+  'Último aviso: o período de tolerância está terminando. Renove seu acesso para evitar o bloqueio.'
+ ];
+ setTimeout(()=>alert(messages[number-1]),500);
+}
+
+/* =========================
    NAVEGAÇÃO E UTILITÁRIOS
    ========================= */
 function navigate(screen){
+ if(accessBlocked){showAccessGate(calculateAccessState(accessControl));return;}
  const el=document.getElementById('screen_'+screen);
  if(!el)return;
  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
@@ -1396,7 +1596,9 @@ function renderHomeAlerts(){
   if(!v.inseminacao)return;
   const days=daysBetween(v.inseminacao);
   if(days>=270){
-   out+=`<div class="alert red"><b>PARTO:</b> ${escapeHTML(v.nome)} — ${days} dias de gestação. Registre o parto para encerrar este alerta.</div>`;
+   out+=`<div class="alert red"><b>PARTO PRÓXIMO:</b> ${escapeHTML(v.nome)} — ${days} dias de gestação. Registre o parto para encerrar este alerta.</div>`;
+  }else if(days>=264){
+   out+=`<div class="alert orange"><b>PRÉ-PARTO:</b> ${escapeHTML(v.nome)} — ${days} dias de gestação. O parto está se aproximando. Prepare o manejo para o nascimento.</div>`;
   }else if(days>=dryThresholdDays() && v.status==='lactacao'){
    out+=`<div class="alert orange"><b>SECAR:</b> ${escapeHTML(v.nome)} — ${days} dias de gestação. O alerta desaparece ao mudar para Seca.</div>`;
   }
@@ -1407,7 +1609,16 @@ function renderHomeAlerts(){
   if(days>=18&&days<=25)out+=`<div class="alert orange"><b>OBSERVAR RETORNO AO CIO:</b> ${escapeHTML(v.nome)} — ${days} dias após a inseminação. Observe se houve retorno ao cio. A confirmação de prenhez deve seguir o método utilizado na propriedade.</div>`;
  });
  db.novilhas.forEach(h=>{
-  if(h.inseminacao){const days=daysBetween(h.inseminacao);if(days>=255)out+=`<div class="alert red"><b>PARTO DE NOVILHA:</b> ${escapeHTML(h.nome)} — ${days} dias de gestação. Parto previsto próximo.</div>`}
+  if(!h.inseminacao)return;
+  const days=daysBetween(h.inseminacao);
+  if(days>=270){
+   out+=`<div class="alert red"><b>PARTO PRÓXIMO:</b> ${escapeHTML(h.nome)} — ${days} dias de gestação. Parto previsto próximo.</div>`;
+  }else if(days>=264){
+   out+=`<div class="alert orange"><b>PRÉ-PARTO:</b> ${escapeHTML(h.nome)} — ${days} dias de gestação. O parto está se aproximando. Prepare o manejo para o nascimento.</div>`;
+  }
+ });
+ db.novilhas.forEach(h=>{
+  if(h.inseminacao){const days=daysBetween(h.inseminacao);if(days>=18&&days<=25)out+=`<div class="alert orange"><b>OBSERVAR RETORNO AO CIO:</b> ${escapeHTML(h.nome)} — ${days} dias após a inseminação. Observe se houve retorno ao cio. A confirmação de prenhez deve seguir o método utilizado na propriedade.</div>`}
  });
  db.novilhas.forEach(h=>{
   if(!h.nascimento)return;
@@ -1629,6 +1840,13 @@ function editFromGenealogy(){startGenealogyEdit();}
 
 async function saveCow(){
  const name=document.getElementById('cowName').value.trim();if(!name)return alert('Informe o nome/brinco.');
+ if(window.__savingCow)return;
+ window.__savingCow=true;
+ const saveBtn=document.getElementById('saveCowBtn');
+ if(saveBtn){saveBtn.disabled=true;saveBtn.dataset.originalText=saveBtn.textContent;saveBtn.textContent='⏳ SALVANDO...';}
+ const hasPhotoActionNow=!!(window.cowPhotoPendingFile||window.cowPhotoRemoveRequested);
+ if(hasPhotoActionNow)setPhotoStatus('cow','⏳ Salvando... enviando a foto para a nuvem. Aguarde.','success-text');
+ try{
  const edit=document.getElementById('cowEditId').value;const calving=getFlexibleDate('cowCalving','cowCalvingManual','Último parto');if(calving===null)return;const inseminacaoInput=getFlexibleDate('cowInsemination','cowInseminationManual','Inseminação');if(inseminacaoInput===null)return;
  const old=edit?db.vacas.find(v=>v.id===Number(edit)):null;
  const newStatus=document.getElementById('cowStatus').value;
@@ -1667,6 +1885,11 @@ async function saveCow(){
   db.novilhas.push({id:generateUniqueAnimalId(),nome:hn,nascimento:calving,pai:document.getElementById('heiferFather').value.trim()||birthReproducer,mae:name,avoMaterna:old?.mae||'',avoMaterno:old?.pai||'',bisavoMaterna:old?.avoMaterna||'',bisavoMaterno:old?.avoMaterno||'',inseminacao:'',reprodutor:'',parto:null,transferida:false,fotoPath:''});
  }
  const hasPhotoAction=!!(window.cowPhotoPendingFile||window.cowPhotoRemoveRequested);saveDB(false,!hasPhotoAction);if(hasPhotoAction){const target=db.vacas.find(x=>x.id===Number(edit||obj.id));if(target)await uploadAnimalPhotoAfterSave('cow',target);}alert('Animal salvo.');resetCowForm();renderAll();
+
+ }finally{
+  window.__savingCow=false;
+  if(saveBtn){saveBtn.disabled=false;saveBtn.textContent=saveBtn.dataset.originalText||'💾 SALVAR NO REBANHO';delete saveBtn.dataset.originalText;}
+ }
 }
 function generateUniqueAnimalId(){
  const used=new Set([...db.vacas,...db.novilhas].map(x=>Number(x.id)).filter(Number.isFinite));
@@ -1757,6 +1980,29 @@ async function deleteCow(){const id=Number(document.getElementById('cowEditId').
 function retrospectivaMonths(){
  return [...new Set(Object.keys(db.entregas||{}).filter(m=>/^\d{4}-\d{2}$/.test(m)))].sort().reverse();
 }
+function reportLast12Months(){
+ const now=new Date(),end=new Date(now.getFullYear(),now.getMonth(),1),months=[];
+ for(let i=11;i>=0;i--){const d=new Date(end.getFullYear(),end.getMonth()-i,1);months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`)}
+ return months.map(month=>{const st=monthDeliveryStats(month),received=Number(st.totalReceived||0),expenses=Number(monthMilkExpenseTotal(month)||0);return {month,liters:Number(st.total||0),received,expenses,net:received-expenses,price:Number(st.preco||0)}});
+}
+function generateMilkReportPDF(){
+ const rows=reportLast12Months(),totalLiters=rows.reduce((s,r)=>s+r.liters,0),totalReceived=rows.reduce((s,r)=>s+r.received,0),totalExpenses=rows.reduce((s,r)=>s+r.expenses,0),net=totalReceived-totalExpenses,currentMonth=`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`,completeRows=rows.filter(r=>r.month!==currentMonth),receivedRows=completeRows.filter(r=>r.liters>0&&r.received>0),expenseRows=completeRows.filter(r=>r.liters>0&&r.expenses>0),netRows=completeRows.filter(r=>r.received>0&&r.expenses>0),receivedPerLiter=receivedRows.reduce((s,r)=>s+r.received,0)/(receivedRows.reduce((s,r)=>s+r.liters,0)||1),costPerLiter=expenseRows.reduce((s,r)=>s+r.expenses,0)/(expenseRows.reduce((s,r)=>s+r.liters,0)||1),avgNet=netRows.length?netRows.reduce((s,r)=>s+r.net,0)/netRows.length:0;
+ const bestProduction=rows.reduce((a,b)=>b.liters>a.liters?b:a,rows[0]),highestExpense=rows.reduce((a,b)=>b.expenses>a.expenses?b:a,rows[0]),bestReceivedPerLiter=rows.filter(r=>r.price>0).reduce((a,b)=>!a||b.price>a.price?b:a,null);
+ const lactating=db.vacas.filter(v=>v.status==='lactacao').length,totalCows=db.vacas.length,totalHeifers=db.novilhas.length,totalAnimals=totalCows+totalHeifers,generatedAt=new Date().toLocaleString('pt-BR'),period=`${formatMonthLabel(rows[0].month)} a ${formatMonthLabel(rows[rows.length-1].month)}`,esc=s=>escapeHTML(String(s??''));
+ const rowHTML=rows.map(r=>`<tr><td>${esc(formatMonthLabel(r.month))}</td><td>${fmtNumber(r.liters)} L</td><td>${r.received>0?money(r.received):'—'}</td><td>${r.expenses>0?money(r.expenses):'—'}</td><td>${(r.received||r.expenses)?money(r.net):'—'}</td></tr>`).join('');
+ const highlights=(bestProduction.liters>0?`<p><b>Melhor mês de entrega:</b> ${esc(formatMonthLabel(bestProduction.month))} — ${fmtNumber(bestProduction.liters)} L.</p>`:'')+(highestExpense.expenses>0?`<p><b>Mês com maior gasto do leite:</b> ${esc(formatMonthLabel(highestExpense.month))} — ${money(highestExpense.expenses)}.</p>`:'')+(bestReceivedPerLiter?`<p><b>Maior valor recebido por litro:</b> ${esc(formatMonthLabel(bestReceivedPerLiter.month))} — ${money(bestReceivedPerLiter.price)}/L.</p>`:'');
+ const w=window.open('','_blank');if(!w){alert('Não foi possível abrir o relatório. Verifique se o navegador bloqueou a nova janela e tente novamente.');return}
+ w.document.open();w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relatório Gestão Rebanho Pro</title><style>
+ body{font-family:Arial,Segoe UI,sans-serif;color:#222;margin:0;padding:28px;font-size:12px}h1{font-size:21px;margin:0 0 4px;color:#1b5e20}h2{font-size:15px;margin:22px 0 8px;color:#1b5e20}.sub{color:#555;margin-bottom:18px}.meta{font-size:11px;color:#666;margin-bottom:18px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border:1px solid #ccc;padding:7px;text-align:right}th:first-child,td:first-child{text-align:left}th{background:#eef3ef;font-size:10px;text-transform:uppercase}.totals{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.box{border:1px solid #ccc;border-radius:7px;padding:9px}.box b{display:block;font-size:15px;margin-top:3px}.summary{border:1px solid #ccc;padding:11px;border-radius:7px}.summary p{margin:5px 0}.herd{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.herd .box{text-align:center}.footer{margin-top:28px;border-top:1px solid #ccc;padding-top:8px;font-size:10px;color:#666}@media print{body{padding:12mm}.no-print{display:none!important}}
+ </style></head><body><h1>GESTÃO REBANHO PRO</h1><div class="sub"><b>Relatório da atividade leiteira — últimos 12 meses</b></div><div class="meta"><b>Período:</b> ${esc(period)}<br><b>Gerado em:</b> ${esc(generatedAt)}</div>
+ <h2>🥛 Resumo mensal</h2><table><thead><tr><th>Mês</th><th>Litros entregues</th><th>Recebido pelo leite</th><th>Gastos do leite</th><th>Resultado</th></tr></thead><tbody>${rowHTML}</tbody></table>
+ <div class="totals"><div class="box">TOTAL DE LITROS<b>${fmtNumber(totalLiters)} L</b></div><div class="box">TOTAL RECEBIDO<b>${money(totalReceived)}</b></div><div class="box">TOTAL DE GASTOS<b>${money(totalExpenses)}</b></div><div class="box">RESULTADO LÍQUIDO<b>${money(net)}</b></div></div>
+ <h2>📌 Indicadores do período</h2><div class="summary"><p><b>Recebido médio por litro:</b> ${receivedRows.length?money(receivedPerLiter)+'/L':'—'}</p><p><b>Custo médio do leite por litro:</b> ${expenseRows.length?money(costPerLiter)+'/L':'—'}</p><p><b>💰 Quanto sobra, em média, por mês:</b> ${netRows.length?money(avgNet):'—'}</p>${highlights}</div>
+ <h2>🐄 Rebanho atual na data do relatório</h2><div class="herd"><div class="box">VACAS<b>${totalCows}</b></div><div class="box">EM LACTAÇÃO<b>${lactating}</b></div><div class="box">NOVILHAS<b>${totalHeifers}</b></div><div class="box">TOTAL DE ANIMAIS<b>${totalAnimals}</b></div></div>
+ <div class="footer">Relatório gerado pelo Gestão Rebanho Pro. Os valores são calculados a partir dos registros existentes no aplicativo. Outras receitas da atividade não entram no total recebido pelo leite nem no custo do leite.</div>
+ <div class="no-print" style="margin-top:18px;text-align:center"><button onclick="window.print()" style="padding:10px 16px;font-weight:700">🖨️ IMPRIMIR / SALVAR COMO PDF</button></div></body></html>`);
+ w.document.close();setTimeout(()=>w.print(),350);
+}
 function renderRetrospectiva(){
  const period=document.getElementById('retrospectivaPeriod'),box=document.getElementById('retrospectivaContent');
  if(!period||!box)return;
@@ -1802,7 +2048,7 @@ function renderDeliveries(){
  document.getElementById('deliveryMonth').textContent=selectedMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
  document.getElementById('paymentMode').value=p.modo||'perLiter';document.getElementById('milkPrice').value=p.modo==='perLiter'&&p.valor?p.valor:'';document.getElementById('milkTotalReceived').value=p.modo==='total'&&p.valor?p.valor:'';setPaymentMode(p.modo||'perLiter',true);
  document.getElementById('deliveryTotal').textContent=fmtNumber(st.total)+' L';document.getElementById('deliveryPriceSummary').textContent=st.preco>0?money(st.preco)+'/L':'—';document.getElementById('deliveryValue').textContent=st.totalReceived>0?money(st.totalReceived):'—';document.getElementById('deliveryAvgEntry').textContent=fmtNumber(st.avgEntry)+' L';document.getElementById('deliveryReceiptStatus').textContent=st.totalReceived>0?'Recebido':'Ainda não registrado';
- let rows='';for(let i=1;i<=st.daysInMonth;i++){const ds=`${m}-${String(i).padStart(2,'0')}`;rows+=`<tr><td>${i}</td><td><input type="number" min="0" step="0.1" value="${ent.dias[ds]??''}" style="margin:0;padding:9px" oninput="updateDelivery('${ds}',this.value)"></td></tr>`}document.getElementById('deliveryTable').innerHTML=rows;
+ let rows='';for(let i=1;i<=st.daysInMonth;i++){const ds=`${m}-${String(i).padStart(2,'0')}`;rows+=`<tr><td>${i}</td><td><input type="number" min="0" step="0.1" value="${ent.dias[ds]??''}" style="margin:0;padding:9px" onblur="updateDelivery('${ds}',this.value)"></td></tr>`}document.getElementById('deliveryTable').innerHTML=rows;
 }
 function changeMonth(dir){selectedMonth=new Date(selectedMonth.getFullYear(),selectedMonth.getMonth()+dir,1);renderDeliveries()}
 function setPaymentMode(mode,silent=false){document.getElementById('paymentPerLiterWrap').classList.toggle('hidden',mode!=='perLiter');document.getElementById('paymentTotalWrap').classList.toggle('hidden',mode!=='total');if(!silent){const m=monthKey(),p=ensurePaymentForMonth(m),st=monthDeliveryStats(m);if(mode==='total'){const currentPerLiter=p.modo==='perLiter'?Number(p.valor||0):(st.preco||0);p.valor=st.total>0?st.total*currentPerLiter:Number(p.valor||0);}else{const currentTotal=p.modo==='total'?Number(p.valor||0):(st.total>0?st.total*Number(p.valor||0):0);p.valor=st.total>0?currentTotal/st.total:Number(p.valor||0);}p.modo=mode;ensureDeliveryMonth(m).preco=p.modo==='perLiter'?p.valor:(st.total>0?p.valor/st.total:0);saveDB(false);renderDeliveries();renderFinanceiro();renderHome()}}
@@ -1828,7 +2074,25 @@ function expenseAllocationOnDate(g,date){
 function monthMilkExpenseTotal(month){let total=0;const parts=month.split('-').map(Number),days=new Date(parts[0],parts[1],0).getDate();for(let i=1;i<=days;i++){const ds=`${month}-${String(i).padStart(2,'0')}`;db.financeiro.gastos.forEach(g=>{total+=expenseAllocationOnDate(g,ds)})}return total}
 function milkLitersInRange(start,end){let total=0;const s=parseLocalDate(start),e=parseLocalDate(end);if(!s||!e)return 0;Object.entries(db.entregas||{}).forEach(([m,ent])=>Object.entries(ent?.dias||{}).forEach(([date,v])=>{const d=parseLocalDate(date);if(d&&d>=s&&d<=e)total+=Number(v||0)}));return total}
 function milkExpenseInRange(start,end){let total=0;const s=parseLocalDate(start),e=parseLocalDate(end);if(!s||!e)return 0;for(let d=new Date(s);d<=e;d.setDate(d.getDate()+1)){const ds=localISO(d);db.financeiro.gastos.forEach(g=>{total+=expenseAllocationOnDate(g,ds)})}return total}
-function calculateMilkCost90Days(){const end=parseLocalDate(isoToday()),start=new Date(end);start.setDate(start.getDate()-89);const liters=milkLitersInRange(localISO(start),isoToday()),expenses=milkExpenseInRange(localISO(start),isoToday());return liters>0&&expenses>0?expenses/liters:null}
+function calculateMilkCost90Days(){const end=parseLocalDate(isoToday()),start=new Date(end);start.setDate(start.getDate()-89);let costPerLiter=0;
+ db.financeiro.gastos.forEach(g=>{
+  if(g.paraLeite!=='sim'||!g.data)return;
+  const gs=parseLocalDate(g.data),ge=parseLocalDate(effectiveExpenseEnd(g));
+  if(!gs||!ge||ge<start||gs>end)return;
+  const from=gs>start?gs:start,to=ge<end?ge:end;
+  const expense=milkExpenseInRange(localISO(from),localISO(to));
+  if(expense<=0)return;
+  let liters=0;
+  if(g.multiMonth){liters=milkLitersInRange(localISO(from),localISO(to));}
+  else{
+   const monthStart=new Date(gs.getFullYear(),gs.getMonth(),1),monthEnd=new Date(gs.getFullYear(),gs.getMonth()+1,0);
+   const mFrom=monthStart>start?monthStart:start,mTo=monthEnd<end?monthEnd:end;
+   liters=milkLitersInRange(localISO(mFrom),localISO(mTo));
+  }
+  if(liters>0)costPerLiter+=expense/liters;
+ });
+ return costPerLiter>0?costPerLiter:null
+}
 function receivedMilkForMonth(month){const st=monthDeliveryStats(month);return st.totalReceived>0?st.totalReceived:0}
 function formatMonthLabel(month){const [y,m]=month.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}
 function financeMonths(){const set=new Set([monthKey(financeSelectedMonth)]);Object.keys(db.entregas||{}).forEach(m=>set.add(m));db.financeiro.gastos.forEach(g=>g.data&&set.add(g.data.slice(0,7)));db.financeiro.outrosRecebimentos.forEach(x=>x.data&&set.add(x.data.slice(0,7)));return [...set].sort()}
@@ -1893,9 +2157,21 @@ function editHeifer(id){
 function closeModal(){document.getElementById('heiferModal').classList.remove('open')}
 async function saveHeifer(){
  const name=document.getElementById('heiferNameModal').value.trim(),birth=document.getElementById('heiferBirthModal').value,inseminacao=getFlexibleDate('heiferInsemModal','heiferInsemManual','Inseminação');if(!name||!birth)return alert('Informe nome e nascimento.');if(!validateISODate(birth,'Data de nascimento',false)||inseminacao===null)return;
+ if(window.__savingHeifer)return;
+ window.__savingHeifer=true;
+ const saveBtn=document.getElementById('saveHeiferBtn');
+ if(saveBtn){saveBtn.disabled=true;saveBtn.dataset.originalText=saveBtn.textContent;saveBtn.textContent='⏳ SALVANDO...';}
+ const hasPhotoActionNow=!!(window.heiferPhotoPendingFile||window.heiferPhotoRemoveRequested);
+ if(hasPhotoActionNow)setPhotoStatus('heifer','⏳ Salvando... enviando a foto para a nuvem. Aguarde.','success-text');
+ try{
  const edit=document.getElementById('heiferEditId').value;const motherName=document.getElementById('heiferMotherModal').value.trim();const old=edit?db.novilhas.find(x=>x.id===Number(edit)):null;const maternalLine=old?{grandmother:old.avoMaterna||'',grandfather:old.avoMaterno||'',greatGrandmother:old.bisavoMaterna||'',greatGrandfather:old.bisavoMaterno||''}:maternalLineageFor(motherName);const obj={id:edit?Number(edit):generateUniqueAnimalId(),nome:name,nascimento:birth,pai:document.getElementById('heiferFatherModal').value.trim(),mae:motherName,avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,inseminacao,reprodutor:document.getElementById('heiferReproducerModal').value.trim(),parto:null,transferida:false,fotoPath:old?.fotoPath||''};
  if(edit){const i=db.novilhas.findIndex(x=>x.id===Number(edit));if(i>=0)db.novilhas[i]=obj}else db.novilhas.push(obj);
  const hasPhotoAction=!!(window.heiferPhotoPendingFile||window.heiferPhotoRemoveRequested);saveDB(false,!hasPhotoAction);if(hasPhotoAction){const target=db.novilhas.find(x=>x.id===Number(edit||obj.id));if(target)await uploadAnimalPhotoAfterSave('heifer',target);}closeModal();renderHeifers();renderHomeAlerts();
+
+ }finally{
+  window.__savingHeifer=false;
+  if(saveBtn){saveBtn.disabled=false;saveBtn.textContent=saveBtn.dataset.originalText||'SALVAR';delete saveBtn.dataset.originalText;}
+ }
 }
 function openHeiferBatchModal(){
  document.getElementById('heiferBatchQuantity').value=1;
@@ -1998,7 +2274,7 @@ function renderAll(){
 }
 document.getElementById('prodDate').value=isoToday();document.getElementById('agendaDate').value=isoToday();
 renderAll();
-setInterval(()=>{if(currentScreen==='home')renderHome();},60000);
+setInterval(()=>{if(currentScreen==='home'&&!accessBlocked)renderHome();},60000);
 </script>
 <script>
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePhotoLightbox()});
