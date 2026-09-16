@@ -2102,24 +2102,27 @@ function expenseAllocationOnDate(g,date){
 function monthMilkExpenseTotal(month){let total=0;const parts=month.split('-').map(Number),days=new Date(parts[0],parts[1],0).getDate();for(let i=1;i<=days;i++){const ds=`${month}-${String(i).padStart(2,'0')}`;db.financeiro.gastos.forEach(g=>{total+=expenseAllocationOnDate(g,ds)})}return total}
 function milkLitersInRange(start,end){let total=0;const s=parseLocalDate(start),e=parseLocalDate(end);if(!s||!e)return 0;Object.entries(db.entregas||{}).forEach(([m,ent])=>Object.entries(ent?.dias||{}).forEach(([date,v])=>{const d=parseLocalDate(date);if(d&&d>=s&&d<=e)total+=Number(v||0)}));return total}
 function milkExpenseInRange(start,end){let total=0;const s=parseLocalDate(start),e=parseLocalDate(end);if(!s||!e)return 0;for(let d=new Date(s);d<=e;d.setDate(d.getDate()+1)){const ds=localISO(d);db.financeiro.gastos.forEach(g=>{total+=expenseAllocationOnDate(g,ds)})}return total}
-function calculateMilkCost90Days(){const end=parseLocalDate(isoToday()),start=new Date(end);start.setDate(start.getDate()-89);let costPerLiter=0;
+function calculateMilkCost90Days(){const end=parseLocalDate(isoToday()),start=new Date(end);start.setDate(start.getDate()-89);const monthlyExpenses={};
  db.financeiro.gastos.forEach(g=>{
   if(g.paraLeite!=='sim'||!g.data)return;
   const gs=parseLocalDate(g.data),ge=parseLocalDate(effectiveExpenseEnd(g));
-  if(!gs||!ge||ge<start||gs>end)return;
+  if(!gs||!ge||ge<gs||ge<start||gs>end)return;
   const from=gs>start?gs:start,to=ge<end?ge:end;
-  const expense=milkExpenseInRange(localISO(from),localISO(to));
-  if(expense<=0)return;
-  let liters=0;
-  if(g.multiMonth){liters=milkLitersInRange(localISO(from),localISO(to));}
-  else{
-   const monthStart=new Date(gs.getFullYear(),gs.getMonth(),1),monthEnd=new Date(gs.getFullYear(),gs.getMonth()+1,0);
-   const mFrom=monthStart>start?monthStart:start,mTo=monthEnd<end?monthEnd:end;
-   liters=milkLitersInRange(localISO(mFrom),localISO(mTo));
+  for(let d=new Date(from);d<=to;d.setDate(d.getDate()+1)){
+   const ds=localISO(d),month=ds.slice(0,7),allocated=expenseAllocationOnDate(g,ds);
+   if(allocated>0)monthlyExpenses[month]=(monthlyExpenses[month]||0)+allocated;
   }
-  if(liters>0)costPerLiter+=expense/liters;
  });
- return costPerLiter>0?costPerLiter:null
+ const eligibleMonths=Object.keys(monthlyExpenses).filter(month=>monthlyExpenses[month]>0);
+ if(!eligibleMonths.length)return null;
+ const totalExpense=eligibleMonths.reduce((sum,month)=>sum+monthlyExpenses[month],0);
+ let totalLiters=0;
+ eligibleMonths.forEach(month=>{
+  const [y,m]=month.split('-').map(Number),monthStart=new Date(y,m-1,1),monthEnd=new Date(y,m,0);
+  const from=monthStart>start?monthStart:start,to=monthEnd<end?monthEnd:end;
+  if(from<=to)totalLiters+=milkLitersInRange(localISO(from),localISO(to));
+ });
+ return totalExpense>0&&totalLiters>0?totalExpense/totalLiters:null
 }
 function receivedMilkForMonth(month){const st=monthDeliveryStats(month);return st.totalReceived>0?st.totalReceived:0}
 function formatMonthLabel(month){const [y,m]=month.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}
