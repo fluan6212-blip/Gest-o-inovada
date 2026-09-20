@@ -793,7 +793,12 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
    ========================= */
 const DB_KEY='gestao_rebanho_pro_db_v1';
 const LEGACY_DB_KEYS=['rebanho_leiteiro_db_v2'];
-const APP_VERSION='8.0';
+const APP_VERSION='8.3';
+const LOCAL_ACCOUNT_KEY='gestao_rebanho_local_account_v1';
+const ACCOUNT_SWITCH_KEY='gestao_rebanho_account_switch_v1';
+let currentUserIsOfflineCached=false;
+let sessionRecoveryRunning=false;
+let pendingConfirmedAccountSwitch=false;
 const KIWIY_CHECKOUT_URL='https://pay.kiwify.com.br/IMvMh7p';
 const CLOUD_SYNC_SNAPSHOT_KEY='gestao_rebanho_last_synced_v1';
 
@@ -849,38 +854,52 @@ async function removeCowPhotoPath(path){if(!path)return true;if(!currentUser||!s
 async function applyPendingAnimalPhoto(type,animal){const st=photoState(type),pending=window[st.pendingKey],remove=window[st.removeKey];const oldPath=animal.fotoPath||'';if(pending){const newPath=await uploadCowPhoto(type,animal.id,pending);animal.fotoPath=newPath;try{if(oldPath)await removeCowPhotoPath(oldPath);}catch(e){console.warn('Nova foto salva, mas a foto anterior não pôde ser excluída:',e);setPhotoStatus(type,'Nova foto salva. A foto anterior ainda está na nuvem.','danger-text');}window[st.pendingKey]=null;window[st.removeKey]=false;clearPhotoPreviewUrl(type);return true;}if(remove&&oldPath){await removeCowPhotoPath(oldPath);animal.fotoPath='';window[st.removeKey]=false;clearPhotoPreviewUrl(type);return true;}return false;}
 async function uploadAnimalPhotoAfterSave(type,animal){const st=photoState(type);try{await applyPendingAnimalPhoto(type,animal);saveDB(false);return true;}catch(e){console.warn('Falha ao salvar foto:',e);setPhotoStatus(type,e?.message||'Não foi possível salvar a foto.','danger-text');alert(`O animal foi salvo, mas a foto não pôde ser salva. ${e?.message||''}`);return false;}}
 
+function saveLocalAccountIdentity(user){
+ if(!user?.id)return;
+ try{localStorage.setItem(LOCAL_ACCOUNT_KEY,JSON.stringify({user_id:user.id,email:user.email||'',saved_at:new Date().toISOString()}));}catch(e){console.warn('Não foi possível guardar a identidade local da conta.',e)}
+}
+function readLocalAccountIdentity(){
+ try{const raw=localStorage.getItem(LOCAL_ACCOUNT_KEY);if(!raw)return null;const data=JSON.parse(raw);return data&&typeof data.user_id==='string'&&data.user_id?data:null;}catch(e){return null}
+}
+function clearLocalAccountState(){[DB_KEY,CLOUD_SYNC_SNAPSHOT_KEY,LOCAL_ACCOUNT_KEY,ACCOUNT_SWITCH_KEY,'gestao_rebanho_login_gate_version',...LEGACY_DB_KEYS].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}})}
+function makeOfflineCachedUser(identity){return {id:identity.user_id,email:identity.email||'',__offlineCached:true}}
+function rememberAuthenticatedUser(user){if(!user?.id)return;currentUserIsOfflineCached=false;saveLocalAccountIdentity(user);try{localStorage.setItem('gestao_rebanho_login_gate_version',APP_VERSION)}catch(e){}}
+async function getSessionWithTimeout(timeoutMs=4500){if(!supabaseClient)return null;const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('TIMEOUT_SESSION')),timeoutMs));const result=await Promise.race([supabaseClient.auth.getSession(),timeout]);return result?.data?.session||null}
+async function recoverOnlineSession(reason='online'){
+ if(!supabaseClient||sessionRecoveryRunning||!navigator.onLine)return false;sessionRecoveryRunning=true;
+ try{const session=await getSessionWithTimeout(4500);if(session?.user){currentUser=session.user;currentUserIsOfflineCached=false;rememberAuthenticatedUser(currentUser);hideLoginGate();renderCloudStatus('Conta reconectada. Verificando seu acesso...');await loadAccessControl();await syncWithCloud(reason);return true;}
+  currentUser=null;currentUserIsOfflineCached=false;accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();showLoginGate();return false;
+ }catch(e){const identity=readLocalAccountIdentity();console.warn('Não foi possível recuperar a sessão agora:',e);if(identity){currentUser=makeOfflineCachedUser(identity);currentUserIsOfflineCached=true;accessMode='offline';accessBlocked=false;hideAccessGate();hideAccessBanner();renderCloudStatus('Sem confirmação da nuvem agora. Seus dados locais continuam disponíveis.');}return false}
+ finally{sessionRecoveryRunning=false}
+}
 function initSupabase(){
  try{
   if(window.supabase&&window.supabase.createClient){
    supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+   try{const pending=JSON.parse(localStorage.getItem(ACCOUNT_SWITCH_KEY)||'null');pendingConfirmedAccountSwitch=pending?.state==='confirmed';}catch(e){pendingConfirmedAccountSwitch=false}
    supabaseClient.auth.onAuthStateChange((event,session)=>{
-    currentUser=session?.user||null;
+    if(session?.user){currentUser=session.user;currentUserIsOfflineCached=false;rememberAuthenticatedUser(currentUser);renderCloudStatus();setTimeout(()=>{loadAccessControl();syncWithCloud('auth-change')},0);return;}
+    if(!navigator.onLine){const identity=readLocalAccountIdentity();if(identity){currentUser=makeOfflineCachedUser(identity);currentUserIsOfflineCached=true;accessMode='offline';accessBlocked=false;hideAccessGate();hideAccessBanner();renderCloudStatus('Sem internet: usando os dados salvos no aparelho.');return;}}
+    if(event==='SIGNED_OUT'){currentUser=null;currentUserIsOfflineCached=false;accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();showLoginGate();}
     renderCloudStatus();
-    if(currentUser){
-     localStorage.setItem('gestao_rebanho_login_gate_version',APP_VERSION);
-     setTimeout(()=>{loadAccessControl();syncWithCloud('login')},0);
-    }else{
-     accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();
-     showLoginGate();
-    }
    });
-   supabaseClient.auth.getSession().then(async({data})=>{
-    currentUser=data.session?.user||null;
-    renderCloudStatus();
-    if(currentUser){
-     localStorage.setItem('gestao_rebanho_login_gate_version',APP_VERSION);
-     await loadAccessControl();
-     syncWithCloud('startup');
-    }else{
-     accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();
-     showLoginGate();
+   if(!navigator.onLine){
+    const identity=readLocalAccountIdentity();
+    if(identity){currentUser=makeOfflineCachedUser(identity);currentUserIsOfflineCached=true;accessMode='offline';accessBlocked=false;hideAccessGate();hideAccessBanner();renderCloudStatus('Sem internet: salvando somente no aparelho.');}
+    return;
+   }
+   getSessionWithTimeout(4500).then(async session=>{
+    if(pendingConfirmedAccountSwitch&&session?.user){
+     try{await supabaseClient.auth.signOut();}catch(e){console.warn('Não foi possível concluir a saída após troca interrompida:',e);return;}
+     clearLocalAccountState();pendingConfirmedAccountSwitch=false;db=normalizeDB(null);currentUser=null;currentUserIsOfflineCached=false;accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();showLoginGate();return;
     }
-   }).catch(()=>{renderCloudStatus();showLoginGate()});
-  }else{
-   renderCloudStatus('Biblioteca de nuvem indisponível no momento.');
-   showLoginGate();
-  }
- }catch(e){console.warn('Supabase não inicializado:',e);renderCloudStatus('Não foi possível inicializar a nuvem.');showLoginGate()}
+    if(pendingConfirmedAccountSwitch&&!session?.user){clearLocalAccountState();pendingConfirmedAccountSwitch=false;db=normalizeDB(null);currentUser=null;currentUserIsOfflineCached=false;accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();showLoginGate();return;}
+    if(session?.user){currentUser=session.user;currentUserIsOfflineCached=false;rememberAuthenticatedUser(currentUser);hideLoginGate();renderCloudStatus();await loadAccessControl();syncWithCloud('startup');}
+    else if(!navigator.onLine){const identity=readLocalAccountIdentity();if(identity){currentUser=makeOfflineCachedUser(identity);currentUserIsOfflineCached=true;accessMode='offline';accessBlocked=false;hideAccessGate();hideAccessBanner();renderCloudStatus('Sem internet: usando os dados salvos no aparelho.');}}
+    else{currentUser=null;currentUserIsOfflineCached=false;accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();showLoginGate();}
+   }).catch(e=>{console.warn('Não foi possível recuperar a sessão:',e);const identity=readLocalAccountIdentity();if(identity){currentUser=makeOfflineCachedUser(identity);currentUserIsOfflineCached=true;accessMode='offline';accessBlocked=false;hideAccessGate();hideAccessBanner();renderCloudStatus('Sem confirmação da nuvem agora. Seus dados locais continuam disponíveis.');}else if(navigator.onLine){renderCloudStatus();showLoginGate();}});
+  }else{renderCloudStatus('Biblioteca de nuvem indisponível no momento.');if(navigator.onLine)showLoginGate();}
+ }catch(e){console.warn('Supabase não inicializado:',e);const identity=readLocalAccountIdentity();if(identity){currentUser=makeOfflineCachedUser(identity);currentUserIsOfflineCached=true;accessMode='offline';accessBlocked=false;hideAccessGate();hideAccessBanner();renderCloudStatus('Nuvem indisponível: usando os dados salvos no aparelho.');}else if(navigator.onLine){renderCloudStatus('Não foi possível inicializar a nuvem.');showLoginGate();}}
 }
 
 function hasLocalData(data=db){
@@ -1062,7 +1081,7 @@ async function saveCloudSnapshot(){
  return true;
 }
 async function syncWithCloud(reason='auto'){
- if(!navigator.onLine||!supabaseClient||!currentUser)return false;
+ if(!navigator.onLine||currentUserIsOfflineCached||!supabaseClient||!currentUser)return false;
  if(cloudSyncRunning){cloudSyncPending=true;return false}
  cloudSyncRunning=true;
  try{
@@ -1125,7 +1144,8 @@ async function signInEmailPassword(){
   const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
   if(error)throw error;
   currentUser=data?.user||currentUser;
-  localStorage.setItem('gestao_rebanho_login_gate_version',APP_VERSION);
+  currentUserIsOfflineCached=false;
+  rememberAuthenticatedUser(currentUser);
   hideLoginGate();
   renderCloudStatus('Conta conectada. Verificando seu acesso...');
   await loadAccessControl();
@@ -1152,7 +1172,8 @@ async function signUpEmailPassword(){
   if(error)throw error;
   if(data?.session&&data?.user){
    currentUser=data.user;
-   localStorage.setItem('gestao_rebanho_login_gate_version',APP_VERSION);
+   currentUserIsOfflineCached=false;
+   rememberAuthenticatedUser(currentUser);
    hideLoginGate();
    renderCloudStatus('Conta criada. Verificando seu acesso...');
    await loadAccessControl();
@@ -1167,11 +1188,24 @@ async function signUpEmailPassword(){
  }
 }
 
-async function signOutCloud(){
- if(!supabaseClient)return;
- const {error}=await supabaseClient.auth.signOut();
- if(error)alert('Não foi possível sair da conta: '+error.message);
- else{currentUser=null;accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();showLoginGate();}
+async function switchAccount(){
+ if(!navigator.onLine){alert('É necessário estar conectado à internet para trocar de conta. Seus dados não foram alterados.');return false;}
+ if(!supabaseClient||!currentUser||currentUserIsOfflineCached){alert('A conta ainda não foi confirmada pela nuvem. Aguarde a conexão e tente novamente.');return false;}
+ if(!confirm('Trocar de conta? Primeiro os dados atuais serão sincronizados com a nuvem. Nenhum dado será apagado se a sincronização falhar.'))return false;
+ try{
+  localStorage.setItem(ACCOUNT_SWITCH_KEY,JSON.stringify({state:'syncing',user_id:currentUser.id,started_at:new Date().toISOString()}));
+  renderCloudStatus('Salvando os dados atuais na nuvem antes da troca...');
+  if(!await syncWithCloud('account-switch'))throw new Error('A sincronização não foi confirmada. Nenhum dado local foi apagado.');
+  const verified=await getCloudRow();if(verified.error)throw verified.error;if(!verified.row||verified.row.user_id!==currentUser.id)throw new Error('Não foi possível confirmar os dados da conta atual na nuvem.');
+  localStorage.setItem(ACCOUNT_SWITCH_KEY,JSON.stringify({state:'confirmed',user_id:currentUser.id,confirmed_at:new Date().toISOString()}));
+  const {error}=await supabaseClient.auth.signOut();if(error)throw error;
+  clearLocalAccountState();db=normalizeDB(null);currentUser=null;currentUserIsOfflineCached=false;accessControl=null;accessMode='login';accessBlocked=false;hideAccessGate();hideAccessBanner();showLoginGate();
+  return true;
+ }catch(e){try{localStorage.removeItem(ACCOUNT_SWITCH_KEY)}catch(err){}alert('Não foi possível concluir a troca de conta. Nenhum dado local foi apagado.\n\n'+(e?.message||'Verifique sua internet e tente novamente.'));renderCloudStatus('Troca de conta cancelada: os dados atuais permanecem no aparelho.');return false;}
+}
+async function signOutCloud(){return switchAccount();}
+function recoverInterruptedAccountSwitch(){
+ try{const raw=localStorage.getItem(ACCOUNT_SWITCH_KEY);if(!raw)return;const state=JSON.parse(raw);if(state?.state==='confirmed')pendingConfirmedAccountSwitch=true;else if(state?.state==='syncing')localStorage.removeItem(ACCOUNT_SWITCH_KEY);}catch(e){try{localStorage.removeItem(ACCOUNT_SWITCH_KEY)}catch(err){}}
 }
 function renderAccessAccountStatus(){
  if(!currentUser)return '';
@@ -1189,14 +1223,12 @@ function renderAccessAccountStatus(){
  return `<div class="access-account-status erro"><strong>🔐 Seu acesso:</strong><br>${escapeHTML(state.label||'Acesso não configurado')}.</div>`;
 }
 function renderCloudStatus(message=''){
- const box=document.getElementById('cloudStatus');
- if(!box)return;
+ const box=document.getElementById('cloudStatus');if(!box)return;
  if(currentUser){
   const email=escapeHTML(currentUser.email||'Conta conectada');
-  box.innerHTML=`<div class="notice"><b>☁️ Nuvem conectada</b><br>${email}<br><span class="small">${message||(navigator.onLine?'Sincronização automática ativa.':'Sem internet: salvando somente no aparelho.')}</span>${renderAccessAccountStatus()}</div><div class="row"><button class="btn btn-blue" onclick="syncWithCloud('manual')">☁️ SINCRONIZAR AGORA</button><button class="btn btn-light" onclick="signOutCloud()">SAIR</button></div>`;
- }else{
-  box.innerHTML=`<div class="notice"><b>☁️ Backup automático na nuvem</b><br><span class="small">Entre com sua conta do Supabase uma vez. Depois disso, cada alteração será salva automaticamente na nuvem quando houver internet. Sem internet, o aplicativo continua funcionando e salvando localmente.</span></div><button class="btn btn-blue btn-block" onclick="showLoginGate()">🔐 ENTRAR NA CONTA</button>`;
- }
+  const purchase=(accessControl&&accessMode==='teste')?'<button class="btn btn-green btn-block" onclick="openCheckout()">💳 ADQUIRIR PLANO ANUAL</button>':((accessControl&&accessMode==='tolerancia')?'<button class="btn btn-green btn-block" onclick="openCheckout()">💳 ADQUIRIR / RENOVAR PLANO ANUAL</button>':'');
+  box.innerHTML=`<div class="notice"><b>☁️ Nuvem conectada</b><br>${email}<br><span class="small">${message||(currentUserIsOfflineCached||!navigator.onLine?'Sem internet: salvando somente no aparelho.':'Sincronização automática ativa.')}</span>${renderAccessAccountStatus()}</div><div class="row"><button class="btn btn-blue" onclick="syncWithCloud('manual')">☁️ SINCRONIZAR AGORA</button><button class="btn btn-light" onclick="switchAccount()">🔄 TROCAR DE CONTA</button></div>${purchase}`;
+ }else{box.innerHTML=`<div class="notice"><b>☁️ Backup automático na nuvem</b><br><span class="small">Entre com sua conta do Supabase uma vez. Depois disso, cada alteração será salva automaticamente na nuvem quando houver internet. Sem internet, o aplicativo continua funcionando e salvando localmente.</span></div><button class="btn btn-blue btn-block" onclick="showLoginGate()">🔐 ENTRAR NA CONTA</button>`;}
 }
 let lastForegroundSync=0;
 async function refreshCloudOnReturn(reason='foreground'){
@@ -1206,8 +1238,21 @@ async function refreshCloudOnReturn(reason='foreground'){
  lastForegroundSync=now;
  await syncWithCloud(reason);
 }
-window.addEventListener('online',()=>{renderCloudStatus();if(currentUser){loadAccessControl();syncWithCloud('online')}});
-window.addEventListener('offline',()=>renderCloudStatus());
+let reconnectRecoveryTimer=null;
+async function recoverAfterReconnect(){
+ clearTimeout(reconnectRecoveryTimer);
+ renderCloudStatus('Internet restaurada. Recuperando a conta...');
+ const ok=await recoverOnlineSession('online');
+ if(!ok&&navigator.onLine&&currentUser){
+  reconnectRecoveryTimer=setTimeout(async()=>{
+   if(!navigator.onLine||!currentUser)return;
+   renderCloudStatus('Conexão restaurada. Confirmando acesso e sincronizando...');
+   await recoverOnlineSession('online-retry');
+  },1800);
+ }
+}
+window.addEventListener('online',recoverAfterReconnect);
+window.addEventListener('offline',()=>{const identity=readLocalAccountIdentity();if(currentUser||identity){if(identity)currentUser=makeOfflineCachedUser(identity);currentUserIsOfflineCached=!!currentUser;accessMode='offline';accessBlocked=false;hideAccessGate();hideAccessBanner();}renderCloudStatus()});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshCloudOnReturn('foreground')});
 window.addEventListener('pageshow',()=>refreshCloudOnReturn('pageshow'));
 
@@ -1337,6 +1382,7 @@ function ensureLicense(){
  saveDB(false);
 }
 ensureLicense();
+recoverInterruptedAccountSwitch();
 setTimeout(initSupabase,0);
 
 /* =========================
@@ -1380,27 +1426,9 @@ async function fetchAccessControl(){
  return await supabaseClient.from('controle_acesso').select('user_id,cadastro_numero,tipo_acesso,data_criacao,data_fim_teste,data_fim_acesso,status_acesso').eq('user_id',currentUser.id).maybeSingle();
 }
 async function loadAccessControl(){
- if(!currentUser||!supabaseClient||accessLoading)return false;
+ if(!navigator.onLine||currentUserIsOfflineCached||!currentUser||!supabaseClient||accessLoading){if(currentUser&&(!navigator.onLine||currentUserIsOfflineCached)){accessMode='offline';accessBlocked=false;hideAccessGate();hideAccessBanner();renderAccessState();}return false;}
  accessLoading=true;accessMode='verificando';renderAccessState();
- try{
-  let result;
-  for(let attempt=0;attempt<3;attempt++){
-   result=await fetchAccessControl();
-   if(result.error)throw result.error;
-   if(result.data)break;
-   await new Promise(r=>setTimeout(r,700));
-  }
-  if(!result?.data)throw new Error('Registro de acesso ainda não encontrado.');
-  accessControl=result.data;
-  applyAccessState();
-  return true;
- }catch(e){
-  console.warn('Não foi possível consultar o acesso:',e);
-  accessControl=null;accessMode='erro';accessBlocked=false;hideAccessGate();
-  const banner=document.getElementById('accessTopBanner');
-  if(banner){banner.innerHTML='⚠️ Não foi possível verificar seu acesso agora. <button type="button" onclick="loadAccessControl()">TENTAR NOVAMENTE</button>';banner.classList.add('open');}
-  return false;
- }finally{accessLoading=false;}
+ try{let result;for(let attempt=0;attempt<3;attempt++){result=await fetchAccessControl();if(result.error)throw result.error;if(result.data)break;await new Promise(r=>setTimeout(r,700));}if(!result?.data)throw new Error('Registro de acesso ainda não encontrado.');accessControl=result.data;applyAccessState();return true;}catch(e){console.warn('Não foi possível consultar o acesso:',e);accessControl=null;accessMode='erro';accessBlocked=false;hideAccessGate();const banner=document.getElementById('accessTopBanner');if(banner){banner.innerHTML='⚠️ Não foi possível verificar seu acesso agora. <button type="button" onclick="loadAccessControl()">TENTAR NOVAMENTE</button>';banner.classList.add('open');}return false;}finally{accessLoading=false;}
 }
 function applyAccessState(){
  const state=calculateAccessState(accessControl);
@@ -1416,6 +1444,7 @@ function renderAccessState(){
  if(email)email.textContent=currentUser?.email?`Conta: ${currentUser.email}`:'';
  if(btn)btn.style.display=accessBlocked?'block':'none';
  if(!content)return;
+ if(accessMode==='offline'){content.innerHTML='<p>Você está sem internet. O acesso à nuvem será verificado quando a conexão voltar.</p>';return;}
  if(accessMode==='verificando'){content.innerHTML='<p>Verificando seu acesso...</p>';return;}
  if(accessMode==='erro'){content.innerHTML='<p>Não foi possível verificar o acesso neste momento. Tente novamente quando houver internet.</p>';return;}
  const state=calculateAccessState(accessControl);
