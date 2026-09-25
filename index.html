@@ -157,8 +157,9 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 </head>
 <body>
 <header class="header">
-  <button class="brand" onclick="navigate('home')"><strong>GESTÃO REBANHO PRO</strong><small>Gestão simples do seu rebanho · V8</small></button>
+  <button class="brand" onclick="navigate('home')"><strong>GESTÃO REBANHO PRO</strong><small>Gestão simples do seu rebanho V8.4</small></button>
   <button class="icon-btn" onclick="navigate('manual')">📖 MANUAL</button>
+  <button class="icon-btn" id="installAppBtn" type="button" onclick="installApp()" style="display:none">📲 INSTALAR</button>
   <button class="icon-btn" onclick="navigate('config')">⚙️</button>
 </header>
 
@@ -208,6 +209,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
   <div id="individualNotice"></div>
   <div id="aggregateFields">
     <div class="row"><div><label>Manhã (L)</label><input type="number" min="0" step="0.1" id="prodMorning" oninput="calcProduction()"></div><div><label>Tarde (L)</label><input type="number" min="0" step="0.1" id="prodAfternoon" oninput="calcProduction()"></div></div>
+    <div id="prodNightWrap" class="hidden"><label>🌙 Noite (L)</label><input type="number" min="0" step="0.1" id="prodNight" oninput="calcProduction()"></div>
   </div>
   <div id="individualFields" class="hidden"></div>
   <div class="notice">Total do dia: <b id="prodTotal">0,0</b> L &nbsp; | &nbsp; Média/vaca: <b id="prodAvg">0,0</b> L</div>
@@ -354,6 +356,13 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
   <div id="cloudStatus"></div>
  </div>
  <div class="card">
+  <h2>🥛 Ordenhas por dia</h2>
+  <p class="small">Escolha quantas ordenhas a propriedade realiza por dia. O padrão é 2. Registros antigos continuam sendo tratados como foram salvos.</p>
+  <label>Número de ordenhas por dia</label>
+  <select id="milkingCount"><option value="2">2 ordenhas</option><option value="3">3 ordenhas</option></select>
+  <button class="btn btn-green btn-block" type="button" onclick="saveMilkingSettings()">💾 SALVAR ORDENHAS</button>
+ </div>
+ <div class="card">
   <h2>Alertas de secagem</h2>
   <label>Receber aviso a partir de</label>
   <div class="row"><input type="number" min="0" max="12" id="dryMonths"><input type="number" min="0" max="30" id="dryDays"></div>
@@ -378,7 +387,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 <section id="screen_manual" class="screen">
 <button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
 <div class="card">
- <h2 style="color:var(--topo)">📖 Manual de Utilização — V8</h2>
+ <h2 style="color:var(--topo)">📖 Manual de Utilização — V8.4</h2>
  <p><b>Idealizado por:</b> Luan Ferreira</p><p><b>Instagram:</b> @luan122006</p><p><b>WhatsApp:</b> 42 9850-8930</p>
  <div class="notice"><b>Como usar este manual:</b> este guia foi feito para o produtor rural. Você não precisa entender de informática para usar o aplicativo. Cadastre os animais, registre a produção e as entregas e mantenha os gastos atualizados. O sistema usa esses registros para montar os indicadores, avisos, gráficos e cálculos automaticamente.</div>
 
@@ -387,8 +396,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 
  <h4>1. 🥛 Hoje (Ordenha)</h4>
  <p><b>O que é:</b> é o total de leite registrado na produção de hoje.</p>
- <p><b>De onde vem:</b> da tela <b>Produção</b>, usando o registro da data de hoje. O aplicativo soma a produção da manhã e da tarde. Nos dias de medição individual, ele soma os litros informados para cada vaca nos dois turnos.</p>
- <p><b>Como calcula:</b> <b>Total do dia = manhã + tarde</b>. Na medição individual, o total é a soma de todos os valores individuais de manhã e tarde.</p>
+ <p><b>De onde vem:</b> da tela <b>Produção</b>, usando o registro da data de hoje. O aplicativo soma as ordenhas configuradas para o dia. Nos dias de medição individual, ele soma os litros informados para cada vaca em cada turno.</p>
+ <p><b>Como calcula:</b> <b>Total do dia = soma das ordenhas configuradas</b>. Na medição individual, o total é a soma dos valores individuais de cada turno.</p>
  <p><b>Exemplo:</b> 180 L pela manhã + 160 L à tarde = <b>340 L</b> no indicador Hoje.</p>
  <p><b>Como interpretar:</b> mostra quanto foi produzido na ordenha de hoje. Ele é um indicador de <b>produção</b>, não de entrega ao comprador.</p>
  <p><b>Para funcionar:</b> é preciso lançar a produção de hoje em Produção. Se ainda não houver produção registrada, o indicador aparece como <b>0,0 L</b>.</p>
@@ -462,7 +471,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <h3>📊 GRÁFICO — TENDÊNCIA DOS ÚLTIMOS 7 DIAS</h3>
  <p><b>O que representa:</b> o gráfico mostra a produção total de cada um dos últimos sete dias, incluindo hoje.</p>
  <p><b>Cada barra:</b> representa um dia. A altura da barra é proporcional à produção daquele dia e o número sobre a barra mostra os litros quando há produção.</p>
- <p><b>Como os valores são obtidos:</b> o aplicativo procura os registros de Produção correspondentes às sete datas e usa o mesmo cálculo de <b>produção total do dia</b>: manhã + tarde ou, na medição individual, a soma dos valores individuais dos turnos.</p>
+ <p><b>Como os valores são obtidos:</b> o aplicativo procura os registros de Produção correspondentes às sete datas e usa o mesmo cálculo de <b>produção total do dia</b>: soma das ordenhas configuradas ou, na medição individual, a soma dos valores individuais dos turnos.</p>
  <p><b>Por que 7 dias:</b> é uma janela curta para enxergar rapidamente a variação recente sem substituir o histórico completo.</p>
  <p><b>Como interpretar:</b> barras subindo de forma repetida indicam aumento recente; barras descendo indicam queda. Uma única queda pode ser apenas um dia diferente. Quando vários dias consecutivos apontam na mesma direção, existe uma tendência mais clara.</p>
  <p><b>Se corrigir uma produção:</b> ao alterar e salvar um registro, o gráfico é recalculado e a barra daquele dia passa a refletir o novo valor.</p>
@@ -470,7 +479,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 
  <h3>🔘 BOTÕES PRINCIPAIS</h3>
  <h4>🥛 PRODUÇÃO</h4>
- <p>Use para registrar quanto leite foi produzido em cada dia. Você informa manhã e tarde ou, nos dias de medição individual configurados, informa esses dois turnos por vaca. O aplicativo calcula o total e a média do dia e usa esses dados no Dashboard e no gráfico de sete dias.</p>
+ <p>Use para registrar quanto leite foi produzido em cada dia. Você informa as ordenhas configuradas para a propriedade ou, nos dias de medição individual configurados, informa esses turnos por vaca. O aplicativo calcula o total e a média do dia e usa esses dados no Dashboard e no gráfico de sete dias.</p>
  <p><b>Exemplo:</b> após a ordenha da manhã, registre o volume; depois registre a tarde e salve. Se precisar corrigir, abra a mesma data, altere o valor e salve novamente.</p>
 
  <h4>🐄 REBANHO</h4>
@@ -495,13 +504,13 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <p>Use para acompanhar especificamente o dinheiro da atividade leiteira: recebimentos do leite, gastos destinados ao leite, resultado mensal, outras receitas da atividade e custo por litro dos últimos 90 dias. Ele não é uma contabilidade geral de toda a propriedade.</p>
 
  <h3>🥛 PRODUÇÃO</h3>
- <p><b>Lançamento diário:</b> escolha a data e informe a produção da manhã e da tarde. O total é calculado automaticamente.</p>
+ <p><b>Lançamento diário:</b> escolha a data e informe a produção das ordenhas configuradas. A propriedade pode trabalhar com 2 ou 3 ordenhas por dia. O total é calculado automaticamente.</p>
  <p><b>Manhã:</b> informe os litros obtidos na ordenha da manhã. <b>Tarde:</b> informe os litros da ordenha da tarde.</p>
- <p><b>Total:</b> em produção geral, <b>Total = manhã + tarde</b>. Exemplo: 200 + 180 = 380 L.</p>
+ <p><b>Total:</b> em produção geral, o total é a soma das ordenhas configuradas. Com 2 ordenhas, por exemplo, 200 + 180 = 380 L. Com 3, a terceira ordenha também entra no total.</p>
  <p><b>Produção geral:</b> é usada nos dias que não foram selecionados para medição individual.</p>
- <p><b>Medição individual:</b> nos dias definidos em Configurações, a tela passa a mostrar cada vaca em lactação com campos para manhã e tarde. O total individual é a soma dos litros de todas as vacas.</p>
+ <p><b>Medição individual:</b> nos dias definidos em Configurações, a tela passa a mostrar cada vaca em lactação com campos para todas as ordenhas configuradas. O total individual é a soma dos litros de todas as vacas.</p>
  <p><b>Dias de medição:</b> o aplicativo usa os dias selecionados em Configurações. O padrão existente é segunda, quarta e sexta. Também é possível não selecionar nenhum dia; nesse caso, a produção será registrada somente de forma geral.</p>
- <p><b>Como lançar por vaca:</b> selecione uma data que seja dia de medição, confira as vacas exibidas e informe os litros de manhã e de tarde para cada uma. Salve a produção.</p>
+ <p><b>Como lançar por vaca:</b> selecione uma data que seja dia de medição, confira as vacas exibidas e informe os litros de cada ordenha configurada para cada uma. Salve a produção.</p>
  <p><b>Como corrigir:</b> selecione novamente a data, altere o valor e salve. O Dashboard e o gráfico passam a usar o novo registro.</p>
  <p><b>Impactos:</b> a produção diária influencia o indicador Hoje, o gráfico de sete dias, a média/vaca do mês e, quando houver produção anterior e configuração válida, a recomendação de ração. As Entregas são um registro separado.</p>
 
@@ -793,7 +802,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
    ========================= */
 const DB_KEY='gestao_rebanho_pro_db_v1';
 const LEGACY_DB_KEYS=['rebanho_leiteiro_db_v2'];
-const APP_VERSION='8.3';
+const APP_VERSION='8.9';
 const LOCAL_ACCOUNT_KEY='gestao_rebanho_local_account_v1';
 const ACCOUNT_SWITCH_KEY='gestao_rebanho_account_switch_v1';
 let currentUserIsOfflineCached=false;
@@ -801,6 +810,7 @@ let sessionRecoveryRunning=false;
 let pendingConfirmedAccountSwitch=false;
 const KIWIY_CHECKOUT_URL='https://pay.kiwify.com.br/IMvMh7p';
 const CLOUD_SYNC_SNAPSHOT_KEY='gestao_rebanho_last_synced_v1';
+const LOCAL_DIRTY_KEY='gestao_rebanho_local_dirty_v1';
 
 /* =========================
    SUPABASE — SINCRONIZAÇÃO NUVEM
@@ -861,7 +871,7 @@ function saveLocalAccountIdentity(user){
 function readLocalAccountIdentity(){
  try{const raw=localStorage.getItem(LOCAL_ACCOUNT_KEY);if(!raw)return null;const data=JSON.parse(raw);return data&&typeof data.user_id==='string'&&data.user_id?data:null;}catch(e){return null}
 }
-function clearLocalAccountState(){[DB_KEY,CLOUD_SYNC_SNAPSHOT_KEY,LOCAL_ACCOUNT_KEY,ACCOUNT_SWITCH_KEY,'gestao_rebanho_login_gate_version',...LEGACY_DB_KEYS].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}})}
+function clearLocalAccountState(){[DB_KEY,CLOUD_SYNC_SNAPSHOT_KEY,LOCAL_DIRTY_KEY,LOCAL_ACCOUNT_KEY,ACCOUNT_SWITCH_KEY,'gestao_rebanho_login_gate_version',...LEGACY_DB_KEYS].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}})}
 function makeOfflineCachedUser(identity){return {id:identity.user_id,email:identity.email||'',__offlineCached:true}}
 function rememberAuthenticatedUser(user){if(!user?.id)return;currentUserIsOfflineCached=false;saveLocalAccountIdentity(user);try{localStorage.setItem('gestao_rebanho_login_gate_version',APP_VERSION)}catch(e){}}
 async function getSessionWithTimeout(timeoutMs=4500){if(!supabaseClient)return null;const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('TIMEOUT_SESSION')),timeoutMs));const result=await Promise.race([supabaseClient.auth.getSession(),timeout]);return result?.data?.session||null}
@@ -917,7 +927,7 @@ function hasLocalData(data=db){
  const days=Array.isArray(cfg.diasMedicao)?cfg.diasMedicao.map(Number).filter(x=>x>=0&&x<=6):[];
  const defaultDays=[1,3,5],legacyDefaultDays=[2,4,6];
  const isKnownDefaultDays=days.length===3&&(days.every((x,i)=>x===defaultDays[i])||days.every((x,i)=>x===legacyDefaultDays[i]));
- const hasCustomConfig=Number(sec.meses)!==7||Number(sec.dias)!==15||Number(cfg.racaoLitrosPorKg||0)>0||!isKnownDefaultDays;
+ const hasCustomConfig=Number(sec.meses)!==7||Number(sec.dias)!==15||Number(cfg.racaoLitrosPorKg||0)>0||Number(cfg.numOrdenhas)!==2||!isKnownDefaultDays;
  const hasFinance=!!(data.financeiro&&((Array.isArray(data.financeiro.gastos)&&data.financeiro.gastos.length)||(Array.isArray(data.financeiro.outrosRecebimentos)&&data.financeiro.outrosRecebimentos.length)));
  return !!(
   (Array.isArray(data.vacas)&&data.vacas.length)||
@@ -1014,6 +1024,98 @@ function mergeArrayThreeWay(base=[],local=[],cloud=[]){
  });
  return out;
 }
+function mergeConfigThreeWay(base={},local={},cloud={}){
+ const b=base&&typeof base==='object'?base:{};
+ const l=local&&typeof local==='object'?local:{};
+ const c=cloud&&typeof cloud==='object'?cloud:{};
+ const out=cloneData(l);
+ const keys=new Set([...Object.keys(b),...Object.keys(l),...Object.keys(c)]);
+ keys.forEach(k=>{
+  if(k==='secagem'){
+   out.secagem=mergeMapThreeWay(b.secagem||{},l.secagem||{},c.secagem||{});
+   return;
+  }
+  const bv=b[k],lv=l[k],cv=c[k];
+  if(sameJSON(lv,bv)) out[k]=cloneData(cv);
+  else if(sameJSON(cv,bv)) out[k]=cloneData(lv);
+  else if(lv===undefined&&cv!==undefined&&bv!==undefined) out[k]=cloneData(cv);
+  else if(cv===undefined&&lv!==undefined&&bv!==undefined) out[k]=cloneData(lv);
+  else if(lv===undefined&&cv!==undefined) out[k]=cloneData(cv);
+  else if(cv===undefined&&lv!==undefined) out[k]=cloneData(lv);
+  else out[k]=cloneData(lv);
+ });
+ return out;
+}
+function mergeConfigWithoutSnapshot(local={},cloud={}){
+ const l=local&&typeof local==='object'?local:{};
+ const c=cloud&&typeof cloud==='object'?cloud:{};
+ const out=cloneData(c);
+ const lsec=l.secagem&&typeof l.secagem==='object'?l.secagem:{};
+ const csec=c.secagem&&typeof c.secagem==='object'?c.secagem:{};
+ const bsec=defaultDB().configuracoes.secagem;
+ out.secagem={};
+ ['meses','dias'].forEach(k=>{
+  const lv=lsec[k],cv=csec[k];
+  const localIsDefault=Number(lv)===Number(bsec[k]);
+  out.secagem[k]=localIsDefault?cloneData(cv!==undefined?cv:bsec[k]):cloneData(lv);
+ });
+ const localDays=Array.isArray(l.diasMedicao)?l.diasMedicao.map(Number):[];
+ const defaultDays=[1,3,5],legacyDefaultDays=[2,4,6];
+ const localDaysDefault=localDays.length===3&&(localDays.every((x,i)=>x===defaultDays[i])||localDays.every((x,i)=>x===legacyDefaultDays[i]));
+ out.diasMedicao=localDaysDefault?cloneData(c.diasMedicao!==undefined?c.diasMedicao:localDays):cloneData(localDays);
+ const localFeed=Number(l.racaoLitrosPorKg);
+ out.racaoLitrosPorKg=(Number.isFinite(localFeed)&&localFeed>0)?localFeed:(c.racaoLitrosPorKg??null);
+ const localMilkings=Number(l.numOrdenhas);
+ out.numOrdenhas=(localMilkings===3)?3:(Number(c.numOrdenhas)===3?3:2);
+ const keys=new Set([...Object.keys(c),...Object.keys(l)]);
+ keys.forEach(k=>{
+  if(['secagem','diasMedicao','racaoLitrosPorKg','numOrdenhas'].includes(k))return;
+  if(!(k in out))out[k]=cloneData(l[k]);
+ });
+ return out;
+}
+function mergeFinanceArrayThreeWay(baseArr=[],localArr=[],cloudArr=[]){
+ const bm=new Map((baseArr||[]).filter(Boolean).map(x=>[String(x.id),x]));
+ const lm=new Map((localArr||[]).filter(Boolean).map(x=>[String(x.id),x]));
+ const cm=new Map((cloudArr||[]).filter(Boolean).map(x=>[String(x.id),x]));
+ const ids=new Set([...bm.keys(),...lm.keys(),...cm.keys()]);
+ const out=[];
+ ids.forEach(id=>{
+  const b=bm.get(id),l=lm.get(id),c=cm.get(id);
+  if(!b){
+   if(l&&c){
+    const item=cloneData(c);Object.keys(l).forEach(k=>{item[k]=cloneData(l[k])});out.push(item);
+   }else if(l)out.push(cloneData(l));
+   else if(c)out.push(cloneData(c));
+   return;
+  }
+  if(l===undefined&&c===undefined)return;
+  if(l===undefined){if(sameJSON(c,b))return;out.push(cloneData(c));return;}
+  if(c===undefined){if(sameJSON(l,b))return;out.push(cloneData(l));return;}
+  if(sameJSON(l,b)){out.push(cloneData(c));return;}
+  if(sameJSON(c,b)){out.push(cloneData(l));return;}
+  const item={};
+  const keys=new Set([...Object.keys(b),...Object.keys(l),...Object.keys(c)]);
+  keys.forEach(k=>{
+   const bv=b[k],lv=l[k],cv=c[k];
+   if(sameJSON(lv,bv))item[k]=cloneData(cv);
+   else if(sameJSON(cv,bv))item[k]=cloneData(lv);
+   else if(lv===undefined&&cv!==undefined)item[k]=cloneData(cv);
+   else if(cv===undefined&&lv!==undefined)item[k]=cloneData(lv);
+   else item[k]=cloneData(lv);
+  });
+  out.push(item);
+ });
+ return out;
+}
+function mergeFinanceWithoutSnapshot(localFinance={},cloudFinance={}){
+ const l=localFinance&&typeof localFinance==='object'?localFinance:{};
+ const c=cloudFinance&&typeof cloudFinance==='object'?cloudFinance:{};
+ return {
+  gastos:mergeById(l.gastos||[],c.gastos||[]),
+  outrosRecebimentos:mergeById(l.outrosRecebimentos||[],c.outrosRecebimentos||[])
+ };
+}
 function mergeThreeWayDB(base,local,cloud){
  const b=normalizeDB(cloneData(base||defaultDB()));
  const l=normalizeDB(cloneData(local||defaultDB()));
@@ -1024,8 +1126,11 @@ function mergeThreeWayDB(base,local,cloud){
  merged.agenda=mergeArrayThreeWay(b.agenda,l.agenda,c.agenda);
  merged.producao=mergeMapThreeWay(b.producao,l.producao,c.producao);
  merged.entregas=mergeMapThreeWay(b.entregas,l.entregas,c.entregas);
- merged.financeiro=mergeMapThreeWay(b.financeiro,l.financeiro,c.financeiro);
- merged.configuracoes=sameJSON(l.configuracoes,b.configuracoes)?cloneData(c.configuracoes):cloneData(l.configuracoes);
+ merged.financeiro={
+  gastos:mergeFinanceArrayThreeWay(b.financeiro?.gastos||[],l.financeiro?.gastos||[],c.financeiro?.gastos||[]),
+  outrosRecebimentos:mergeFinanceArrayThreeWay(b.financeiro?.outrosRecebimentos||[],l.financeiro?.outrosRecebimentos||[],c.financeiro?.outrosRecebimentos||[])
+ };
+ merged.configuracoes=mergeConfigThreeWay(b.configuracoes,l.configuracoes,c.configuracoes);
  merged.backup=sameJSON(l.backup,b.backup)?cloneData(c.backup):cloneData(l.backup);
  merged.licenca=sameJSON(l.licenca,b.licenca)?cloneData(c.licenca):cloneData(l.licenca);
  merged.meta=mergeMapThreeWay(b.meta,l.meta,c.meta);
@@ -1041,7 +1146,7 @@ function mergeById(localArr,cloudArr){
  (cloudArr||[]).forEach(c=>{
   if(!c||c.id==null)return;
   const key=String(c.id),l=(localArr||[]).find(x=>x&&x.id!=null&&String(x.id)===key);
-  if(l&&(!l.fotoPath)&&c.fotoPath)map.set(key,{...cloneData(l),fotoPath:c.fotoPath});
+  if(l&&(!l.fotoPath)&&c.fotoPath&&!l.fotoPathDeleteRequestedAt)map.set(key,{...cloneData(l),fotoPath:c.fotoPath});
  });
  return [...map.values()];
 }
@@ -1053,13 +1158,25 @@ function mergeDB(localData,cloudData){
  merged.agenda=mergeById(localData.agenda,cloudData.agenda);
  merged.producao={...(cloudData.producao||{}),...(localData.producao||{})};
  merged.entregas={...(cloudData.entregas||{}),...(localData.entregas||{})};
- merged.financeiro={...(cloudData.financeiro||{}),...(localData.financeiro||{})};
- merged.configuracoes=JSON.parse(JSON.stringify(localData.configuracoes||cloudData.configuracoes||merged.configuracoes));
+ merged.financeiro=mergeFinanceWithoutSnapshot(localData.financeiro||{},cloudData.financeiro||{});
+ merged.configuracoes=mergeConfigWithoutSnapshot(localData.configuracoes||{},cloudData.configuracoes||{});
  merged.backup=JSON.parse(JSON.stringify(localData.backup||cloudData.backup||merged.backup));
  merged.licenca=JSON.parse(JSON.stringify(localData.licenca||cloudData.licenca||merged.licenca));
  merged.meta=Object.assign({},cloudData.meta||{},localData.meta||{});
  merged.version=APP_VERSION;
  return normalizeDB(merged);
+}
+function protectCloudAnimalPhotos(mergedData,cloudData){
+ if(!mergedData||!cloudData)return;
+ ['vacas','novilhas'].forEach(type=>{
+  const mergedArr=Array.isArray(mergedData[type])?mergedData[type]:[];
+  const cloudArr=Array.isArray(cloudData[type])?cloudData[type]:[];
+  const cloudById=new Map(cloudArr.filter(x=>x&&x.id!=null).map(x=>[String(x.id),x]));
+  mergedArr.forEach(animal=>{
+   const cloudAnimal=cloudById.get(String(animal.id));
+   if(cloudAnimal?.fotoPath&&!animal.fotoPath&&!animal.fotoPathDeleteRequestedAt)animal.fotoPath=cloudAnimal.fotoPath;
+  });
+ });
 }
 async function getCloudRow(){
  if(!supabaseClient||!currentUser)return {row:null,error:null};
@@ -1091,13 +1208,21 @@ async function syncWithCloud(reason='auto'){
   const cloudData=found.row?.dados||null;
   const base=readLastSyncedSnapshot();
   if(cloudData){
-   if(!hasLocalData(db)) db=normalizeDB(cloneData(cloudData));
+   // Se houve alterações locais desde a última sincronização, o banco local é
+   // a fonte de trabalho e nunca deve ser substituído simplesmente porque a
+   // nuvem está atrasada. O merge continua resolvendo conflitos por data/campo.
+   if(!hasLocalData(db) && !hasLocalDirtyState()) db=normalizeDB(cloneData(cloudData));
    else if(base) db=mergeThreeWayDB(base,db,cloudData);
    else db=mergeDB(db,cloudData);
-   saveDB(false,false);
+   saveDB(false,false,false);
   }
+  // Proteção final: uma referência de foto que ainda existe na nuvem não pode ser
+  // substituída por vazio durante um merge, exceto quando o próprio registro local
+  // carrega a marca de exclusão explícita gerada pela ação EXCLUIR FOTO.
+  protectCloudAnimalPhotos(db,cloudData);
   await saveCloudSnapshot();
   writeLastSyncedSnapshot(db);
+  clearLocalDirtyState();
   renderAll();
   renderCloudStatus('Dados salvos na nuvem automaticamente.');
   return true;
@@ -1255,6 +1380,11 @@ window.addEventListener('online',recoverAfterReconnect);
 window.addEventListener('offline',()=>{const identity=readLocalAccountIdentity();if(currentUser||identity){if(identity)currentUser=makeOfflineCachedUser(identity);currentUserIsOfflineCached=!!currentUser;accessMode='offline';accessBlocked=false;hideAccessGate();hideAccessBanner();}renderCloudStatus()});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshCloudOnReturn('foreground')});
 window.addEventListener('pageshow',()=>refreshCloudOnReturn('pageshow'));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')checkpointLocalDB()});
+window.addEventListener('pagehide',checkpointLocalDB);
+window.addEventListener('beforeunload',checkpointLocalDB);
+setInterval(()=>{checkpointLocalDB()},30000);
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});}catch(e){}
 
 
 
@@ -1275,7 +1405,8 @@ function defaultDB(){
   configuracoes:{
    secagem:{meses:7,dias:15},
    diasMedicao:[1,3,5], // domingo=0 ... sábado=6; padrão: segunda, quarta, sexta
-   racaoLitrosPorKg:null
+   racaoLitrosPorKg:null,
+   numOrdenhas:2
   },
   licenca:{idInstalacao:null,dataInstalacao:null,isPro:false},
   backup:{ultimoBackup:null},
@@ -1315,6 +1446,7 @@ function normalizeDB(raw){
  n.configuracoes.secagem=Object.assign(base.configuracoes.secagem,(raw.configuracoes&&raw.configuracoes.secagem)||{});
  n.configuracoes.diasMedicao=Array.isArray(raw.configuracoes&&raw.configuracoes.diasMedicao)?raw.configuracoes.diasMedicao.map(Number).filter(x=>x>=0&&x<=6):base.configuracoes.diasMedicao;
  n.configuracoes.racaoLitrosPorKg=Number.isFinite(Number(raw.configuracoes&&raw.configuracoes.racaoLitrosPorKg))&&Number(raw.configuracoes.racaoLitrosPorKg)>0?Number(raw.configuracoes.racaoLitrosPorKg):null;
+ n.configuracoes.numOrdenhas=Number(raw.configuracoes&&raw.configuracoes.numOrdenhas)===3?3:2;
  n.licenca=Object.assign(base.licenca,raw.licenca||{});
  n.backup=Object.assign(base.backup,raw.backup||{});
  n.meta=Object.assign(base.meta,raw.meta||{});
@@ -1363,23 +1495,40 @@ function loadDB(){
   return normalizeDB(null);
  }
 }
-function saveDB(show=false, schedule=true){
+function saveDB(show=false, schedule=true, markDirty=true){
  db.meta.atualizadoEm=new Date().toISOString();
  try{
-  localStorage.setItem(DB_KEY,JSON.stringify(db));
+  const payload=JSON.stringify(db);
+  localStorage.setItem(DB_KEY,payload);
+  const confirmed=localStorage.getItem(DB_KEY);
+  if(confirmed!==payload)throw new Error('VERIFICACAO_LOCAL_FALHOU');
+  if(markDirty)localStorage.setItem(LOCAL_DIRTY_KEY,'1');
   if(show) toast('Dados salvos no celular.');
   // Durante uma sincronização com a nuvem, schedule=false evita o ciclo
   // sincroniza -> saveDB -> agenda nova sincronização.
   if(schedule) scheduleCloudSync();
- }catch(e){alert('Não foi possível salvar no armazenamento deste aparelho.');}
+ }catch(e){
+  console.error('Falha ao salvar o banco local:',e);
+  alert('Não foi possível salvar os dados no armazenamento deste aparelho. Verifique o espaço disponível e não feche o aplicativo até corrigir o problema.');
+ }
 }
+function hasLocalDirtyState(){
+ try{return localStorage.getItem(LOCAL_DIRTY_KEY)==='1';}catch(e){return false;}
+}
+function clearLocalDirtyState(){
+ try{localStorage.removeItem(LOCAL_DIRTY_KEY);}catch(e){}
+}
+function checkpointLocalDB(){
+ try{saveDB(false,false,true);}catch(e){console.warn('Falha no checkpoint local:',e)}
+}
+
 function generateInstallId(){
  return Math.floor(100000+Math.random()*900000000);
 }
 function ensureLicense(){
  if(!db.licenca.idInstalacao) db.licenca.idInstalacao=generateInstallId();
  if(!db.licenca.dataInstalacao) db.licenca.dataInstalacao=new Date().toISOString();
- saveDB(false);
+ saveDB(false,false,false);
 }
 ensureLicense();
 recoverInterruptedAccountSwitch();
@@ -1556,25 +1705,37 @@ function renderHome(){
  const cost=calculateMilkCost90Days();document.getElementById('kpiMilkCost').textContent=cost?money(cost)+'/L':'—';
  renderChart();renderHomeAlerts();
 }
+function individualProductionTotal(x){
+ if(!x||typeof x!=='object')return 0;
+ return Number(x.m||0)+Number(x.t||0)+Number(x.n||0);
+}
+function productionMilkingCount(p){
+ return p&&Number(p.numOrdenhas)===3?3:2;
+}
+function configuredMilkingCount(){
+ return Number(db.configuracoes.numOrdenhas)===3?3:2;
+}
 function productionTotal(p){
  if(!p)return 0;
  if(p.individual && typeof p.individual==='object'){
-  const vals=Object.values(p.individual);let m=0,t=0,has=false;
-  vals.forEach(x=>{m+=Number(x.m||0);t+=Number(x.t||0);if(Number(x.m||0)||Number(x.t||0))has=true});
-  if(has)return m+t;
+  const vals=Object.values(p.individual);
+  let total=0,has=false;
+  vals.forEach(x=>{const v=individualProductionTotal(x);total+=v;if(v)has=true});
+  if(has)return total;
  }
- return Number(p.m||0)+Number(p.t||0);
+ return Number(p.m||0)+Number(p.t||0)+Number(p.n||0);
 }
 function productionPeriodTotals(p){
- if(!p)return {m:0,t:0};
+ if(!p)return {m:0,t:0,n:0};
  if(p.individual){
-  let m=0,t=0;Object.values(p.individual).forEach(x=>{m+=Number(x.m||0);t+=Number(x.t||0)});return {m,t};
+  let m=0,t=0,n=0;Object.values(p.individual).forEach(x=>{m+=Number(x.m||0);t+=Number(x.t||0);n+=Number(x.n||0)});return {m,t,n};
  }
- return {m:Number(p.m||0),t:Number(p.t||0)};
+ return {m:Number(p.m||0),t:Number(p.t||0),n:Number(p.n||0)};
 }
 function productionDayComplete(p){
  if(!p)return false;
  const totals=productionPeriodTotals(p);
+ if(productionMilkingCount(p)===3)return totals.m>0 && totals.t>0 && totals.n>0;
  return totals.m>0 && totals.t>0;
 }
 function cowParticipatesOnDate(cow,date){
@@ -1729,7 +1890,7 @@ function feedRecommendationForCow(id){
   const p=db.producao[date];
   const x=p&&p.individual&&p.individual[id];
   if(!x)continue;
-  const liters=Number(x.m||0)+Number(x.t||0);
+  const liters=individualProductionTotal(x);
   if(liters>0)return {kg:liters/ratio,liters,date};
  }
  return null;
@@ -1744,36 +1905,48 @@ function isMeasurementDay(dateStr){
 function loadProductionDay(){
  const date=document.getElementById('prodDate').value||isoToday(),p=db.producao[date]||{};
  const individual=isMeasurementDay(date);
- document.getElementById('individualNotice').innerHTML=individual?'<div class="notice"><b>Medição individual ativa:</b> selecione a produção de cada vaca nos dois turnos.</div>':'';
+ const numOrdenhas=productionTotal(p)>0?productionMilkingCount(p):configuredMilkingCount();
+ document.getElementById('individualNotice').innerHTML=individual?`<div class="notice"><b>Medição individual ativa:</b> informe a produção de cada vaca nos ${numOrdenhas} turnos.</div>`:'';
  document.getElementById('aggregateFields').classList.toggle('hidden',individual);
  document.getElementById('individualFields').classList.toggle('hidden',!individual);
- if(individual)renderIndividualInputs(p.individual||{});
- else {document.getElementById('prodMorning').value=p.m??'';document.getElementById('prodAfternoon').value=p.t??''}
+ document.getElementById('prodNightWrap').classList.toggle('hidden',numOrdenhas!==3);
+ if(individual)renderIndividualInputs(p.individual||{},numOrdenhas);
+ else {
+  document.getElementById('prodMorning').value=p.m??'';
+  document.getElementById('prodAfternoon').value=p.t??'';
+  document.getElementById('prodNight').value=numOrdenhas===3?(p.n??''):'';
+ }
  calcProduction();
 }
-function renderIndividualInputs(existing){
+function renderIndividualInputs(existing,numOrdenhas=configuredMilkingCount()){
  const date=document.getElementById('prodDate').value||isoToday();
  const cows=lactatingCowsOnDate(date);
  const box=document.getElementById('individualFields');
  if(!cows.length){box.innerHTML='<div class="empty">Cadastre vacas em lactação para fazer a medição individual.</div>';return}
- box.innerHTML='<label>Produção por vaca</label>'+cows.map(v=>{const x=existing[v.id]||{};return `<div class="card" style="padding:12px;background:#f8faf9"><b>${escapeHTML(v.nome)}</b><div class="row"><div><label>Manhã</label><input type="number" min="0" step="0.1" data-cow="${v.id}" data-turn="m" value="${x.m??''}" oninput="calcProduction()"></div><div><label>Tarde</label><input type="number" min="0" step="0.1" data-cow="${v.id}" data-turn="t" value="${x.t??''}" oninput="calcProduction()"></div></div></div>`}).join('');
+ box.innerHTML='<label>Produção por vaca</label>'+cows.map(v=>{const x=existing[v.id]||{};return `<div class="card" style="padding:12px;background:#f8faf9"><b>${escapeHTML(v.nome)}</b><div class="row"><div><label>Manhã</label><input type="number" min="0" step="0.1" data-cow="${v.id}" data-turn="m" value="${x.m??''}" oninput="calcProduction()"></div><div><label>Tarde</label><input type="number" min="0" step="0.1" data-cow="${v.id}" data-turn="t" value="${x.t??''}" oninput="calcProduction()"></div></div>${numOrdenhas===3?`<div style="margin-top:8px"><label>🌙 Noite</label><input type="number" min="0" step="0.1" data-cow="${v.id}" data-turn="n" value="${x.n??''}" oninput="calcProduction()"></div>`:''}</div>`}).join('');
 }
 function readIndividual(){
  const out={};document.querySelectorAll('#individualFields input[data-cow]').forEach(i=>{const id=i.dataset.cow;out[id]=out[id]||{m:0,t:0};out[id][i.dataset.turn]=Number(i.value||0)});return out;
 }
 function calcProduction(){
- let total=0;if(isMeasurementDay(document.getElementById('prodDate').value||isoToday())){const x=readIndividual();Object.values(x).forEach(v=>total+=Number(v.m||0)+Number(v.t||0))}
- else total=Number(document.getElementById('prodMorning').value||0)+Number(document.getElementById('prodAfternoon').value||0);
- const date=document.getElementById('prodDate').value||isoToday();
+ const date=document.getElementById('prodDate').value||isoToday(),p=db.producao[date]||{};
+ const numOrdenhas=productionTotal(p)>0?productionMilkingCount(p):configuredMilkingCount();
+ let total=0;
+ if(isMeasurementDay(date)){const x=readIndividual();Object.values(x).forEach(v=>total+=individualProductionTotal(v))}
+ else total=Number(document.getElementById('prodMorning').value||0)+Number(document.getElementById('prodAfternoon').value||0)+(numOrdenhas===3?Number(document.getElementById('prodNight').value||0):0);
  const n=lactatingCowsOnDate(date).length;document.getElementById('prodTotal').textContent=fmtNumber(total);document.getElementById('prodAvg').textContent=fmtNumber(n?total/n:0);
 }
 function saveProduction(){
  const date=document.getElementById('prodDate').value;if(!date)return alert('Informe a data.');
+ const previous=db.producao[date]||{};
+ const previousHasData=productionTotal(previous)>0;
+ const numOrdenhas=previousHasData?productionMilkingCount(previous):configuredMilkingCount();
  const divisor=lactatingCowsOnDate(date).length;
  if(isMeasurementDay(date)){
-  db.producao[date]={individual:readIndividual(),m:0,t:0,medicaoIndividual:true,vacasAtivas:divisor};
+  const individual=readIndividual();
+  db.producao[date]={individual,m:0,t:0,n:0,numOrdenhas,medicaoIndividual:true,vacasAtivas:divisor};
  }else{
-  db.producao[date]={m:Number(document.getElementById('prodMorning').value||0),t:Number(document.getElementById('prodAfternoon').value||0),medicaoIndividual:false,vacasAtivas:divisor};
+  db.producao[date]={m:Number(document.getElementById('prodMorning').value||0),t:Number(document.getElementById('prodAfternoon').value||0),n:numOrdenhas===3?Number(document.getElementById('prodNight').value||0):0,numOrdenhas,medicaoIndividual:false,vacasAtivas:divisor};
  }
  saveDB(false);alert('Produção salva.');renderAll();
 }
@@ -1788,7 +1961,7 @@ function cowIndividualStats(id){
  Object.keys(db.producao).forEach(date=>{
   const p=db.producao[date];if(!p||!p.individual||!p.individual[id])return;
   if(cow.dataEntradaLactacao&&date<cow.dataEntradaLactacao)return;
-  const x=p.individual[id],total=Number(x.m||0)+Number(x.t||0);if(total<=0)return;
+  const x=p.individual[id],total=individualProductionTotal(x);if(total<=0)return;
   const item={date,total};all.push(item);if(date>=cutoff&&date<=today)recent.push(item);
  });
  if(!all.length)return null;
@@ -1935,6 +2108,7 @@ async function saveCow(){
  const motherName=document.getElementById('cowMother').value.trim();
  const maternalLine=old?{grandmother:old.avoMaterna||'',grandfather:old.avoMaterno||'',greatGrandmother:old.bisavoMaterna||'',greatGrandfather:old.bisavoMaterno||''}:maternalLineageFor(motherName);
  const obj={id:edit?Number(edit):Date.now(),nome:name,parto:calving,inseminacao,status:newStatus,dataEntradaLactacao,dataSaidaLactacao,pai:document.getElementById('cowFather').value.trim(),mae:motherName,avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,reprodutor:calving&&old&&calving!==old.parto&&!inseminacao?'':currentReproducer,fotoPath:old?.fotoPath||''};
+ if(window.cowPhotoRemoveRequested)obj.fotoPathDeleteRequestedAt=new Date().toISOString();
  if(edit){const i=db.vacas.findIndex(v=>v.id===Number(edit));if(i>=0)db.vacas[i]=obj}
  else db.vacas.push(obj);
  if(calving&&document.getElementById('registerHeifer').checked){
@@ -2225,6 +2399,7 @@ async function saveHeifer(){
  if(hasPhotoActionNow)setPhotoStatus('heifer','⏳ Salvando... enviando a foto para a nuvem. Aguarde.','success-text');
  try{
  const edit=document.getElementById('heiferEditId').value;const motherName=document.getElementById('heiferMotherModal').value.trim();const old=edit?db.novilhas.find(x=>x.id===Number(edit)):null;const maternalLine=old?{grandmother:old.avoMaterna||'',grandfather:old.avoMaterno||'',greatGrandmother:old.bisavoMaterna||'',greatGrandfather:old.bisavoMaterno||''}:maternalLineageFor(motherName);const obj={id:edit?Number(edit):generateUniqueAnimalId(),nome:name,nascimento:birth,pai:document.getElementById('heiferFatherModal').value.trim(),mae:motherName,avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,inseminacao,reprodutor:inseminacao?document.getElementById('heiferReproducerModal').value.trim():'',parto:null,transferida:false,fotoPath:old?.fotoPath||''};
+ if(window.heiferPhotoRemoveRequested)obj.fotoPathDeleteRequestedAt=new Date().toISOString();
  if(edit){const i=db.novilhas.findIndex(x=>x.id===Number(edit));if(i>=0)db.novilhas[i]=obj}else db.novilhas.push(obj);
  const hasPhotoAction=!!(window.heiferPhotoPendingFile||window.heiferPhotoRemoveRequested);saveDB(false,!hasPhotoAction);if(hasPhotoAction){const target=db.novilhas.find(x=>x.id===Number(edit||obj.id));if(target)await uploadAnimalPhotoAfterSave('heifer',target);}closeModal();renderHeifers();renderHomeAlerts();
 
@@ -2299,11 +2474,13 @@ function saveCalfParturition(){
    CONFIGURAÇÕES / PRO
    ========================= */
 function renderConfig(){
+  const milkingEl=document.getElementById('milkingCount');if(milkingEl)milkingEl.value=Number(db.configuracoes.numOrdenhas)===3?'3':'2';
   document.getElementById('dryMonths').value=db.configuracoes.secagem.meses;document.getElementById('dryDays').value=db.configuracoes.secagem.dias;
   renderFeedConfig();
   const names=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];document.getElementById('measurementDays').innerHTML=names.map((n,i)=>`<label class="day-check"><input type="checkbox" value="${i}" ${db.configuracoes.diasMedicao.includes(i)?'checked':''}>${n}</label>`).join('');
 }
-function saveSettings(){db.configuracoes.secagem.meses=Math.max(0,Number(document.getElementById('dryMonths').value||0));db.configuracoes.secagem.dias=Math.max(0,Number(document.getElementById('dryDays').value||0));saveDB(false);alert('Configurações salvas.');renderAll()}
+function saveMilkingSettings(){db.configuracoes.numOrdenhas=Number(document.getElementById('milkingCount').value)===3?3:2;saveDB(false);alert(`Ordenhas configuradas: ${db.configuracoes.numOrdenhas}.`);if(currentScreen==='producao')loadProductionDay();renderConfig()}
+function saveSettings(){db.configuracoes.numOrdenhas=Number(document.getElementById('milkingCount').value)===3?3:2;db.configuracoes.secagem.meses=Math.max(0,Number(document.getElementById('dryMonths').value||0));db.configuracoes.secagem.dias=Math.max(0,Number(document.getElementById('dryDays').value||0));saveDB(false);alert('Configurações salvas.');renderAll()}
 function saveMeasurementDays(){const vals=[...document.querySelectorAll('#measurementDays input:checked')].map(x=>Number(x.value));db.configuracoes.diasMedicao=vals;saveDB(false);alert(vals.length?'Dias de medição salvos.':'Nenhum dia de medição individual selecionado. A produção será registrada de forma geral.');if(currentScreen==='producao')loadProductionDay()}
 
 /* =========================
@@ -2350,6 +2527,27 @@ setInterval(()=>{if(currentScreen==='home'&&!accessBlocked)renderHome();},60000)
 <script>
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePhotoLightbox()});
 window.addEventListener('online',()=>{if(currentScreen==='rebanho')renderCowList();if(currentScreen==='novilhas')renderHeifers();});
+</script>
+<script>
+let deferredInstallPrompt=null;
+function updateInstallButton(){
+ const btn=document.getElementById('installAppBtn');
+ if(!btn)return;
+ btn.style.display=deferredInstallPrompt?'inline-block':'none';
+}
+window.addEventListener('beforeinstallprompt',e=>{
+ e.preventDefault();deferredInstallPrompt=e;updateInstallButton();
+});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;updateInstallButton();});
+async function installApp(){
+ if(!deferredInstallPrompt){
+  alert('A instalação ainda não está disponível neste navegador ou o aplicativo já está instalado. No Android/Chrome, abra o menu do navegador e procure por “Instalar aplicativo” ou “Adicionar à tela inicial”.');
+  return;
+ }
+ const promptEvent=deferredInstallPrompt;deferredInstallPrompt=null;updateInstallButton();
+ try{await promptEvent.prompt();await promptEvent.userChoice;}catch(e){console.warn('Instalação não concluída:',e);}
+ updateInstallButton();
+}
 </script>
 <script>
 if ('serviceWorker' in navigator) {
