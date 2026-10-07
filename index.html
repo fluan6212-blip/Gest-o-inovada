@@ -131,7 +131,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 
 
 /* =========================
-   ACESSO V8.9 — TESTE / TOLERÂNCIA / ANUAL
+   ACESSO V9 — TESTE / TOLERÂNCIA / ANUAL
    ========================= */
 .access-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px;z-index:9000}
 .access-overlay.open{display:flex}
@@ -177,7 +177,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 </head>
 <body>
 <header class="header">
-  <button class="brand" onclick="navigate('home')"><strong>GESTÃO REBANHO PRO</strong><small>Gestão simples do seu rebanho V8.9</small></button>
+  <button class="brand" onclick="navigate('home')"><strong>GESTÃO REBANHO PRO</strong><small>Gestão simples do seu rebanho V9</small></button>
   <button class="icon-btn" onclick="navigate('manual')">📖 MANUAL</button>
   <button class="icon-btn" id="installAppBtn" type="button" onclick="installApp()" style="display:none">📲 INSTALAR</button>
   <button class="icon-btn" onclick="navigate('config')">⚙️</button>
@@ -412,7 +412,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 <section id="screen_manual" class="screen">
 <button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
 <div class="card">
- <h2 style="color:var(--topo)">📖 Manual de Utilização — V8.9</h2>
+ <h2 style="color:var(--topo)">📖 Manual de Utilização — V9</h2>
  <p><b>Idealizado por:</b> Luan Ferreira</p><p><b>Instagram:</b> @luan122006</p><p><b>WhatsApp:</b> 42 9850-8930</p>
  <div class="notice"><b>Como usar este manual:</b> este guia foi feito para o produtor rural. Você não precisa entender de informática para usar o aplicativo. Cadastre os animais, registre a produção e as entregas e mantenha os gastos atualizados. O sistema usa esses registros para montar os indicadores, avisos, gráficos e cálculos automaticamente.</div>
 
@@ -627,7 +627,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <p>Aparece quando uma vaca em lactação atingiu o número de dias configurado para secagem após a inseminação. O padrão é 7 meses e 15 dias, calculado pelo aplicativo com meses aproximados de 30,44 dias. <b>O que fazer:</b> avaliar a secagem e atualizar o status para Seca quando isso realmente ocorrer. O aviso informa que desaparece ao mudar para Seca.</p>
  <h4>🔄 OBSERVAR RETORNO AO CIO</h4>
  <p>Aparece para vacas e novilhas entre <b>18 e 25 dias após a inseminação</b>. <b>O que fazer:</b> observar se houve retorno ao cio. O próprio aplicativo orienta que a confirmação de prenhez deve seguir o método utilizado na propriedade.</p>
- <h4>📋 HISTÓRICO REPRODUTIVO — V8.9</h4>
+ <h4>📋 HISTÓRICO REPRODUTIVO — V9</h4>
  <p>Cada vaca possui um histórico próprio de inseminações e partos/crias. As listas são mostradas da data mais antiga para a mais recente.</p>
  <p><b>Taxa de prenhez:</b> considera somente inseminações com resultado definido. Prenhez confirmada e prenhez não confirmada entram no cálculo; inseminações ainda pendentes ficam fora do denominador.</p>
  <p><b>Confirmação:</b> a partir de <b>23 dias após a inseminação</b>, quando a inseminação ainda estiver pendente, aparece uma ação persistente no cartão da vaca. Ela fica disponível até o produtor confirmar a prenhez ou informar que não confirmou.</p>
@@ -684,7 +684,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <p><b>Recuperação:</b> a nuvem ajuda a recuperar os dados sincronizados em outro momento, enquanto o backup em arquivo oferece uma cópia independente para restauração.</p>
  <p><b>Não é preciso entender a parte técnica:</b> mantenha a conta conectada quando quiser sincronização automática e faça backups em arquivo regularmente como camada extra de segurança.</p>
 
- <h3>🔐 ACESSO E RENOVAÇÃO — V8.9</h3>
+ <h3>🔐 ACESSO E RENOVAÇÃO — V9</h3>
  <p><b>Como funciona:</b> o aplicativo usa sua conta para identificar o tipo de acesso. Os primeiros 15 cadastros recebem acesso vitalício. A partir do 16º cadastro, o usuário recebe 40 dias de teste.</p>
  <p><b>Depois do teste:</b> ao terminar os 40 dias, existe um período de tolerância de 15 dias. Durante a tolerância, o aplicativo continua disponível e mostra lembretes para renovação.</p>
  <p><b>Se a tolerância terminar:</b> o aplicativo fica bloqueado para uso e mostra somente a opção de comprar ou renovar o acesso.</p>
@@ -849,13 +849,13 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
    ========================= */
 const DB_KEY='gestao_rebanho_pro_db_v1';
 const LEGACY_DB_KEYS=['rebanho_leiteiro_db_v2'];
-const APP_VERSION='8.9';
+const APP_VERSION='9';
 const LOCAL_ACCOUNT_KEY='gestao_rebanho_local_account_v1';
 const ACCOUNT_SWITCH_KEY='gestao_rebanho_account_switch_v1';
 let currentUserIsOfflineCached=false;
 let sessionRecoveryRunning=false;
 let pendingConfirmedAccountSwitch=false;
-const KIWIY_CHECKOUT_URL='https://pay.kiwify.com.br/HKU7jNA';
+const KIWIY_CHECKOUT_URL='https://pay.kiwify.com.br/GeLEcEf';
 const CLOUD_SYNC_SNAPSHOT_KEY='gestao_rebanho_last_synced_v1';
 const LOCAL_DIRTY_KEY='gestao_rebanho_local_dirty_v1';
 
@@ -1609,7 +1609,7 @@ recoverInterruptedAccountSwitch();
 setTimeout(initSupabase,0);
 
 /* =========================
-   ACESSO COMERCIAL V8.9
+   ACESSO COMERCIAL V9
    ========================= */
 const ACCESS_TOLERANCE_DAYS=15;
 
@@ -2172,7 +2172,7 @@ function saveGenealogy(){
 function editFromGenealogy(){startGenealogyEdit();}
 
 /* =========================
-   HISTÓRICO REPRODUTIVO V8.9
+   HISTÓRICO REPRODUTIVO V9
    ========================= */
 function newReproductiveHistory(){return {inseminacoes:[],partos:[]};}
 function ensureCowReproductiveHistory(v){
