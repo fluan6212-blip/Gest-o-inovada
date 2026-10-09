@@ -108,6 +108,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 .animal-info{border-top:1px solid var(--borda);margin-top:10px;padding-top:9px;font-size:.8rem;line-height:1.6;color:#4b5563;position:relative;min-height:82px;padding-right:92px}
 .animal-photo{position:absolute;right:0;top:22px;width:78px;height:78px;min-width:78px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#e8f5e9,#d7eee0);border:2px solid #c8dfcc;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 7px rgba(27,94,32,.12);z-index:1}
 .animal-photo img{width:100%;height:100%;display:block;object-fit:cover;cursor:zoom-in}
+.animal-photo.male-card-photo{top:7px}
 .animal-photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:5px;color:var(--verde2);font-size:.58rem;font-weight:900;line-height:1.2}
 .animal-photo-placeholder.no-photo{color:#78909c}
 .photo-editor{background:#f5faf6;border:1px solid #d9e9dc;border-radius:13px;padding:12px;margin:8px 0 13px}
@@ -127,7 +128,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 .photo-lightbox-content img{display:block;max-width:94vw;max-height:88vh;width:auto;height:auto;object-fit:contain;border-radius:12px;box-shadow:0 12px 45px rgba(0,0,0,.45)}
 .photo-lightbox-close{position:fixed;top:14px;right:14px;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:1.35rem;font-weight:900;z-index:1}
 .photo-lightbox-caption{position:fixed;left:18px;right:18px;bottom:14px;text-align:center;color:#fff;font-size:.78rem;font-weight:800;text-shadow:0 1px 3px #000}
-@media(max-width:480px){.animal-info{padding-right:88px}.animal-photo{width:74px;height:74px;min-width:74px;top:18px}.photo-editor-preview{width:90px;height:90px;min-width:90px}.photo-lightbox{padding:10px}}
+@media(max-width:480px){.animal-info{padding-right:88px}.animal-photo{width:74px;height:74px;min-width:74px;top:18px}.animal-photo.male-card-photo{top:3px}.photo-editor-preview{width:90px;height:90px;min-width:90px}.photo-lightbox{padding:10px}}
 
 
 /* =========================
@@ -173,11 +174,12 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 .repro-form{background:#f5faf6;border:1px solid #d9e9dc;border-radius:12px;padding:12px;margin-top:12px}
 .repro-sex{display:flex;gap:8px;margin-bottom:12px}.repro-sex label{flex:1;border:1px solid var(--borda);border-radius:10px;padding:10px;text-align:center;background:#fff}
 .repro-sex input{width:auto;margin:0 5px 0 0}
+.male-reproducer-badge{background:#ef8b00;color:#fff;padding:4px 8px;border-radius:7px;font-size:.65rem;font-weight:900}
 </style>
 </head>
 <body>
 <header class="header">
-  <button class="brand" onclick="navigate('home')"><strong>GESTÃO REBANHO PRO</strong><small>Gestão simples do seu rebanho V9</small></button>
+  <button class="brand" onclick="navigate('home')"><strong>GESTÃO REBANHO PRO</strong><small>Gestão simples do seu rebanho V9.1</small></button>
   <button class="icon-btn" onclick="navigate('manual')">📖 MANUAL</button>
   <button class="icon-btn" id="installAppBtn" type="button" onclick="installApp()" style="display:none">📲 INSTALAR</button>
   <button class="icon-btn" onclick="navigate('config')">⚙️</button>
@@ -203,6 +205,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
     <div class="stat"><span class="value" id="kpiLactation">0 / 0</span><span class="label">Lactação / Rebanho</span></div>
     <div class="stat"><span class="value" id="kpiDEL">0 dias</span><span class="label">DEL Médio</span></div>
     <div class="stat"><span class="value" id="kpiHeifers">0</span><span class="label">Novilhas</span></div>
+    <div class="stat"><span class="value" id="kpiPregnancyRate">—</span><span class="label">Taxa média de prenhez</span></div>
+    <div class="stat"><span class="value" id="kpiMales">0</span><span class="label">Machos</span></div>
     <div class="stat"><span class="value" id="kpiFeed">—</span><span class="label">Ração recomendada hoje</span></div>
     <div class="stat"><span class="value" id="kpiMilkCost">—</span><span class="label">Custo do leite<br><span style="font-size:.58rem;font-weight:700;text-transform:none">Últimos 90 dias</span></span></div>
   </div>
@@ -213,6 +217,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
     <button class="menu-btn m-blue" onclick="navigate('entregas')">🚚 ENTREGAS</button>
     <button class="menu-btn m-cyan" onclick="navigate('agenda')">📅 AGENDA</button>
     <button class="menu-btn m-orange" onclick="navigate('novilhas')">🐮 NOVILHAS</button>
+    <button class="menu-btn m-dark" onclick="navigate('machos')">🐂 MACHOS</button>
     <button class="menu-btn m-blue" onclick="navigate('retrospectiva')">📊 RETROSPECTIVA DO REBANHO</button>
     <button class="menu-btn m-gray" onclick="navigate('backup')">💾 BACKUP</button>
     <button class="menu-btn m-green" onclick="navigate('financeiro')">💰 FINANCEIRO</button>
@@ -264,8 +269,10 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
       <label><input type="radio" name="cowCalfSex" value="novilha"> 🐮 Novilha</label>
       <label><input type="radio" name="cowCalfSex" value="boi"> 🐂 Boi</label>
     </div>
-    <label><input type="checkbox" id="registerHeifer" style="width:auto;margin:0 5px 0 0"> Registrar a fêmea deste parto como novilha</label>
+    <div id="heiferRegisterWrap" class="hidden"><label><input type="checkbox" id="registerHeifer" style="width:auto;margin:0 5px 0 0"> Registrar a fêmea deste parto como novilha</label></div>
     <div id="heiferNameWrap" class="hidden"><label>Nome / Brinco da novilha</label><input id="heiferName" maxlength="60"><label>Pai da novilha (opcional)</label><input id="heiferFather" maxlength="60" placeholder="Nome do pai / sêmen"><div class="small muted" style="margin-top:4px">Se houver reprodutor informado na inseminação desta vaca, ele será preenchido automaticamente e poderá ser editado.</div></div>
+    <div id="maleRegisterWrap" class="hidden"><label><input type="checkbox" id="registerMale" style="width:auto;margin:0 5px 0 0"> Registrar o macho deste parto no Rebanho de Machos</label></div>
+    <div id="maleNameWrap" class="hidden"><label>Nome / Brinco do macho</label><input id="maleName" maxlength="60"><label>Pai / Reprodutor (opcional)</label><input id="maleFather" maxlength="60" placeholder="Nome / identificação do reprodutor"><div class="small muted" style="margin-top:4px">Você pode desmarcar para registrar somente o histórico do parto, sem criar um macho no rebanho.</div></div>
   </div>
   <button id="saveCowBtn" class="btn btn-green btn-block" onclick="saveCow()">💾 SALVAR NO REBANHO</button>
   <button class="btn btn-red btn-block hidden" id="deleteCowBtn" onclick="deleteCow()">🗑️ EXCLUIR ANIMAL</button>
@@ -319,6 +326,16 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <button class="btn btn-blue btn-block" onclick="openHeiferBatchModal()">➕ CADASTRAR NOVA REMESSA</button>
 </div>
 <div id="heiferList"></div>
+</section>
+
+<section id="screen_machos" class="screen">
+<button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
+<div class="card">
+ <h2>🐂 Rebanho de Machos</h2>
+ <p class="small">Cadastre e acompanhe os machos nascidos ou cadastrados na propriedade. Reprodutores/touros ficam priorizados no início da lista.</p>
+ <button class="btn btn-green btn-block" onclick="openNewMaleModal()">➕ CADASTRAR MACHO</button>
+</div>
+<div id="maleList"></div>
 </section>
 
 <section id="screen_retrospectiva" class="screen">
@@ -412,12 +429,12 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
 <section id="screen_manual" class="screen">
 <button class="btn btn-light back" onclick="navigate('home')">↩️ VOLTAR</button>
 <div class="card">
- <h2 style="color:var(--topo)">📖 Manual de Utilização — V9</h2>
+ <h2 style="color:var(--topo)">📖 Manual de Utilização — V9.1</h2>
  <p><b>Idealizado por:</b> Luan Ferreira</p><p><b>Instagram:</b> @luan122006</p><p><b>WhatsApp:</b> 42 9850-8930</p>
  <div class="notice"><b>Como usar este manual:</b> este guia foi feito para o produtor rural. Você não precisa entender de informática para usar o aplicativo. Cadastre os animais, registre a produção e as entregas e mantenha os gastos atualizados. O sistema usa esses registros para montar os indicadores, avisos, gráficos e cálculos automaticamente.</div>
 
  <h3>🏠 DASHBOARD</h3>
- <p>O Dashboard é a tela inicial. Ele reúne oito indicadores para você ter uma visão rápida do que está acontecendo no rebanho e na atividade leiteira. Os números não são preenchidos manualmente: eles são calculados a partir dos dados cadastrados nas áreas Produção, Rebanho, Entregas, Novilhas, Financeiro e Configurações.</p>
+ <p>O Dashboard é a tela inicial. Ele reúne dez indicadores para você ter uma visão rápida do que está acontecendo no rebanho e na atividade leiteira. Os números não são preenchidos manualmente: eles são calculados a partir dos dados cadastrados nas áreas Produção, Rebanho, Entregas, Novilhas, Financeiro e Configurações.</p>
 
  <h4>1. 🥛 Hoje (Ordenha)</h4>
  <p><b>O que é:</b> é o total de leite registrado na produção de hoje.</p>
@@ -471,7 +488,16 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <p><b>Para funcionar:</b> cadastre as novilhas e mantenha seus registros atualizados.</p>
  <p><b>Quando aparecer 0:</b> não há novilhas cadastradas no módulo.</p>
 
- <h4>7. 🌾 Ração recomendada hoje</h4>
+ <h4>7. 📊 Taxa média de prenhez</h4>
+ <p><b>O que é:</b> é a média das taxas individuais de prenhez calculáveis das vacas.</p>
+ <p><b>Como calcula:</b> usa somente taxas individuais válidas. Inseminações pendentes não são consideradas negativas e uma vaca sem taxa calculável não entra como 0%.</p>
+ <p><b>Quando aparecer —:</b> nenhuma vaca possui taxa individual calculável.</p>
+
+ <h4>8. 🐂 Machos</h4>
+ <p><b>O que é:</b> é a quantidade de machos cadastrados no Rebanho de Machos.</p>
+ <p><b>Como funciona:</b> o indicador conta somente registros reais de machos. Uma cria macho registrada apenas no histórico de parto não entra no contador.</p>
+
+ <h4>9. 🌾 Ração recomendada hoje</h4>
  <p><b>O que é:</b> é uma recomendação de quantidade de ração baseada na proporção de litros de leite por quilo de ração configurada pelo produtor.</p>
  <p><b>De onde vem:</b> da configuração <b>Litros de leite para 1 kg de ração</b> e da última produção registrada <b>antes de hoje</b>.</p>
  <p><b>Como calcula:</b> <b>ração recomendada (kg) = litros da última produção anterior a hoje ÷ litros por kg configurados</b>.</p>
@@ -481,7 +507,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  <p><b>Para funcionar:</b> é necessário configurar uma proporção válida e possuir alguma produção anterior a hoje.</p>
  <p><b>Quando aparecer —:</b> a proporção não foi configurada. Quando estiver configurada, mas não houver produção anterior válida, o aplicativo informa que não há produção anterior disponível.</p>
 
- <h4>8. 💰 CUSTO DO LEITE</h4>
+ <h4>10. 💰 CUSTO DO LEITE</h4>
  <p><b>O que é:</b> é o custo médio estimado por litro de leite produzido/entregue para o período móvel dos últimos 90 dias, usando os gastos marcados como destinados à produção de leite e os litros registrados nas Entregas.</p>
  <p><b>Período:</b> o aplicativo considera hoje e os 89 dias anteriores, formando uma janela de <b>90 dias</b>.</p>
  <p><b>Entram:</b> somente despesas marcadas como <b>SIM</b> na pergunta “Esse gasto é para produzir leite?”. Se forem de vários meses, o valor é distribuído pelos dias do período informado.</p>
@@ -779,6 +805,10 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
     <label>🐂 Pai / Reprodutor da cria</label><input id="heiferCalfFather" maxlength="60" placeholder="Nome / identificação do reprodutor">
     <div class="small">O pai será preenchido automaticamente pelo reprodutor da inseminação correspondente, quando houver, mas pode ser alterado.</div>
    </div>
+   <div id="heiferCalfMaleFields" class="hidden">
+    <div id="heiferCalfMaleRegisterWrap" class="hidden"><label><input type="checkbox" id="registerHeiferCalfMale" style="width:auto;margin:0 5px 0 0"> Registrar o macho desta cria no Rebanho de Machos</label></div>
+    <div id="heiferCalfMaleNameWrap" class="hidden"><label>Nome / Brinco do macho</label><input id="heiferCalfMaleName" maxlength="60"><label>Pai / Reprodutor (opcional)</label><input id="heiferCalfMaleFather" maxlength="60" placeholder="Nome / identificação do reprodutor"></div>
+   </div>
    <div class="row"><button class="btn btn-light" onclick="closeCalfParturitionModal()">CANCELAR</button><button class="btn btn-green" onclick="saveCalfParturition()">SALVAR</button></div>
   </div>
  </div>
@@ -792,9 +822,36 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
  </div>
 </div>
 
+<div id="duplicateAnimalModal" class="modal" style="align-items:center;padding:18px;z-index:6000">
+ <div class="modal-box" style="border-radius:18px;max-width:560px">
+  <h2>⚠️ Animal com identificação semelhante</h2>
+  <p id="duplicateAnimalMessage" style="font-size:.86rem;line-height:1.55"></p>
+  <div class="row" style="margin-top:12px"><button class="btn btn-light" onclick="resolveDuplicateAnimal(false)">NÃO, VOLTAR</button><button class="btn btn-green" onclick="resolveDuplicateAnimal(true)">SIM, CONTINUAR</button></div>
+ </div>
+</div>
+
+<div id="maleModal" class="modal" onclick="if(event.target===this)closeMaleModal()">
+ <div class="modal-box">
+  <h2 id="maleModalTitle">Novo macho</h2>
+  <input type="hidden" id="maleEditId">
+  <label>Nome / Brinco</label><input id="maleNameModal" maxlength="60">
+  <div class="photo-editor" id="malePhotoEditor">
+   <div class="photo-editor-head"><div class="photo-editor-preview" id="malePhotoPreview"><div class="animal-photo-placeholder no-photo">📷<br>Sem foto</div></div><div class="photo-editor-copy"><strong>📷 Foto do macho</strong><span class="small">A foto fica salva na nuvem e aparece no cartão quando houver internet.</span></div></div>
+   <label class="photo-file-label">📷 ESCOLHER FOTO<input id="malePhotoInput" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleCowPhotoSelection('male',this.files[0])"></label>
+   <div class="photo-editor-actions"><button type="button" class="btn btn-light hidden" id="malePhotoRemoveBtn" onclick="requestRemoveAnimalPhoto('male')">🗑️ EXCLUIR FOTO</button></div>
+   <div id="malePhotoStatus" class="small photo-status"></div>
+  </div>
+  <div class="row"><div><label>Data de nascimento</label><input type="date" id="maleBirth"></div><div><label>É reprodutor / touro?</label><select id="maleReproducer"><option value="nao">Não</option><option value="sim">Sim</option></select></div></div>
+  <div class="row"><div><label>Pai (opcional)</label><input id="maleFatherModal" maxlength="60"></div><div><label>Mãe (opcional)</label><input id="maleMotherModal" maxlength="60"></div></div>
+  <button class="btn btn-green btn-block" id="saveMaleBtn" onclick="saveMale()">💾 SALVAR MACHO</button>
+  <button class="btn btn-red btn-block hidden" id="deleteMaleBtn" onclick="deleteMale()">🗑️ EXCLUIR MACHO</button>
+  <button class="btn btn-light btn-block" onclick="closeMaleModal()">CANCELAR</button>
+ </div>
+</div>
+
 <div id="genealogyModal" class="modal" onclick="if(event.target===this)closeGenealogyModal()">
  <div class="modal-box">
-  <h2>🌳 Linhagem materna</h2>
+  <h2>🌳 Linhagem do animal</h2>
   <div id="genealogyContent"></div>
   <div id="genealogyEditForm" class="hidden">
    <div class="card" style="margin-top:10px">
@@ -849,7 +906,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 6px;border-bottom:1p
    ========================= */
 const DB_KEY='gestao_rebanho_pro_db_v1';
 const LEGACY_DB_KEYS=['rebanho_leiteiro_db_v2'];
-const APP_VERSION='9';
+const APP_VERSION='9.1';
 const LOCAL_ACCOUNT_KEY='gestao_rebanho_local_account_v1';
 const ACCOUNT_SWITCH_KEY='gestao_rebanho_account_switch_v1';
 let currentUserIsOfflineCached=false;
@@ -888,17 +945,21 @@ let cowPhotoPreviewUrl=null;
 let heiferPhotoPendingFile=null;
 let heiferPhotoRemoveRequested=false;
 let heiferPhotoPreviewUrl=null;
+let malePhotoPendingFile=null;
+let malePhotoRemoveRequested=false;
+let malePhotoPreviewUrl=null;
 
 
-function photoState(type){return type==='cow'?{input:'cowPhotoInput',preview:'cowPhotoPreview',remove:'cowPhotoRemoveBtn',status:'cowPhotoStatus',pendingKey:'cowPhotoPendingFile',removeKey:'cowPhotoRemoveRequested',previewKey:'cowPhotoPreviewUrl'}:{input:'heiferPhotoInput',preview:'heiferPhotoPreview',remove:'heiferPhotoRemoveBtn',status:'heiferPhotoStatus',pendingKey:'heiferPhotoPendingFile',removeKey:'heiferPhotoRemoveRequested',previewKey:'heiferPhotoPreviewUrl'};}
+function photoState(type){if(type==='cow')return {input:'cowPhotoInput',preview:'cowPhotoPreview',remove:'cowPhotoRemoveBtn',status:'cowPhotoStatus',pendingKey:'cowPhotoPendingFile',removeKey:'cowPhotoRemoveRequested',previewKey:'cowPhotoPreviewUrl'};if(type==='heifer')return {input:'heiferPhotoInput',preview:'heiferPhotoPreview',remove:'heiferPhotoRemoveBtn',status:'heiferPhotoStatus',pendingKey:'heiferPhotoPendingFile',removeKey:'heiferPhotoRemoveRequested',previewKey:'heiferPhotoPreviewUrl'};return {input:'malePhotoInput',preview:'malePhotoPreview',remove:'malePhotoRemoveBtn',status:'malePhotoStatus',pendingKey:'malePhotoPendingFile',removeKey:'malePhotoRemoveRequested',previewKey:'malePhotoPreviewUrl'};}
 function setPhotoStatus(type,msg,kind=''){const st=photoState(type),el=document.getElementById(st.status);if(!el)return;el.textContent=msg||'';el.className='small photo-status'+(kind?' '+kind:'');}
 function clearPhotoPreviewUrl(type){const st=photoState(type),url=window[st.previewKey];if(url)URL.revokeObjectURL(url);window[st.previewKey]=null;}
 function photoFileIsValid(file){if(!file)return false;if(!/^image\/(jpeg|png|webp)$/i.test(file.type))return alert('Escolha uma foto JPG, PNG ou WEBP.'),false;if(file.size>PHOTO_SOURCE_MAX_BYTES)return alert('A foto original pode ter no máximo 15 MB.'),false;return true;}
 function setPhotoImage(box,url,alt,lightboxName){if(!box)return;box.innerHTML='';const img=document.createElement('img');img.src=url;img.alt=alt||'Foto do animal';img.loading='lazy';img.decoding='async';img.addEventListener('error',()=>{box.innerHTML='<div class="animal-photo-placeholder">⚠️<br>Não foi possível carregar</div>';});img.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPhotoLightbox(url,lightboxName||alt||'Foto do animal')});box.appendChild(img);}
 async function signedPhotoUrl(path){if(!path)throw new Error('Foto sem caminho.');if(!supabaseClient||!currentUser)throw new Error('Sem sessão para visualizar a foto.');const {data,error}=await supabaseClient.storage.from(COW_PHOTO_BUCKET).createSignedUrl(path,3600);if(error||!data?.signedUrl)throw error||new Error('Não foi possível gerar o endereço temporário da foto.');return data.signedUrl;}
-async function renderAnimalPhotoCard(type,animal){const id=animal?.id;const prefix=type==='cow'?'cow':'heifer';const box=document.getElementById(`${prefix}-photo-card-${id}`);if(!box)return;if(!animal?.fotoPath){box.innerHTML='<div class="animal-photo-placeholder no-photo">📷<br>Sem foto</div>';return;}if(!navigator.onLine){box.innerHTML='<div class="animal-photo-placeholder">☁️<br>Foto salva<br>disponível online</div>';return;}box.innerHTML='<div class="animal-photo-placeholder">⏳<br>Carregando</div>';try{const url=await signedPhotoUrl(animal.fotoPath);const currentBox=document.getElementById(`${prefix}-photo-card-${id}`);if(!currentBox)return;setPhotoImage(currentBox,url,`Foto de ${animal.nome||'animal'}`,animal.nome||'Foto do animal');}catch(e){console.warn('Falha ao gerar/carregar foto do animal:',{id,path:animal.fotoPath,error:e});const currentBox=document.getElementById(`${prefix}-photo-card-${id}`);if(currentBox)currentBox.innerHTML='<div class="animal-photo-placeholder">⚠️<br>Foto indisponível</div>';}}
+async function renderAnimalPhotoCard(type,animal){const id=animal?.id;const prefix=type==='cow'?'cow':type==='heifer'?'heifer':'male';const box=document.getElementById(`${prefix}-photo-card-${id}`);if(!box)return;if(!animal?.fotoPath){box.innerHTML='<div class="animal-photo-placeholder no-photo">📷<br>Sem foto</div>';return;}if(!navigator.onLine){box.innerHTML='<div class="animal-photo-placeholder">☁️<br>Foto salva<br>disponível online</div>';return;}box.innerHTML='<div class="animal-photo-placeholder">⏳<br>Carregando</div>';try{const url=await signedPhotoUrl(animal.fotoPath);const currentBox=document.getElementById(`${prefix}-photo-card-${id}`);if(!currentBox)return;setPhotoImage(currentBox,url,`Foto de ${animal.nome||'animal'}`,animal.nome||'Foto do animal');}catch(e){console.warn('Falha ao gerar/carregar foto do animal:',{id,path:animal.fotoPath,error:e});const currentBox=document.getElementById(`${prefix}-photo-card-${id}`);if(currentBox)currentBox.innerHTML='<div class="animal-photo-placeholder">⚠️<br>Foto indisponível</div>';}}
 function renderCowCardPhoto(v){return renderAnimalPhotoCard('cow',v);}
 function renderHeiferCardPhoto(h){return renderAnimalPhotoCard('heifer',h);}
+function renderMaleCardPhoto(m){return renderAnimalPhotoCard('male',m);}
 async function renderAnimalPhotoEditor(type,animal){const st=photoState(type),box=document.getElementById(st.preview);if(!box)return;clearPhotoPreviewUrl(type);const pending=window[st.pendingKey];if(pending){const url=URL.createObjectURL(pending);window[st.previewKey]=url;setPhotoImage(box,url,`Nova foto de ${animal?.nome||'animal'}`,animal?.nome||'Foto do animal');document.getElementById(st.remove).classList.remove('hidden');return;}if(!animal?.fotoPath){box.innerHTML='<div class="animal-photo-placeholder no-photo">📷<br>Sem foto</div>';document.getElementById(st.remove).classList.add('hidden');return;}if(!navigator.onLine){box.innerHTML='<div class="animal-photo-placeholder">☁️<br>Foto salva<br>disponível online</div>';document.getElementById(st.remove).classList.remove('hidden');return;}try{const url=await signedPhotoUrl(animal.fotoPath);setPhotoImage(box,url,`Foto de ${animal.nome||'animal'}`,animal.nome||'Foto do animal');document.getElementById(st.remove).classList.remove('hidden');}catch(e){console.warn('Falha ao carregar foto do editor:',e);box.innerHTML='<div class="animal-photo-placeholder">⚠️<br>Foto indisponível</div>';document.getElementById(st.remove).classList.remove('hidden');}}
 function resetAnimalPhotoState(type){const st=photoState(type);clearPhotoPreviewUrl(type);window[st.pendingKey]=null;window[st.removeKey]=false;const input=document.getElementById(st.input);if(input)input.value='';const btn=document.getElementById(st.remove);if(btn)btn.classList.add('hidden');setPhotoStatus(type,'');const box=document.getElementById(st.preview);if(box)box.innerHTML='<div class="animal-photo-placeholder no-photo">📷<br>Sem foto</div>';}
 function requestRemoveAnimalPhoto(type){const st=photoState(type);window[st.removeKey]=true;window[st.pendingKey]=null;clearPhotoPreviewUrl(type);const input=document.getElementById(st.input);if(input)input.value='';const box=document.getElementById(st.preview);if(box)box.innerHTML='<div class="animal-photo-placeholder no-photo">📷<br>Foto será excluída ao salvar</div>';setPhotoStatus(type,'A foto será excluída quando você salvar o animal.','danger-text');}
@@ -979,6 +1040,7 @@ function hasLocalData(data=db){
  return !!(
   (Array.isArray(data.vacas)&&data.vacas.length)||
   (Array.isArray(data.novilhas)&&data.novilhas.length)||
+  (Array.isArray(data.machos)&&data.machos.length)||
   hasObjectEntries(data.producao)||
   Object.values(data.entregas||{}).some(hasMeaningfulDelivery)||
   (Array.isArray(data.agenda)&&data.agenda.length)||
@@ -1170,6 +1232,7 @@ function mergeThreeWayDB(base,local,cloud){
  const merged=normalizeDB(cloneData(l));
  merged.vacas=mergeArrayThreeWay(b.vacas,l.vacas,c.vacas);
  merged.novilhas=mergeArrayThreeWay(b.novilhas,l.novilhas,c.novilhas);
+ merged.machos=mergeArrayThreeWay(b.machos,l.machos,c.machos);
  merged.agenda=mergeArrayThreeWay(b.agenda,l.agenda,c.agenda);
  merged.producao=mergeMapThreeWay(b.producao,l.producao,c.producao);
  merged.entregas=mergeMapThreeWay(b.entregas,l.entregas,c.entregas);
@@ -1202,6 +1265,7 @@ function mergeDB(localData,cloudData){
  if(!cloudData||typeof cloudData!=='object')return merged;
  merged.vacas=mergeById(localData.vacas,cloudData.vacas);
  merged.novilhas=mergeById(localData.novilhas,cloudData.novilhas);
+ merged.machos=mergeById(localData.machos,cloudData.machos);
  merged.agenda=mergeById(localData.agenda,cloudData.agenda);
  merged.producao={...(cloudData.producao||{}),...(localData.producao||{})};
  merged.entregas={...(cloudData.entregas||{}),...(localData.entregas||{})};
@@ -1461,6 +1525,7 @@ function defaultDB(){
   entregas:{},
   agenda:[],
   novilhas:[],
+  machos:[],
   financeiro:{},
   configuracoes:{
    secagem:{meses:7,dias:15},
@@ -1499,6 +1564,8 @@ function normalizeDB(raw){
   ensureCowReproductiveHistory(v);
  });
  n.novilhas=Array.isArray(raw.novilhas)?raw.novilhas:[];
+ n.machos=Array.isArray(raw.machos)?raw.machos:[];
+ n.machos.forEach(m=>{if(!Object.prototype.hasOwnProperty.call(m,'pai'))m.pai='';if(!Object.prototype.hasOwnProperty.call(m,'mae'))m.mae='';if(!Object.prototype.hasOwnProperty.call(m,'reprodutor'))m.reprodutor=false;if(!Object.prototype.hasOwnProperty.call(m,'fotoPath'))m.fotoPath='';});
  n.novilhas.forEach(h=>{
   if(!Object.prototype.hasOwnProperty.call(h,'pai'))h.pai='';
   if(!Object.prototype.hasOwnProperty.call(h,'mae'))h.mae='';
@@ -1724,6 +1791,7 @@ function navigate(screen){
  if(screen==='entregas')renderDeliveries();
  if(screen==='agenda')renderAgenda();
  if(screen==='novilhas')renderHeifers();
+ if(screen==='machos')renderMales();
  if(screen==='config')renderConfig();
  if(screen==='backup')renderBackup();
  if(screen==='retrospectiva')renderRetrospectiva();
@@ -1760,6 +1828,11 @@ function getBatchDate(dateEl,manualEl,label,allowBlank=true){if(!manualEl.classL
 /* =========================
    DASHBOARD / ALERTAS
    ========================= */
+function averagePregnancyRate(){
+ const rates=db.vacas.map(v=>pregnancyRate(v)).filter(r=>r&&Number.isFinite(r.rate));
+ if(!rates.length)return null;
+ return rates.reduce((sum,r)=>sum+r.rate,0)/rates.length;
+}
 function renderHome(){
  const today=isoToday(), month=today.slice(0,7);
  const p=db.producao[today];const todayTotal=productionTotal(p);
@@ -1774,6 +1847,8 @@ function renderHome(){
  const delAvg=delValues.length?Math.round(delValues.reduce((sum,d)=>sum+d,0)/delValues.length):0;
  document.getElementById('kpiDEL').textContent=delValues.length?`${delAvg} dias`:'—';
  document.getElementById('kpiHeifers').textContent=String(db.novilhas.length);
+ const pregnancyAvg=averagePregnancyRate();document.getElementById('kpiPregnancyRate').textContent=pregnancyAvg===null?'—':fmtNumber(pregnancyAvg)+'%';
+ document.getElementById('kpiMales').textContent=String(db.machos.length);
  const feed=getFeedRecommendation();
  document.getElementById('kpiFeed').textContent=feed.configured&&feed.hasProduction?fmtNumber(feed.total)+' kg':(feed.configured?'Sem produção anterior':'Configure nas configurações');
  const cost=calculateMilkCost90Days();document.getElementById('kpiMilkCost').textContent=cost?money(cost)+'/L':'—';
@@ -2057,10 +2132,10 @@ function openNewCowForm(){
 }
 function resetCowForm(){
  resetAnimalPhotoState('cow');
- document.getElementById('cowFormTitle').textContent='Cadastrar animal';['cowEditId','cowName','cowCalving','cowInsemination','cowCalvingManual','cowInseminationManual','cowFather','cowMother','cowReproducer','heiferName','heiferFather'].forEach(id=>document.getElementById(id).value='');setDateMode('cowCalving','cowCalvingManual','calendar');setDateMode('cowInsemination','cowInseminationManual','calendar');
+ document.getElementById('cowFormTitle').textContent='Cadastrar animal';['cowEditId','cowName','cowCalving','cowInsemination','cowCalvingManual','cowInseminationManual','cowFather','cowMother','cowReproducer','heiferName','heiferFather','maleName','maleFather'].forEach(id=>document.getElementById(id).value='');setDateMode('cowCalving','cowCalvingManual','calendar');setDateMode('cowInsemination','cowInseminationManual','calendar');
  document.getElementById('cowStatus').value='lactacao';document.querySelectorAll('input[name="cowCalfSex"]').forEach(r=>r.checked=false);document.getElementById('deleteCowBtn').classList.add('hidden');document.getElementById('cancelCowBtn').classList.add('hidden');
  document.getElementById('cowRegistrationForm').classList.add('hidden');document.getElementById('cowReproducerWrap').classList.add('hidden');
- document.getElementById('heiferFields').classList.add('hidden');document.getElementById('registerHeifer').checked=false;document.getElementById('heiferNameWrap').classList.add('hidden');
+ document.getElementById('heiferFields').classList.add('hidden');document.getElementById('registerHeifer').checked=false;document.getElementById('heiferRegisterWrap').classList.add('hidden');document.getElementById('heiferNameWrap').classList.add('hidden');document.getElementById('registerMale').checked=false;document.getElementById('maleRegisterWrap').classList.add('hidden');document.getElementById('maleNameWrap').classList.add('hidden');
  renderCowList();
 }
 function updateCowHeiferFields(){
@@ -2081,11 +2156,27 @@ function updateCowReproducerField(){
 }
 function syncCowCalfSexSelection(){
  const sex=document.querySelector('input[name="cowCalfSex"]:checked')?.value||'';
- const register=document.getElementById('registerHeifer'),wrap=document.getElementById('heiferNameWrap');
+ const register=document.getElementById('registerHeifer'),wrap=document.getElementById('heiferNameWrap'),registerWrap=document.getElementById('heiferRegisterWrap');
+ const maleRegister=document.getElementById('registerMale'),maleRegisterWrap=document.getElementById('maleRegisterWrap'),maleWrap=document.getElementById('maleNameWrap');
  if(!register||!wrap)return;
+ if(registerWrap)registerWrap.classList.toggle('hidden',sex!=='novilha');
  if(sex==='novilha')register.checked=true;
  if(sex==='boi')register.checked=false;
- wrap.classList.toggle('hidden',!register.checked);
+ wrap.classList.toggle('hidden',sex!=='novilha'||!register.checked);
+ if(maleRegister&&maleRegisterWrap&&maleWrap){
+   maleRegisterWrap.classList.toggle('hidden',sex!=='boi');
+   if(sex==='boi'){
+     maleRegister.checked=true;
+     const oldId=Number(document.getElementById('cowEditId')?.value||0);
+     const old=oldId?db.vacas.find(v=>Number(v.id)===oldId):null;
+     const date=document.getElementById('cowCalving')?.value||getFlexibleDate('cowCalving','cowCalvingManual','Último parto')||'';
+     const repro=reproducerForPregnancy(old||{historicoReprodutivo:newReproductiveHistory(),inseminacao:document.getElementById('cowInsemination')?.value||'',reprodutor:document.getElementById('cowReproducer')?.value||''},date)||document.getElementById('cowReproducer')?.value.trim()||'';
+     const father=document.getElementById('maleFather');
+     if(father&&!father.value&&repro)father.value=repro;
+   }
+   if(sex!=='boi')maleRegister.checked=false;
+   maleWrap.classList.toggle('hidden',sex!=='boi'||!maleRegister.checked);
+ }
 }
 function loadCowCalfSexForEdit(v){
  const radios=document.querySelectorAll('input[name="cowCalfSex"]');radios.forEach(r=>r.checked=false);
@@ -2095,10 +2186,11 @@ function loadCowCalfSexForEdit(v){
  const entry=v.historicoReprodutivo.partos.find(x=>String(x.data||'')===String(v.parto||''));
  const sex=entry?.sexoCria||'';
  if(sex){const radio=document.querySelector(`input[name="cowCalfSex"][value="${sex}"]`);if(radio)radio.checked=true;}
- if(entry?.identificacaoCria){const name=document.getElementById('heiferName');if(name)name.value=entry.identificacaoCria;}const father=document.getElementById('heiferFather');if(father)father.value=entry?.reprodutor||reproducerForPregnancy(v,v.parto)||'';
+ if(entry?.identificacaoCria){const name=document.getElementById('heiferName');if(name)name.value=entry.identificacaoCria;const maleName=document.getElementById('maleName');if(maleName)maleName.value=entry.identificacaoCria;}const father=document.getElementById('heiferFather');if(father)father.value=entry?.reprodutor||reproducerForPregnancy(v,v.parto)||'';const maleFather=document.getElementById('maleFather');if(maleFather)maleFather.value=entry?.reprodutor||reproducerForPregnancy(v,v.parto)||'';syncCowCalfSexSelection();
 }
 document.querySelectorAll('input[name="cowCalfSex"]').forEach(r=>r.addEventListener('change',syncCowCalfSexSelection));
-document.getElementById('registerHeifer').addEventListener('change',()=>document.getElementById('heiferNameWrap').classList.toggle('hidden',!document.getElementById('registerHeifer').checked));
+document.getElementById('registerHeifer').addEventListener('change',()=>{const sex=document.querySelector('input[name="cowCalfSex"]:checked')?.value||'';document.getElementById('heiferNameWrap').classList.toggle('hidden',sex!=='novilha'||!document.getElementById('registerHeifer').checked);});
+document.getElementById('registerMale').addEventListener('change',()=>document.getElementById('maleNameWrap').classList.toggle('hidden',!document.getElementById('registerMale').checked));
 document.getElementById('cowCalving').addEventListener('change',updateCowHeiferFields);
 document.getElementById('cowCalvingManual').addEventListener('input',updateCowHeiferFields);
 document.getElementById('cowCalvingManual').addEventListener('blur',updateCowHeiferFields);
@@ -2119,6 +2211,13 @@ function freezeMissingHistoricalDivisors(beforeDate){
   }
  });
 }
+function normalizeAnimalIdentifier(value){return String(value||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('pt-BR');}
+function duplicateAnimalMessage(){return 'Já existe um animal com o mesmo nome ou brinco no seu rebanho. Se forem animais diferentes, recomendamos alterar algum dado de identificação ou adicionar uma foto para facilitar o reconhecimento. O aplicativo utiliza um ID interno para separar os registros, mas esse ID não aparece no cartão do animal. Deseja cadastrar mesmo assim?';}
+function hasDuplicateAnimalIdentifier(name,excludeId=null,extra=[]){const target=normalizeAnimalIdentifier(name);if(!target)return false;const all=[...db.vacas,...db.novilhas,...db.machos,...extra];return all.some(a=>Number(a.id)!==Number(excludeId)&&normalizeAnimalIdentifier(a.nome)===target);}
+let duplicateAnimalResolver=null;
+function confirmAnimalIdentifier(name,excludeId=null,extra=[]){if(!hasDuplicateAnimalIdentifier(name,excludeId,extra))return Promise.resolve(true);const modal=document.getElementById('duplicateAnimalModal'),msg=document.getElementById('duplicateAnimalMessage');if(!modal||!msg)return Promise.resolve(confirm(duplicateAnimalMessage()));msg.textContent=duplicateAnimalMessage();modal.classList.add('open');return new Promise(resolve=>{duplicateAnimalResolver=resolve;});}
+function resolveDuplicateAnimal(continueAnyway){const modal=document.getElementById('duplicateAnimalModal');if(modal)modal.classList.remove('open');const resolve=duplicateAnimalResolver;duplicateAnimalResolver=null;if(resolve)resolve(!!continueAnyway);}
+
 function findAnimalByName(name){
  const n=String(name||'').trim().toLowerCase();
  if(!n)return null;
@@ -2134,9 +2233,10 @@ function maternalLineageFor(name, fallbackGrandmother='', fallbackGrandfather=''
  };
 }
 function openGenealogy(id,type){
- const list=type==='cow'?db.vacas:db.novilhas; const a=list.find(x=>x.id===id); if(!a)return;
+ const list=type==='cow'?db.vacas:type==='heifer'?db.novilhas:db.machos; const a=list.find(x=>x.id===id); if(!a)return;
  window.__genealogyRef={id,type};
  const line=maternalLineageFor(a.mae,a.avoMaterna,a.avoMaterno,a.bisavoMaterna,a.bisavoMaterno);
+ if(type==='male'){document.getElementById('genealogyContent').innerHTML=`<div class="card"><h3 style="margin-top:0">🐂 ${escapeHTML(a.nome||'Macho')}</h3><div class="kpi-line"><b>Pai</b><span>${escapeHTML(a.pai||'Não informado')}</span></div><div class="kpi-line"><b>Mãe</b><span>${escapeHTML(a.mae||'Não informado')}</span></div></div>`;document.getElementById('genealogyEditForm').classList.add('hidden');document.getElementById('genealogyEditBtn').classList.add('hidden');document.getElementById('genealogyModal').classList.add('open');return;}
  document.getElementById('genealogyContent').innerHTML=`<div class="card" style="margin-bottom:10px"><h3 style="margin-top:0">🐄 ${escapeHTML(a.nome||'Animal')}</h3><div class="kpi-line"><b>Pai</b><span>${escapeHTML(a.pai||'Não informado')}</span></div><div class="kpi-line"><b>Mãe</b><span>${escapeHTML(a.mae||'Não informado')}</span></div></div><div class="card"><h3 style="margin-top:0">🌿 Linhagem materna</h3><div class="kpi-line"><b>Mãe</b><span>${escapeHTML(a.mae||'Não informado')}</span></div><div class="kpi-line"><b>Avô materno</b><span>${escapeHTML(line.grandfather||'Não informado')}</span></div><div class="kpi-line"><b>Avó materna</b><span>${escapeHTML(line.grandmother||'Não informado')}</span></div><div class="kpi-line"><b>Bisavô materno</b><span>${escapeHTML(line.greatGrandfather||'Não informado')}</span></div><div class="kpi-line"><b>Bisavó materna</b><span>${escapeHTML(line.greatGrandmother||'Não informado')}</span></div><p class="small" style="margin-bottom:0">Os nomes são opcionais. Quando a mãe já está cadastrada no rebanho, as informações disponíveis podem ser aproveitadas automaticamente.</p></div>`;
  document.getElementById('genealogyEditForm').classList.add('hidden');
  document.getElementById('genealogyEditBtn').classList.remove('hidden');
@@ -2145,7 +2245,7 @@ function openGenealogy(id,type){
 function closeGenealogyModal(){document.getElementById('genealogyModal').classList.remove('open');document.getElementById('genealogyEditForm').classList.add('hidden');document.getElementById('genealogyEditBtn').classList.remove('hidden');window.__genealogyRef=null;}
 function startGenealogyEdit(){
  const ref=window.__genealogyRef;if(!ref)return;
- const list=ref.type==='cow'?db.vacas:db.novilhas;const a=list.find(x=>x.id===ref.id);if(!a)return;
+ const list=ref.type==='cow'?db.vacas:ref.type==='heifer'?db.novilhas:db.machos;const a=list.find(x=>x.id===ref.id);if(!a)return;
  const line=maternalLineageFor(a.mae,a.avoMaterna,a.avoMaterno,a.bisavoMaterna,a.bisavoMaterno);
  document.getElementById('genealogyFather').value=a.pai||'';
  document.getElementById('genealogyMother').value=a.mae||'';
@@ -2159,7 +2259,7 @@ function startGenealogyEdit(){
 function cancelGenealogyEdit(){document.getElementById('genealogyEditForm').classList.add('hidden');document.getElementById('genealogyEditBtn').classList.remove('hidden');}
 function saveGenealogy(){
  const ref=window.__genealogyRef;if(!ref)return;
- const list=ref.type==='cow'?db.vacas:db.novilhas;const i=list.findIndex(x=>x.id===ref.id);if(i<0)return;
+ const list=ref.type==='cow'?db.vacas:ref.type==='heifer'?db.novilhas:db.machos;const i=list.findIndex(x=>x.id===ref.id);if(i<0)return;
  const a=list[i];
  a.pai=document.getElementById('genealogyFather').value.trim();
  a.mae=document.getElementById('genealogyMother').value.trim();
@@ -2180,6 +2280,8 @@ function ensureCowReproductiveHistory(v){
  if(!v.historicoReprodutivo||typeof v.historicoReprodutivo!=='object')v.historicoReprodutivo=newReproductiveHistory();
  if(!Array.isArray(v.historicoReprodutivo.inseminacoes))v.historicoReprodutivo.inseminacoes=[];
  if(!Array.isArray(v.historicoReprodutivo.partos))v.historicoReprodutivo.partos=[];
+ v.historicoReprodutivo.inseminacoes.forEach(x=>{if(!x.id)x.id=generateUniqueHistoryId();});
+ v.historicoReprodutivo.partos.forEach(x=>{if(!x.id)x.id=generateUniqueHistoryId();});
  if(v.inseminacao&&!v.historicoReprodutivo.inseminacoes.some(x=>String(x.data||'')===String(v.inseminacao||'')))v.historicoReprodutivo.inseminacoes.push({id:generateUniqueHistoryId(),data:v.inseminacao,resultado:'pendente',reprodutor:v.reprodutor||''});
  if(v.parto&&!v.historicoReprodutivo.partos.some(x=>String(x.data||'')===String(v.parto||'')))v.historicoReprodutivo.partos.push({id:generateUniqueHistoryId(),data:v.parto,sexoCria:'',identificacaoCria:'',reprodutor:''});
  return v.historicoReprodutivo;
@@ -2203,7 +2305,7 @@ function addInseminationHistory(v,data,reprodutor='',resultado='pendente'){ensur
 function markInseminationResult(v,data,resultado){ensureCowReproductiveHistory(v);const entry=v.historicoReprodutivo.inseminacoes.find(x=>String(x.data||'')===String(data||''));if(!entry)return null;entry.resultado=resultado;return entry;}
 function pregnancyRate(v){ensureCowReproductiveHistory(v);const defined=v.historicoReprodutivo.inseminacoes.filter(x=>x.resultado==='confirmada'||x.resultado==='nao_confirmada');if(!defined.length)return null;const confirmed=defined.filter(x=>x.resultado==='confirmada').length;return {confirmed,total:defined.length,rate:confirmed/defined.length*100};}
 function reproductiveResultLabel(result){return result==='confirmada'?'🟢 Prenhez confirmada':result==='nao_confirmada'?'🔴 Prenhez não confirmada':'🟠 A confirmar';}
-function findAnimalById(id){return db.vacas.find(x=>Number(x.id)===Number(id))||db.novilhas.find(x=>Number(x.id)===Number(id))||null;}
+function findAnimalById(id){return db.vacas.find(x=>Number(x.id)===Number(id))||db.novilhas.find(x=>Number(x.id)===Number(id))||db.machos.find(x=>Number(x.id)===Number(id))||null;}
 function animalIsHeifer(v){return !!v&&db.novilhas.some(x=>Number(x.id)===Number(v.id));}
 function hasHeiferReproductiveHistory(v){ensureCowReproductiveHistory(v);return animalIsHeifer(v)&&v.historicoReprodutivo.inseminacoes.length>0;}
 function reproductiveSourceInsemination(v,calvingDate=''){
@@ -2220,21 +2322,43 @@ function openReproductiveHistory(id,type){const v=type==='heifer'?db.novilhas.fi
 function closeReproductiveHistory(){document.getElementById('reproductiveHistoryModal').classList.remove('open');window.__reproductiveAnimalId=null;window.__reproductiveAnimalType=null;}
 function renderReproductiveHistoryModal(v){
  ensureCowReproductiveHistory(v);const isHeifer=animalIsHeifer(v),rate=pregnancyRate(v),status=getAnimalReproductiveStatus(v),ins=[...v.historicoReprodutivo.inseminacoes].sort((a,b)=>String(a.data||'').localeCompare(String(b.data||''))),calv=isHeifer?[]:[...v.historicoReprodutivo.partos].sort((a,b)=>String(a.data||'').localeCompare(String(b.data||''))),rateText=rate?`${fmtNumber(rate.rate)}%`:'—',rateSub=rate?`${rate.confirmed} confirmada(s) de ${rate.total} inseminação(ões) com resultado`:'Nenhuma inseminação com resultado definido';
- const insHTML=ins.length?ins.map(x=>`<div class="repro-history-item"><b>${fmtDate(x.data)}</b><div class="small">🐂 Reprodutor: ${escapeHTML(x.reprodutor||'Não informado')}<br>${reproductiveResultLabel(x.resultado)}</div><div class="repro-history-actions"><button class="btn btn-light" onclick="editHistoricalInsemination(${x.id})">✏️ EDITAR</button><button class="btn btn-red" onclick="deleteHistoricalInsemination(${x.id})">🗑️ EXCLUIR</button></div></div>`).join(''):'<div class="empty">Nenhuma inseminação registrada no histórico.</div>';
- const calvHTML=calv.length?calv.map(x=>`<div class="repro-history-item"><b>${fmtDate(x.data)}</b><div class="small">Cria: ${calfSexLabel(x.sexoCria)}${x.identificacaoCria?`<br>Identificação: ${escapeHTML(x.identificacaoCria)}`:''}<br>Pai / Reprodutor: ${escapeHTML(x.reprodutor||'Não informado')}</div><div class="repro-history-actions"><button class="btn btn-light" onclick="editHistoricalCalving(${x.id})">✏️ EDITAR</button><button class="btn btn-red" onclick="deleteHistoricalCalving(${x.id})">🗑️ EXCLUIR</button></div></div>`).join(''):'<div class="empty">Nenhum parto registrado no histórico.</div>';
+ const insHTML=ins.length?ins.map(x=>`<div class="repro-history-item"><b>${fmtDate(x.data)}</b><div class="small">🐂 Reprodutor: ${escapeHTML(x.reprodutor||'Não informado')}<br>${reproductiveResultLabel(x.resultado)}</div><div class="repro-history-actions"><button class="btn btn-light" onclick='editHistoricalInsemination(${JSON.stringify(String(x.id))})'>✏️ EDITAR</button><button class="btn btn-red" onclick='deleteHistoricalInsemination(${JSON.stringify(String(x.id))})'>🗑️ EXCLUIR</button></div></div>`).join(''):'<div class="empty">Nenhuma inseminação registrada no histórico.</div>';
+ const calvHTML=calv.length?calv.map(x=>`<div class="repro-history-item"><b>${fmtDate(x.data)}</b><div class="small">Cria: ${calfSexLabel(x.sexoCria)}${x.identificacaoCria?`<br>Identificação: ${escapeHTML(x.identificacaoCria)}`:''}<br>Pai / Reprodutor: ${escapeHTML(x.reprodutor||'Não informado')}</div><div class="repro-history-actions"><button class="btn btn-light" onclick='editHistoricalCalving(${JSON.stringify(String(x.id))})'>✏️ EDITAR</button><button class="btn btn-red" onclick='deleteHistoricalCalving(${JSON.stringify(String(x.id))})'>🗑️ EXCLUIR</button></div></div>`).join(''):'<div class="empty">Nenhum parto registrado no histórico.</div>';
  const partosSection=isHeifer?'':`<div class="section-title">🐮 PARTOS / CRIAS</div><div class="repro-history-list">${calvHTML}</div><button class="btn btn-green btn-block" style="margin-top:10px" onclick="showHistoricalCalvingForm()">➕ REGISTRAR PARTO</button>`;
  document.getElementById('reproductiveHistoryContent').innerHTML=`<div class="repro-kpi"><div class="small">TAXA DE PRENHEZ</div><div class="big">${rateText}</div><div class="small">${rateSub}</div><div style="margin-top:8px"><b>Situação atual:</b> <span class="repro-status ${status.className}">${status.label}</span></div></div><div class="section-title">🤰 INSEMINAÇÕES</div><div class="repro-history-list">${insHTML}</div><button class="btn btn-blue btn-block" style="margin-top:10px" onclick="showHistoricalInseminationForm()">➕ REGISTRAR INSEMINAÇÃO</button>${partosSection}`;
  document.getElementById('historicalInseminationForm').classList.add('hidden');document.getElementById('historicalCalvingForm').classList.add('hidden');
 }
-function showHistoricalInseminationForm(editId=null){const v=findAnimalById(window.__reproductiveAnimalId);if(!v)return;const entry=editId?v.historicoReprodutivo?.inseminacoes?.find(x=>Number(x.id)===Number(editId)):null;document.getElementById('historicalInseminationTitle').textContent=entry?'✏️ Editar inseminação':'➕ Registrar inseminação';document.getElementById('histInsemEditId').value=entry?.id||'';document.getElementById('histInsemDate').value=entry?.data||isoToday();document.getElementById('histInsemReproducer').value=entry?.reprodutor||'';document.getElementById('histInsemResult').value=entry?.resultado||'pendente';document.getElementById('historicalInseminationForm').classList.remove('hidden');document.getElementById('historicalCalvingForm').classList.add('hidden');}
-function showHistoricalCalvingForm(editId=null){const v=findAnimalById(window.__reproductiveAnimalId);if(!v||animalIsHeifer(v))return;const entry=editId?v.historicoReprodutivo?.partos?.find(x=>Number(x.id)===Number(editId)):null;document.getElementById('historicalCalvingTitle').textContent=entry?'✏️ Editar parto':'➕ Registrar parto';document.getElementById('histCalvingEditId').value=entry?.id||'';document.getElementById('histCalvingDate').value=entry?.data||isoToday();document.querySelectorAll('input[name="histCalfSex"]').forEach(r=>r.checked=r.value===(entry?.sexoCria||''));document.getElementById('histCalfId').value=entry?.identificacaoCria||'';document.getElementById('histCalfReproducer').value=entry?.reprodutor||reproducerForPregnancy(v,entry?.data||isoToday())||'';document.getElementById('historicalCalvingForm').classList.remove('hidden');document.getElementById('historicalInseminationForm').classList.add('hidden');}
+function showHistoricalInseminationForm(editId=null){const v=findAnimalById(window.__reproductiveAnimalId);if(!v)return;const entry=editId?v.historicoReprodutivo?.inseminacoes?.find(x=>String(x.id)===String(editId)):null;document.getElementById('historicalInseminationTitle').textContent=entry?'✏️ Editar inseminação':'➕ Registrar inseminação';document.getElementById('histInsemEditId').value=entry?.id||'';document.getElementById('histInsemDate').value=entry?.data||isoToday();document.getElementById('histInsemReproducer').value=entry?.reprodutor||'';document.getElementById('histInsemResult').value=entry?.resultado||'pendente';document.getElementById('historicalInseminationForm').classList.remove('hidden');document.getElementById('historicalCalvingForm').classList.add('hidden');}
+function showHistoricalCalvingForm(editId=null){const v=findAnimalById(window.__reproductiveAnimalId);if(!v||animalIsHeifer(v))return;const entry=editId?v.historicoReprodutivo?.partos?.find(x=>String(x.id)===String(editId)):null;document.getElementById('historicalCalvingTitle').textContent=entry?'✏️ Editar parto':'➕ Registrar parto';document.getElementById('histCalvingEditId').value=entry?.id||'';document.getElementById('histCalvingDate').value=entry?.data||isoToday();document.querySelectorAll('input[name="histCalfSex"]').forEach(r=>r.checked=r.value===(entry?.sexoCria||''));document.getElementById('histCalfId').value=entry?.identificacaoCria||'';document.getElementById('histCalfReproducer').value=entry?.reprodutor||reproducerForPregnancy(v,entry?.data||isoToday())||'';document.getElementById('historicalCalvingForm').classList.remove('hidden');document.getElementById('historicalInseminationForm').classList.add('hidden');}
 function prefillHistoricalCalfFather(){const v=findAnimalById(window.__reproductiveAnimalId);if(!v)return;const field=document.getElementById('histCalfReproducer');if(field&&!field.value)field.value=reproducerForPregnancy(v,document.getElementById('histCalvingDate').value)||'';}
 function editHistoricalInsemination(id){showHistoricalInseminationForm(id);}
 function deleteHistoricalInsemination(id){const v=findAnimalById(window.__reproductiveAnimalId);if(!v)return;if(!confirm('Excluir esta inseminação do histórico?'))return;ensureCowReproductiveHistory(v);v.historicoReprodutivo.inseminacoes=v.historicoReprodutivo.inseminacoes.filter(x=>Number(x.id)!==Number(id));if(v.inseminacao&& !v.historicoReprodutivo.inseminacoes.some(x=>String(x.data)===String(v.inseminacao))){v.inseminacao='';v.reprodutor='';}saveDB(false);renderReproductiveHistoryModal(v);renderAll();}
 function editHistoricalCalving(id){showHistoricalCalvingForm(id);}
-function deleteHistoricalCalving(id){const v=findAnimalById(window.__reproductiveAnimalId);if(!v||animalIsHeifer(v))return;if(!confirm('Excluir este parto/cria do histórico?'))return;ensureCowReproductiveHistory(v);const entry=v.historicoReprodutivo.partos.find(x=>Number(x.id)===Number(id));v.historicoReprodutivo.partos=v.historicoReprodutivo.partos.filter(x=>Number(x.id)!==Number(id));if(entry&&String(v.parto||'')===String(entry.data||'')){const latest=getLatestCalvingHistory(v);v.parto=latest?.data||'';}saveDB(false);renderReproductiveHistoryModal(v);renderAll();}
-function saveHistoricalInsemination(){const id=Number(window.__reproductiveAnimalId),v=findAnimalById(id);if(!v)return;ensureCowReproductiveHistory(v);const editId=Number(document.getElementById('histInsemEditId').value||0),data=document.getElementById('histInsemDate').value,repro=document.getElementById('histInsemReproducer').value.trim(),result=document.getElementById('histInsemResult').value;if(!validateISODate(data,'Data da inseminação',false))return;let entry=editId?v.historicoReprodutivo.inseminacoes.find(x=>Number(x.id)===editId):null;if(entry){const wasCurrent=String(v.inseminacao||'')===String(entry.data||'');entry.data=data;entry.reprodutor=repro;entry.resultado=result;if(wasCurrent){if(result==='nao_confirmada'){v.inseminacao='';v.reprodutor='';}else{v.inseminacao=data;v.reprodutor=repro;}}}else addInseminationHistory(v,data,repro,result);saveDB(false);renderReproductiveHistoryModal(v);renderAll();}
-function saveHistoricalCalving(){const id=Number(window.__reproductiveAnimalId),v=db.vacas.find(x=>x.id===id);if(!v)return;ensureCowReproductiveHistory(v);const editId=Number(document.getElementById('histCalvingEditId').value||0),data=document.getElementById('histCalvingDate').value,sex=document.querySelector('input[name="histCalfSex"]:checked')?.value||'',calfId=document.getElementById('histCalfId').value.trim(),repro=document.getElementById('histCalfReproducer').value.trim()||reproducerForPregnancy(v,data);if(!validateISODate(data,'Data do parto',false))return;if(!sex)return alert('Selecione o sexo da cria: 🐮 Novilha ou 🐂 Boi.');if(editId){const entry=v.historicoReprodutivo.partos.find(x=>Number(x.id)===editId);if(!entry)return;entry.data=data;entry.sexoCria=sex;entry.identificacaoCria=calfId;entry.reprodutor=repro;}else{if(v.historicoReprodutivo.partos.some(x=>String(x.data||'')===String(data)&&String(x.identificacaoCria||'')===String(calfId||'')))return alert('Já existe um parto com essa data e identificação no histórico.');v.historicoReprodutivo.partos.push({id:generateUniqueHistoryId(),data,sexoCria:sex,identificacaoCria:calfId,reprodutor:repro});}saveDB(false);renderReproductiveHistoryModal(v);renderAll();}
+function deleteHistoricalCalving(id){
+ const animalId=Number(window.__reproductiveAnimalId),type=window.__reproductiveAnimalType||'cow';
+ const v=type==='heifer'?db.novilhas.find(x=>Number(x.id)===animalId):db.vacas.find(x=>Number(x.id)===animalId);
+ if(!v||animalIsHeifer(v))return;
+ if(!confirm('Excluir esta cria do histórico?'))return;
+ ensureCowReproductiveHistory(v);
+ const targetId=String(id);
+ const entry=v.historicoReprodutivo.partos.find(x=>String(x.id)===targetId);
+ if(!entry)return;
+ const before=v.historicoReprodutivo.partos.length;
+ const wasCurrent=String(v.parto||'')===String(entry.data||'');
+ v.historicoReprodutivo.partos=v.historicoReprodutivo.partos.filter(x=>String(x.id)!==targetId);
+ if(v.historicoReprodutivo.partos.length===before)return;
+ if(wasCurrent){
+   // Limpa primeiro para que ensureCowReproductiveHistory não recrie o parto excluído.
+   v.parto='';
+   const latest=getLatestCalvingHistory(v);
+   v.parto=latest?.data||'';
+ }
+ saveDB(false);
+ renderReproductiveHistoryModal(v);
+ renderAll();
+}
+function saveHistoricalInsemination(){const id=Number(window.__reproductiveAnimalId),v=findAnimalById(id);if(!v)return;ensureCowReproductiveHistory(v);const editId=Number(document.getElementById('histInsemEditId').value||0),data=document.getElementById('histInsemDate').value,repro=document.getElementById('histInsemReproducer').value.trim(),result=document.getElementById('histInsemResult').value;if(!validateISODate(data,'Data da inseminação',false))return;let entry=editId?v.historicoReprodutivo.inseminacoes.find(x=>String(x.id)===String(editId)):null;if(entry){const wasCurrent=String(v.inseminacao||'')===String(entry.data||'');entry.data=data;entry.reprodutor=repro;entry.resultado=result;if(wasCurrent){if(result==='nao_confirmada'){v.inseminacao='';v.reprodutor='';}else{v.inseminacao=data;v.reprodutor=repro;}}}else addInseminationHistory(v,data,repro,result);saveDB(false);renderReproductiveHistoryModal(v);renderAll();}
+function saveHistoricalCalving(){const id=Number(window.__reproductiveAnimalId),v=db.vacas.find(x=>x.id===id);if(!v)return;ensureCowReproductiveHistory(v);const editId=Number(document.getElementById('histCalvingEditId').value||0),data=document.getElementById('histCalvingDate').value,sex=document.querySelector('input[name="histCalfSex"]:checked')?.value||'',calfId=document.getElementById('histCalfId').value.trim(),repro=document.getElementById('histCalfReproducer').value.trim()||reproducerForPregnancy(v,data);if(!validateISODate(data,'Data do parto',false))return;if(!sex)return alert('Selecione o sexo da cria: 🐮 Novilha ou 🐂 Boi.');if(editId){const entry=v.historicoReprodutivo.partos.find(x=>String(x.id)===String(editId));if(!entry)return;entry.data=data;entry.sexoCria=sex;entry.identificacaoCria=calfId;entry.reprodutor=repro;}else{if(v.historicoReprodutivo.partos.some(x=>String(x.data||'')===String(data)&&String(x.identificacaoCria||'')===String(calfId||'')))return alert('Já existe um parto com essa data e identificação no histórico.');v.historicoReprodutivo.partos.push({id:generateUniqueHistoryId(),data,sexoCria:sex,identificacaoCria:calfId,reprodutor:repro});}saveDB(false);renderReproductiveHistoryModal(v);renderAll();}
 async function confirmPregnancy(id,type){const v=type==='heifer'?db.novilhas.find(x=>x.id===id):db.vacas.find(x=>x.id===id);if(!v||!v.inseminacao)return;const entry=markInseminationResult(v,v.inseminacao,'confirmada');if(!entry)return;saveDB(false,false,true);if(currentUser&&!currentUserIsOfflineCached&&navigator.onLine)await syncWithCloud('pregnancy-confirmed');alert(`Prenhez confirmada para ${v.nome}.`);renderAll();}
 async function rejectPregnancy(id,type){const v=type==='heifer'?db.novilhas.find(x=>x.id===id):db.vacas.find(x=>x.id===id);if(!v||!v.inseminacao)return;const entry=markInseminationResult(v,v.inseminacao,'nao_confirmada');if(!entry)return;v.inseminacao='';v.reprodutor='';saveDB(false,false,true);if(currentUser&&!currentUserIsOfflineCached&&navigator.onLine)await syncWithCloud('pregnancy-rejected');alert(`Prenhez não confirmada para ${v.nome}. A inseminação foi mantida no histórico.`);renderAll();}
 function handleNewInseminationAgainstPending(old,newDate){if(!old?.inseminacao||!newDate||String(old.inseminacao)===String(newDate))return true;const current=findCurrentInseminationHistory(old);if(current?.resultado==='pendente'){const days=daysBetween(old.inseminacao),msg=days>=0?`Este animal já possui uma inseminação em acompanhamento (${fmtDate(old.inseminacao)}, há ${days} dia(s)). Se registrar a nova inseminação, a anterior será marcada como “Prenhez não confirmada” e a nova começará um novo acompanhamento.`:`Este animal já possui uma inseminação em acompanhamento (${fmtDate(old.inseminacao)}). Se registrar a nova, a anterior será marcada como “Prenhez não confirmada”.`;if(!confirm(msg))return false;current.resultado='nao_confirmada';}return true;}
@@ -2247,12 +2371,16 @@ async function saveCow(){
  const hasPhotoActionNow=!!(window.cowPhotoPendingFile||window.cowPhotoRemoveRequested);if(hasPhotoActionNow)setPhotoStatus('cow','⏳ Salvando... enviando a foto para a nuvem. Aguarde.','success-text');
  try{
  const edit=document.getElementById('cowEditId').value,calving=getFlexibleDate('cowCalving','cowCalvingManual','Último parto');if(calving===null)return;const inseminacaoInput=getFlexibleDate('cowInsemination','cowInseminationManual','Inseminação');if(inseminacaoInput===null)return;
- const old=edit?db.vacas.find(v=>v.id===Number(edit)):null,newStatus=document.getElementById('cowStatus').value,today=isoToday();let dataEntradaLactacao=null,dataSaidaLactacao=null;
+ const old=edit?db.vacas.find(v=>v.id===Number(edit)):null,newStatus=document.getElementById('cowStatus').value,today=isoToday();
+ if(!(await confirmAnimalIdentifier(name,edit)))return;let dataEntradaLactacao=null,dataSaidaLactacao=null;
  if(old){ensureCowReproductiveHistory(old);dataEntradaLactacao=old.dataEntradaLactacao||null;dataSaidaLactacao=old.dataSaidaLactacao||null;if(old.status==='lactacao'&&newStatus==='seca'){freezeMissingHistoricalDivisors(today);dataSaidaLactacao=today;}else if(old.status==='seca'&&newStatus==='lactacao'){dataEntradaLactacao=today;dataSaidaLactacao=null;}else if(newStatus==='lactacao')dataSaidaLactacao=null;}else if(newStatus==='lactacao')dataEntradaLactacao=today;
  let inseminacao=inseminacaoInput;const isCalvingRecord=!!calving;const isNewCalving=!!(isCalvingRecord&&(!old||calving!==old.parto));if(isNewCalving&&(!inseminacao||inseminacao===old.inseminacao))inseminacao='';
  const calfSex=document.querySelector('input[name="cowCalfSex"]:checked')?.value||'';
  if(isNewCalving&&!calfSex)return alert('Selecione o sexo da cria: 🐮 Novilha ou 🐂 Boi.');
  if(isCalvingRecord&&calfSex==='boi'&&document.getElementById('registerHeifer').checked)return alert('A cria foi marcada como Boi. Para cadastrar uma novilha, selecione 🐮 Novilha.');
+ if(isCalvingRecord&&calfSex==='novilha'&&document.getElementById('registerMale').checked)return alert('A cria foi marcada como Novilha. Para cadastrar um macho, selecione 🐂 Boi.');
+ if(isNewCalving&&calfSex==='boi'&&document.getElementById('registerMale').checked&&!document.getElementById('maleName').value.trim())return alert('Informe o nome/brinco do macho.');
+ if(isNewCalving&&calfSex==='boi'&&document.getElementById('registerMale').checked&&!(await confirmAnimalIdentifier(document.getElementById('maleName').value.trim())))return;
  if(isCalvingRecord&&calfSex==='novilha'&&document.getElementById('registerHeifer').checked&&!document.getElementById('heiferName').value.trim())return alert('Informe o nome/brinco da novilha.');
  const currentReproducer=inseminacao?document.getElementById('cowReproducer').value.trim():'',birthReproducer=isNewCalving?reproducerForPregnancy(old||{historicoReprodutivo:newReproductiveHistory(),inseminacao:inseminacaoInput,reprodutor:currentReproducer},calving)||currentReproducer:'';
  if(old&&!isNewCalving&&inseminacao&&inseminacao!==old.inseminacao){if(!handleNewInseminationAgainstPending(old,inseminacao))return;}
@@ -2263,12 +2391,13 @@ async function saveCow(){
  const obj={id:edit?Number(edit):Date.now(),nome:name,parto:calving,inseminacao,status:newStatus,dataEntradaLactacao,dataSaidaLactacao,pai:document.getElementById('cowFather').value.trim(),mae:motherName,avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,reprodutor:calving&&isNewCalving&&!inseminacao?'':currentReproducer,fotoPath:old?.fotoPath||'',historicoReprodutivo:history};
  if(window.cowPhotoRemoveRequested)obj.fotoPathDeleteRequestedAt=new Date().toISOString();
  if(edit){const i=db.vacas.findIndex(v=>v.id===Number(edit));if(i>=0)db.vacas[i]=obj}else db.vacas.push(obj);
- if(isNewCalving&&calfSex==='novilha'&&document.getElementById('registerHeifer').checked){const hn=document.getElementById('heiferName').value.trim();db.novilhas.push({id:generateUniqueAnimalId(),nome:hn,nascimento:calving,pai:document.getElementById('heiferFather').value.trim()||birthReproducer,mae:name,avoMaterna:old?.mae||'',avoMaterno:old?.pai||'',bisavoMaterna:old?.avoMaterna||'',bisavoMaterno:old?.avoMaterno||'',inseminacao:'',reprodutor:'',parto:null,transferida:false,fotoPath:''});}
+ if(isNewCalving&&calfSex==='novilha'&&document.getElementById('registerHeifer').checked){const hn=document.getElementById('heiferName').value.trim();if(!(await confirmAnimalIdentifier(hn)))return;db.novilhas.push({id:generateUniqueAnimalId(),nome:hn,nascimento:calving,pai:document.getElementById('heiferFather').value.trim()||birthReproducer,mae:name,avoMaterna:old?.mae||'',avoMaterno:old?.pai||'',bisavoMaterna:old?.avoMaterna||'',bisavoMaterno:old?.avoMaterno||'',inseminacao:'',reprodutor:'',parto:null,transferida:false,fotoPath:''});}
+ if(isNewCalving&&calfSex==='boi'&&document.getElementById('registerMale').checked){const mn=document.getElementById('maleName').value.trim();db.machos.push({id:generateUniqueAnimalId(),nome:mn,nascimento:calving,pai:document.getElementById('maleFather').value.trim()||birthReproducer,mae:name,reprodutor:false,fotoPath:''});}
  const hasPhotoAction=!!(window.cowPhotoPendingFile||window.cowPhotoRemoveRequested);saveDB(false,!hasPhotoAction);if(hasPhotoAction){const target=db.vacas.find(x=>x.id===Number(edit||obj.id));if(target)await uploadAnimalPhotoAfterSave('cow',target);}alert('Animal salvo.');resetCowForm();renderAll();
  }finally{window.__savingCow=false;if(saveBtn){saveBtn.disabled=false;saveBtn.textContent=saveBtn.dataset.originalText||'💾 SALVAR NO REBANHO';delete saveBtn.dataset.originalText;}}
 }
 function generateUniqueAnimalId(){
- const used=new Set([...db.vacas,...db.novilhas].map(x=>Number(x.id)).filter(Number.isFinite));
+ const used=new Set([...db.vacas,...db.novilhas,...db.machos].map(x=>Number(x.id)).filter(Number.isFinite));
  let id=Math.max(Date.now(),Number(window.__lastGeneratedAnimalId||0)+1);
  while(used.has(id))id++;
  window.__lastGeneratedAnimalId=id;
@@ -2295,8 +2424,10 @@ function generateCowBatch(){
    <div class="notice cow-batch-heifer-prompt">Ao informar um novo parto, você poderá cadastrar a cria no histórico e, se for novilha, no Rebanho de Novilhas.</div>
    <div class="hidden cow-batch-heifer-fields" id="cowBatchHeiferFields${i}">
     <label>Sexo da cria</label><div class="repro-sex"><label><input type="radio" name="cowBatchCalfSex${i}" value="novilha"> 🐮 Novilha</label><label><input type="radio" name="cowBatchCalfSex${i}" value="boi"> 🐂 Boi</label></div>
-    <label><input type="checkbox" class="cow-batch-register-heifer" data-index="${i}" onchange="toggleCowBatchHeifer(${i})" style="width:auto;margin:0 5px 0 0"> Registrar a fêmea deste parto como novilha</label>
+    <div class="hidden cow-batch-heifer-register-wrap" id="cowBatchHeiferRegisterWrap${i}"><label><input type="checkbox" class="cow-batch-register-heifer" data-index="${i}" onchange="toggleCowBatchHeifer(${i})" style="width:auto;margin:0 5px 0 0"> Registrar a fêmea deste parto como novilha</label></div>
     <div class="hidden" id="cowBatchHeiferNameWrap${i}"><label>Nome / Brinco da novilha</label><input class="cow-batch-heifer-name" maxlength="60" data-index="${i}"><label>Pai da novilha (opcional)</label><input class="cow-batch-heifer-father" maxlength="60" data-index="${i}"></div>
+    <div class="hidden cow-batch-male-register-wrap" id="cowBatchMaleRegisterWrap${i}"><label><input type="checkbox" class="cow-batch-register-male" data-index="${i}" onchange="toggleCowBatchMale(${i})" style="width:auto;margin:0 5px 0 0"> Registrar o macho deste parto no Rebanho de Machos</label></div>
+    <div class="hidden" id="cowBatchMaleNameWrap${i}"><label>Nome / Brinco do macho</label><input class="cow-batch-male-name" maxlength="60" data-index="${i}"><label>Pai / Reprodutor (opcional)</label><input class="cow-batch-male-father" maxlength="60" data-index="${i}"></div>
    </div>
   </div>`);
  }
@@ -2304,33 +2435,41 @@ function generateCowBatch(){
  document.querySelectorAll('.cow-batch-calving-date').forEach(el=>el.addEventListener('change',()=>{
   const i=el.dataset.index,fields=document.getElementById('cowBatchHeiferFields'+i);
   fields.classList.toggle('hidden',!el.value);
-  if(!el.value){document.querySelector(`.cow-batch-register-heifer[data-index="${i}"]`).checked=false;document.getElementById('cowBatchHeiferNameWrap'+i).classList.add('hidden');}
+  if(!el.value){document.querySelector(`.cow-batch-register-heifer[data-index="${i}"]`).checked=false;document.getElementById('cowBatchHeiferRegisterWrap'+i)?.classList.add('hidden');document.getElementById('cowBatchHeiferNameWrap'+i).classList.add('hidden');const mr=document.querySelector(`.cow-batch-register-male[data-index="${i}"]`);if(mr)mr.checked=false;document.getElementById('cowBatchMaleRegisterWrap'+i)?.classList.add('hidden');document.getElementById('cowBatchMaleNameWrap'+i)?.classList.add('hidden');}
  }));
  document.querySelectorAll('.cow-batch-heifer-fields input[type="radio"]').forEach(r=>r.addEventListener('change',()=>{
-  const i=r.name.replace('cowBatchCalfSex',''),sex=document.querySelector(`input[name="cowBatchCalfSex${i}"]:checked`)?.value||'',reg=document.querySelector(`.cow-batch-register-heifer[data-index="${i}"]`),wrap=document.getElementById('cowBatchHeiferNameWrap'+i);
+  const i=r.name.replace('cowBatchCalfSex',''),sex=document.querySelector(`input[name="cowBatchCalfSex${i}"]:checked`)?.value||'',reg=document.querySelector(`.cow-batch-register-heifer[data-index="${i}"]`),regWrap=document.getElementById('cowBatchHeiferRegisterWrap'+i),wrap=document.getElementById('cowBatchHeiferNameWrap'+i);
   if(!reg||!wrap)return;
+  if(regWrap)regWrap.classList.toggle('hidden',sex!=='novilha');
   if(sex==='novilha')reg.checked=true;
   if(sex==='boi')reg.checked=false;
-  wrap.classList.toggle('hidden',!reg.checked);
+  const maleReg=document.querySelector(`.cow-batch-register-male[data-index="${i}"]`),maleRegisterWrap=document.getElementById('cowBatchMaleRegisterWrap'+i),maleWrap=document.getElementById('cowBatchMaleNameWrap'+i),maleFather=document.querySelector(`.cow-batch-male-father[data-index="${i}"]`),reproducer=document.querySelector(`.cow-batch-reproducer[data-index="${i}"]`);if(maleRegisterWrap)maleRegisterWrap.classList.toggle('hidden',sex!=='boi');if(maleReg)maleReg.checked=sex==='boi';if(sex==='boi'&&maleFather&&!maleFather.value&&reproducer)maleFather.value=reproducer.value.trim();if(maleWrap)maleWrap.classList.toggle('hidden',sex!=='boi'||!maleReg?.checked);
+  wrap.classList.toggle('hidden',sex!=='novilha'||!reg.checked);
  }));
  document.getElementById('cowBatchQuantityBox').classList.add('hidden');
  document.getElementById('cowBatchForm').classList.remove('hidden');
 }
+function toggleCowBatchMale(i){const checked=document.querySelector(`.cow-batch-register-male[data-index="${i}"]`).checked;document.getElementById('cowBatchMaleNameWrap'+i).classList.toggle('hidden',!checked);}
 function toggleCowBatchHeifer(i){
  const checked=document.querySelector(`.cow-batch-register-heifer[data-index="${i}"]`).checked;
  document.getElementById('cowBatchHeiferNameWrap'+i).classList.toggle('hidden',!checked);
 }
-function saveCowBatch(){
- const names=[...document.querySelectorAll('.cow-batch-name')],calvings=[...document.querySelectorAll('.cow-batch-calving-date')],calvingManual=[...document.querySelectorAll('.cow-batch-calving-manual')],insem=[...document.querySelectorAll('.cow-batch-insem-date')],insemManual=[...document.querySelectorAll('.cow-batch-insem-manual')],statuses=[...document.querySelectorAll('.cow-batch-status')],fathers=[...document.querySelectorAll('.cow-batch-father')],mothers=[...document.querySelectorAll('.cow-batch-mother')],reproducers=[...document.querySelectorAll('.cow-batch-reproducer')],regs=[...document.querySelectorAll('.cow-batch-register-heifer')],heiferNames=[...document.querySelectorAll('.cow-batch-heifer-name')],heiferFathers=[...document.querySelectorAll('.cow-batch-heifer-father')];
+async function saveCowBatch(){
+ const names=[...document.querySelectorAll('.cow-batch-name')],calvings=[...document.querySelectorAll('.cow-batch-calving-date')],calvingManual=[...document.querySelectorAll('.cow-batch-calving-manual')],insem=[...document.querySelectorAll('.cow-batch-insem-date')],insemManual=[...document.querySelectorAll('.cow-batch-insem-manual')],statuses=[...document.querySelectorAll('.cow-batch-status')],fathers=[...document.querySelectorAll('.cow-batch-father')],mothers=[...document.querySelectorAll('.cow-batch-mother')],reproducers=[...document.querySelectorAll('.cow-batch-reproducer')],regs=[...document.querySelectorAll('.cow-batch-register-heifer')],heiferNames=[...document.querySelectorAll('.cow-batch-heifer-name')],heiferFathers=[...document.querySelectorAll('.cow-batch-heifer-father')],maleRegs=[...document.querySelectorAll('.cow-batch-register-male')],maleNames=[...document.querySelectorAll('.cow-batch-male-name')],maleFathers=[...document.querySelectorAll('.cow-batch-male-father')];
  if(!names.length)return alert('Gere os cartões da remessa primeiro.');
- const records=[],heifers=[];
+ const records=[],heifers=[],males=[];
  for(let i=0;i<names.length;i++){
   const name=names[i].value.trim(),calving=getBatchDate(calvings[i],calvingManual[i],`Último parto da Vaca ${i+1}`),inseminacao=getBatchDate(insem[i],insemManual[i],`Inseminação da Vaca ${i+1}`),status=statuses[i].value;
   if(calving===null||inseminacao===null)return;if(!name)return alert(`Informe o nome/brinco da Vaca ${i+1}.`);
+  if(!(await confirmAnimalIdentifier(name,null,[...records,...heifers,...males])))return;
   const calfSexBatch=document.querySelector(`input[name="cowBatchCalfSex${i}"]:checked`)?.value||'';
   if(calving&&!calfSexBatch)return alert(`Selecione o sexo da cria da Vaca ${i+1}: 🐮 Novilha ou 🐂 Boi.`);
   if(calving&&calfSexBatch==='boi'&&regs[i].checked)return alert(`A cria da Vaca ${i+1} foi marcada como Boi. Para cadastrar uma novilha, selecione 🐮 Novilha.`);
+  if(calving&&calfSexBatch==='novilha'&&maleRegs[i].checked)return alert(`A cria da Vaca ${i+1} foi marcada como Novilha. Para cadastrar um macho, selecione 🐂 Boi.`);
+  if(calving&&calfSexBatch==='boi'&&maleRegs[i].checked&&!maleNames[i].value.trim())return alert(`Informe o nome/brinco do macho da Vaca ${i+1}.`);
+  if(calving&&calfSexBatch==='boi'&&maleRegs[i].checked&&!(await confirmAnimalIdentifier(maleNames[i].value.trim(),null,males)))return;
   if(calving&&regs[i].checked&&!heiferNames[i].value.trim())return alert(`Informe o nome/brinco da novilha da Vaca ${i+1}.`);
+  if(calving&&regs[i].checked&&!(await confirmAnimalIdentifier(heiferNames[i].value.trim(),null,[...records,...heifers,...males])))return;
   const today=isoToday();
   const reproducer=reproducers[i].value.trim();
   const maternalLine=maternalLineageFor(mothers[i].value.trim());
@@ -2338,11 +2477,13 @@ function saveCowBatch(){
   if(inseminacao)history.inseminacoes.push({id:generateUniqueHistoryId(),data:inseminacao,resultado:'pendente',reprodutor:reproducer});
   if(calving)history.partos.push({id:generateUniqueHistoryId(),data:calving,sexoCria:calfSexBatch,identificacaoCria:regs[i].checked?heiferNames[i].value.trim():'',reprodutor:reproducer});
   records.push({id:generateUniqueAnimalId(),nome:name,parto:calving,inseminacao,status,dataEntradaLactacao:status==='lactacao'?today:null,dataSaidaLactacao:null,pai:fathers[i].value.trim(),mae:mothers[i].value.trim(),avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,reprodutor:reproducer,fotoPath:'',historicoReprodutivo:history});
+  if(calving&&maleRegs[i].checked)males.push({id:generateUniqueAnimalId(),nome:maleNames[i].value.trim(),nascimento:calving,pai:maleFathers[i].value.trim()||reproducer,mae:name,reprodutor:false,fotoPath:''});
   if(calving&&regs[i].checked)heifers.push({id:generateUniqueAnimalId(),nome:heiferNames[i].value.trim(),nascimento:calving,pai:heiferFathers[i].value.trim()||reproducer,mae:name,avoMaterna:mothers[i].value.trim(),avoMaterno:fathers[i].value.trim(),bisavoMaterna:maternalLine.grandmother,bisavoMaterno:maternalLine.grandfather,inseminacao:'',reprodutor:'',parto:null,transferida:false,fotoPath:''});
  }
  db.vacas.push(...records);
  if(heifers.length)db.novilhas.push(...heifers);
- saveDB(false);closeCowBatchModal();alert(`${records.length} ${records.length===1?'animal salvo':'animais salvos'} no rebanho${heifers.length?` e ${heifers.length} ${heifers.length===1?'novilha':'novilhas'} cadastrada${heifers.length===1?'':'s'}.`:'.'}`);renderAll();resetCowForm();
+ if(males.length)db.machos.push(...males);
+ saveDB(false);closeCowBatchModal();alert(`${records.length} ${records.length===1?'animal salvo':'animais salvos'} no rebanho${heifers.length?` e ${heifers.length} ${heifers.length===1?'novilha':'novilhas'} cadastrada${heifers.length===1?'':'s'}.`:''}${males.length?` e ${males.length} ${males.length===1?'macho':'machos'} cadastrado${males.length===1?'':'s'}.`:'.'}`);renderAll();resetCowForm();
 }
 function renderCowList(){
  const box=document.getElementById('cowList');
@@ -2361,7 +2502,7 @@ function renderCowList(){
 }
 function editCow(id){
  const v=db.vacas.find(x=>x.id===id);if(!v)return;resetAnimalPhotoState('cow');document.getElementById('cowRegistrationForm').classList.remove('hidden');
- document.getElementById('cowFormTitle').textContent='Editar animal';document.getElementById('cowEditId').value=v.id;document.getElementById('cowName').value=v.nome;document.getElementById('cowCalving').value=v.parto||'';document.getElementById('cowInsemination').value=v.inseminacao||'';document.getElementById('cowCalvingManual').value='';document.getElementById('cowInseminationManual').value='';setDateMode('cowCalving','cowCalvingManual','calendar');setDateMode('cowInsemination','cowInseminationManual','calendar');document.getElementById('cowFather').value=v.pai||'';document.getElementById('cowMother').value=v.mae||'';document.getElementById('cowReproducer').value=v.reprodutor||'';document.getElementById('cowStatus').value=v.status||'lactacao';loadCowCalfSexForEdit(v);updateCowHeiferFields();updateCowReproducerField();document.getElementById('deleteCowBtn').classList.remove('hidden');document.getElementById('cancelCowBtn').classList.remove('hidden');renderAnimalPhotoEditor('cow',v);window.scrollTo(0,0);
+ document.getElementById('cowFormTitle').textContent='Editar animal';document.getElementById('cowEditId').value=v.id;document.getElementById('cowName').value=v.nome;document.getElementById('cowCalving').value=v.parto||'';document.getElementById('cowInsemination').value=v.inseminacao||'';document.getElementById('cowCalvingManual').value='';document.getElementById('cowInseminationManual').value='';setDateMode('cowCalving','cowCalvingManual','calendar');setDateMode('cowInsemination','cowInseminationManual','calendar');document.getElementById('cowFather').value=v.pai||'';document.getElementById('cowMother').value=v.mae||'';document.getElementById('cowReproducer').value=v.reprodutor||'';document.getElementById('cowStatus').value=v.status||'lactacao';loadCowCalfSexForEdit(v);document.getElementById('registerMale').checked=false;document.getElementById('maleRegisterWrap').classList.add('hidden');document.getElementById('maleNameWrap').classList.add('hidden');updateCowHeiferFields();updateCowReproducerField();document.getElementById('deleteCowBtn').classList.remove('hidden');document.getElementById('cancelCowBtn').classList.remove('hidden');renderAnimalPhotoEditor('cow',v);window.scrollTo(0,0);
 }
 async function deleteCow(){const id=Number(document.getElementById('cowEditId').value);if(!id)return;const cow=db.vacas.find(v=>v.id===id);if(!cow)return;if(!confirm('Excluir este animal?'))return;if(cow.fotoPath){try{await removeCowPhotoPath(cow.fotoPath);}catch(e){alert(`Não foi possível excluir a foto com segurança. O animal não foi excluído. ${e?.message||''}`);return;}}db.vacas=db.vacas.filter(v=>v.id!==id);saveDB(false);resetCowForm();renderAll();}
 
@@ -2380,7 +2521,7 @@ function reportLast12Months(){
 function generateMilkReportPDF(){
  const rows=reportLast12Months(),totalLiters=rows.reduce((s,r)=>s+r.liters,0),totalReceived=rows.reduce((s,r)=>s+r.received,0),totalExpenses=rows.reduce((s,r)=>s+r.expenses,0),net=totalReceived-totalExpenses,currentMonth=`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`,completeRows=rows.filter(r=>r.month!==currentMonth),receivedRows=completeRows.filter(r=>r.liters>0&&r.received>0),expenseRows=completeRows.filter(r=>r.liters>0&&r.expenses>0),netRows=completeRows.filter(r=>r.received>0&&r.expenses>0),receivedPerLiter=receivedRows.reduce((s,r)=>s+r.received,0)/(receivedRows.reduce((s,r)=>s+r.liters,0)||1),costPerLiter=expenseRows.reduce((s,r)=>s+r.expenses,0)/(expenseRows.reduce((s,r)=>s+r.liters,0)||1),avgNet=netRows.length?netRows.reduce((s,r)=>s+r.net,0)/netRows.length:0;
  const bestProduction=rows.reduce((a,b)=>b.liters>a.liters?b:a,rows[0]),highestExpense=rows.reduce((a,b)=>b.expenses>a.expenses?b:a,rows[0]),bestReceivedPerLiter=rows.filter(r=>r.price>0).reduce((a,b)=>!a||b.price>a.price?b:a,null);
- const lactating=db.vacas.filter(v=>v.status==='lactacao').length,totalCows=db.vacas.length,totalHeifers=db.novilhas.length,totalAnimals=totalCows+totalHeifers,generatedAt=new Date().toLocaleString('pt-BR'),period=`${formatMonthLabel(rows[0].month)} a ${formatMonthLabel(rows[rows.length-1].month)}`,esc=s=>escapeHTML(String(s??''));
+ const lactating=db.vacas.filter(v=>v.status==='lactacao').length,totalCows=db.vacas.length,totalHeifers=db.novilhas.length,totalMales=db.machos.length,totalAnimals=totalCows+totalHeifers+totalMales,generatedAt=new Date().toLocaleString('pt-BR'),period=`${formatMonthLabel(rows[0].month)} a ${formatMonthLabel(rows[rows.length-1].month)}`,esc=s=>escapeHTML(String(s??''));
  const rowHTML=rows.map(r=>`<tr><td>${esc(formatMonthLabel(r.month))}</td><td>${fmtNumber(r.liters)} L</td><td>${r.received>0?money(r.received):'—'}</td><td>${r.expenses>0?money(r.expenses):'—'}</td><td>${(r.received||r.expenses)?money(r.net):'—'}</td></tr>`).join('');
  const highlights=(bestProduction.liters>0?`<p><b>Melhor mês de entrega:</b> ${esc(formatMonthLabel(bestProduction.month))} — ${fmtNumber(bestProduction.liters)} L.</p>`:'')+(highestExpense.expenses>0?`<p><b>Mês com maior gasto do leite:</b> ${esc(formatMonthLabel(highestExpense.month))} — ${money(highestExpense.expenses)}.</p>`:'')+(bestReceivedPerLiter?`<p><b>Maior valor recebido por litro:</b> ${esc(formatMonthLabel(bestReceivedPerLiter.month))} — ${money(bestReceivedPerLiter.price)}/L.</p>`:'');
  const w=window.open('','_blank');if(!w){alert('Não foi possível abrir o relatório. Verifique se o navegador bloqueou a nova janela e tente novamente.');return}
@@ -2390,7 +2531,7 @@ function generateMilkReportPDF(){
  <h2>🥛 Resumo mensal</h2><table><thead><tr><th>Mês</th><th>Litros entregues</th><th>Recebido pelo leite</th><th>Gastos do leite</th><th>Resultado</th></tr></thead><tbody>${rowHTML}</tbody></table>
  <div class="totals"><div class="box">TOTAL DE LITROS<b>${fmtNumber(totalLiters)} L</b></div><div class="box">TOTAL RECEBIDO<b>${money(totalReceived)}</b></div><div class="box">TOTAL DE GASTOS<b>${money(totalExpenses)}</b></div><div class="box">RESULTADO LÍQUIDO<b>${money(net)}</b></div></div>
  <h2>📌 Indicadores do período</h2><div class="summary"><p><b>Recebido médio por litro:</b> ${receivedRows.length?money(receivedPerLiter)+'/L':'—'}</p><p><b>Custo médio do leite por litro:</b> ${expenseRows.length?money(costPerLiter)+'/L':'—'}</p><p><b>💰 Quanto sobra, em média, por mês:</b> ${netRows.length?money(avgNet):'—'}</p>${highlights}</div>
- <h2>🐄 Rebanho atual na data do relatório</h2><div class="herd"><div class="box">VACAS<b>${totalCows}</b></div><div class="box">EM LACTAÇÃO<b>${lactating}</b></div><div class="box">NOVILHAS<b>${totalHeifers}</b></div><div class="box">TOTAL DE ANIMAIS<b>${totalAnimals}</b></div></div>
+ <h2>🐄 Rebanho atual na data do relatório</h2><div class="herd"><div class="box">VACAS<b>${totalCows}</b></div><div class="box">EM LACTAÇÃO<b>${lactating}</b></div><div class="box">NOVILHAS<b>${totalHeifers}</b></div><div class="box">MACHOS<b>${totalMales}</b></div><div class="box">TOTAL DE ANIMAIS<b>${totalAnimals}</b></div></div>
  <div class="footer">Relatório gerado pelo Gestão Rebanho Pro. Os valores são calculados a partir dos registros existentes no aplicativo. Outras receitas da atividade não entram no total recebido pelo leite nem no custo do leite.</div>
  <div class="no-print" style="margin-top:18px;text-align:center"><button onclick="window.print()" style="padding:10px 16px;font-weight:700">🖨️ IMPRIMIR / SALVAR COMO PDF</button></div></body></html>`);
  w.document.close();setTimeout(()=>w.print(),350);
@@ -2416,7 +2557,7 @@ function renderRetrospectiva(){
  let confirmar=0,prenhe=0,noInfo=0;
  [...db.vacas,...db.novilhas].forEach(v=>{if(db.novilhas.includes(v)&&isNovilhaUnder15Months(v))return;const st=getAnimalReproductiveStatus(v);if(st.key==='confirmar')confirmar++;else if(st.key==='prehne')prenhe++;else noInfo++;});
  html+=`<div class="card"><h3>🤰 Situação reprodutiva</h3><div class="kpi-line"><b>🟠 A CONFIRMAR</b><span>${confirmar}</span></div><div class="kpi-line"><b>🟢 PRENHE</b><span>${prenhe}</span></div><div class="kpi-line"><b>⚪ SEM INFORMAÇÃO</b><span>${noInfo}</span></div><p class="small" style="margin-bottom:0">A CONFIRMAR: existe uma inseminação atual ainda sem decisão. PRENHE: a prenhez foi confirmada. SEM INFORMAÇÃO: não há inseminação atual em acompanhamento. O passar dos dias, sozinho, nunca transforma A CONFIRMAR em PRENHE.</p></div>`;
- html='<div class="card"><h3>🐄 Tamanho atual do rebanho</h3><div class="summary-grid"><div class="summary-item"><small>VACAS</small><b>'+db.vacas.length+'</b></div><div class="summary-item"><small>NOVILHAS</small><b>'+db.novilhas.length+'</b></div><div class="summary-item"><small>TOTAL DE ANIMAIS</small><b>'+(db.vacas.length+db.novilhas.length)+'</b></div></div></div>'+html;
+ html='<div class="card"><h3>🐄 Tamanho atual do rebanho</h3><div class="summary-grid"><div class="summary-item"><small>VACAS</small><b>'+db.vacas.length+'</b></div><div class="summary-item"><small>NOVILHAS</small><b>'+db.novilhas.length+'</b></div><div class="summary-item"><small>MACHOS</small><b>'+db.machos.length+'</b></div><div class="summary-item"><small>TOTAL DE ANIMAIS</small><b>'+(db.vacas.length+db.novilhas.length+db.machos.length)+'</b></div></div></div>'+html;
  box.innerHTML=html;
 }
 /* =========================
@@ -2558,7 +2699,7 @@ async function saveHeifer(){
  const hasPhotoActionNow=!!(window.heiferPhotoPendingFile||window.heiferPhotoRemoveRequested);
  if(hasPhotoActionNow)setPhotoStatus('heifer','⏳ Salvando... enviando a foto para a nuvem. Aguarde.','success-text');
  try{
- const edit=document.getElementById('heiferEditId').value;const motherName=document.getElementById('heiferMotherModal').value.trim();const old=edit?db.novilhas.find(x=>x.id===Number(edit)):null;const maternalLine=old?{grandmother:old.avoMaterna||'',grandfather:old.avoMaterno||'',greatGrandmother:old.bisavoMaterna||'',greatGrandfather:old.bisavoMaterno||''}:maternalLineageFor(motherName);const history=old?ensureCowReproductiveHistory(old):newReproductiveHistory();if(old&&old.inseminacao&&inseminacao&&String(old.inseminacao)!==String(inseminacao)){if(!handleNewInseminationAgainstPending(old,inseminacao))return;}if(inseminacao){const same=history.inseminacoes.find(x=>String(x.data||'')===String(inseminacao));if(same){same.reprodutor=document.getElementById('heiferReproducerModal').value.trim()||same.reprodutor||'';}else history.inseminacoes.push({id:generateUniqueHistoryId(),data:inseminacao,resultado:'pendente',reprodutor:document.getElementById('heiferReproducerModal').value.trim()||''});}const obj={id:edit?Number(edit):generateUniqueAnimalId(),nome:name,nascimento:birth,pai:document.getElementById('heiferFatherModal').value.trim(),mae:motherName,avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,inseminacao,reprodutor:inseminacao?document.getElementById('heiferReproducerModal').value.trim():'',parto:null,transferida:false,fotoPath:old?.fotoPath||'',historicoReprodutivo:history};
+ const edit=document.getElementById('heiferEditId').value;const motherName=document.getElementById('heiferMotherModal').value.trim();const old=edit?db.novilhas.find(x=>x.id===Number(edit)):null;if(!(await confirmAnimalIdentifier(name,edit)))return;const maternalLine=old?{grandmother:old.avoMaterna||'',grandfather:old.avoMaterno||'',greatGrandmother:old.bisavoMaterna||'',greatGrandfather:old.bisavoMaterno||''}:maternalLineageFor(motherName);const history=old?ensureCowReproductiveHistory(old):newReproductiveHistory();if(old&&old.inseminacao&&inseminacao&&String(old.inseminacao)!==String(inseminacao)){if(!handleNewInseminationAgainstPending(old,inseminacao))return;}if(inseminacao){const same=history.inseminacoes.find(x=>String(x.data||'')===String(inseminacao));if(same){same.reprodutor=document.getElementById('heiferReproducerModal').value.trim()||same.reprodutor||'';}else history.inseminacoes.push({id:generateUniqueHistoryId(),data:inseminacao,resultado:'pendente',reprodutor:document.getElementById('heiferReproducerModal').value.trim()||''});}const obj={id:edit?Number(edit):generateUniqueAnimalId(),nome:name,nascimento:birth,pai:document.getElementById('heiferFatherModal').value.trim(),mae:motherName,avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,inseminacao,reprodutor:inseminacao?document.getElementById('heiferReproducerModal').value.trim():'',parto:null,transferida:false,fotoPath:old?.fotoPath||'',historicoReprodutivo:history};
  if(window.heiferPhotoRemoveRequested)obj.fotoPathDeleteRequestedAt=new Date().toISOString();
  if(edit){const i=db.novilhas.findIndex(x=>x.id===Number(edit));if(i>=0)db.novilhas[i]=obj}else db.novilhas.push(obj);
  const hasPhotoAction=!!(window.heiferPhotoPendingFile||window.heiferPhotoRemoveRequested);saveDB(false,!hasPhotoAction);if(hasPhotoAction){const target=db.novilhas.find(x=>x.id===Number(edit||obj.id));if(target)await uploadAnimalPhotoAfterSave('heifer',target);}closeModal();renderHeifers();renderHomeAlerts();
@@ -2585,7 +2726,7 @@ function generateHeiferBatch(){
  document.getElementById('heiferBatchQuantityBox').classList.add('hidden');
  document.getElementById('heiferBatchForm').classList.remove('hidden');
 }
-function saveHeiferBatch(){
+async function saveHeiferBatch(){
  const names=[...document.querySelectorAll('.heifer-batch-name')],births=[...document.querySelectorAll('.heifer-batch-birth')],insem=[...document.querySelectorAll('.heifer-batch-insem-date')],insemManual=[...document.querySelectorAll('.heifer-batch-insem-manual')],fathers=[...document.querySelectorAll('.heifer-batch-father')],mothers=[...document.querySelectorAll('.heifer-batch-mother')],reproducers=[...document.querySelectorAll('.heifer-batch-reproducer')];
  if(!names.length)return alert('Gere os cartões da remessa primeiro.');
  const records=[];
@@ -2593,6 +2734,7 @@ function saveHeiferBatch(){
   const name=names[i].value.trim(),birth=births[i].value,inseminacao=getBatchDate(insem[i],insemManual[i],`Inseminação da Novilha ${i+1}`);
   if(inseminacao===null)return;if(!name)return alert(`Informe o nome/brinco da Novilha ${i+1}.`);
   if(!birth)return alert(`Informe a data de nascimento da Novilha ${i+1}.`);
+  if(!(await confirmAnimalIdentifier(name,null,records)))return;
   if(!validateISODate(birth,`Data de nascimento da Novilha ${i+1}`,false))return;const maternalLine=maternalLineageFor(mothers[i].value.trim());
   records.push({id:generateUniqueAnimalId(),nome:name,nascimento:birth,pai:fathers[i].value.trim(),mae:mothers[i].value.trim(),avoMaterna:maternalLine.grandmother,avoMaterno:maternalLine.grandfather,bisavoMaterna:maternalLine.greatGrandmother,bisavoMaterno:maternalLine.greatGrandfather,inseminacao,reprodutor:reproducers[i].value.trim(),parto:null,transferida:false,fotoPath:''});
  }
@@ -2618,25 +2760,59 @@ document.getElementById('heiferInsemManual').addEventListener('blur',updateHeife
 async function deleteHeifer(){const id=Number(document.getElementById('heiferEditId').value);if(!id)return;const heifer=db.novilhas.find(h=>h.id===id);if(!heifer)return;if(!confirm('Excluir esta novilha? Esta ação não poderá ser desfeita.'))return;if(heifer.fotoPath){try{await removeCowPhotoPath(heifer.fotoPath);}catch(e){alert(`Não foi possível excluir a foto com segurança. A novilha não foi excluída. ${e?.message||''}`);return;}}db.novilhas=db.novilhas.filter(h=>h.id!==id);saveDB(false);closeModal();renderAll();}
 function calfParturition(id){
  const h=db.novilhas.find(x=>x.id===id);if(!h)return;ensureCowReproductiveHistory(h);
- document.getElementById('calfParturitionId').value=h.id;document.getElementById('calfParturitionDate').value=isoToday();document.getElementById('calfParturitionName').value=h.nome;document.getElementById('heiferCalfName').value='';document.getElementById('heiferCalfFather').value=reproducerForPregnancy(h,isoToday())||h.reprodutor||'';document.querySelectorAll('input[name="heiferCalfSex"]').forEach(r=>r.checked=false);syncHeiferCalfFields();document.getElementById('calfParturitionModal').classList.add('open');
+ document.getElementById('calfParturitionId').value=h.id;document.getElementById('calfParturitionDate').value=isoToday();document.getElementById('calfParturitionName').value=h.nome;document.getElementById('heiferCalfName').value='';document.getElementById('heiferCalfFather').value=reproducerForPregnancy(h,isoToday())||h.reprodutor||'';document.getElementById('heiferCalfMaleName').value='';document.getElementById('heiferCalfMaleFather').value=reproducerForPregnancy(h,isoToday())||h.reprodutor||'';document.getElementById('registerHeiferCalfMale').checked=false;document.querySelectorAll('input[name="heiferCalfSex"]').forEach(r=>r.checked=false);syncHeiferCalfFields();document.getElementById('calfParturitionModal').classList.add('open');
 }
-function syncHeiferCalfFields(){const sex=document.querySelector('input[name="heiferCalfSex"]:checked')?.value||'';document.getElementById('heiferCalfFemaleFields').classList.toggle('hidden',sex!=='novilha');if(sex==='novilha')updateHeiferCalfFatherField();}
+function syncHeiferCalfFields(){const sex=document.querySelector('input[name="heiferCalfSex"]:checked')?.value||'';const maleRegister=document.getElementById('registerHeiferCalfMale'),maleRegisterWrap=document.getElementById('heiferCalfMaleRegisterWrap'),maleNameWrap=document.getElementById('heiferCalfMaleNameWrap');document.getElementById('heiferCalfFemaleFields').classList.toggle('hidden',sex!=='novilha');document.getElementById('heiferCalfMaleFields').classList.toggle('hidden',sex!=='boi');if(maleRegister&&maleRegisterWrap&&maleNameWrap){maleRegisterWrap.classList.toggle('hidden',sex!=='boi');if(sex==='boi')maleRegister.checked=true;if(sex!=='boi')maleRegister.checked=false;maleNameWrap.classList.toggle('hidden',!maleRegister.checked);}if(sex==='novilha')updateHeiferCalfFatherField();}
+document.getElementById('registerHeiferCalfMale').addEventListener('change',()=>document.getElementById('heiferCalfMaleNameWrap').classList.toggle('hidden',!document.getElementById('registerHeiferCalfMale').checked));
 function updateHeiferCalfFatherField(){const h=db.novilhas.find(x=>Number(x.id)===Number(document.getElementById('calfParturitionId').value));if(!h)return;const field=document.getElementById('heiferCalfFather');if(field&&!field.value)field.value=reproducerForPregnancy(h,document.getElementById('calfParturitionDate').value)||h.reprodutor||'';}
 function closeCalfParturitionModal(){document.getElementById('calfParturitionModal').classList.remove('open')}
-function saveCalfParturition(){
+async function saveCalfParturition(){
  const id=Number(document.getElementById('calfParturitionId').value),h=db.novilhas.find(x=>x.id===id);if(!h)return;ensureCowReproductiveHistory(h);
  const date=document.getElementById('calfParturitionDate').value,name=document.getElementById('calfParturitionName').value.trim();if(!name)return alert('Informe o nome/brinco da vaca.');if(!validateISODate(date,'Data do parto',false))return;
  const calfSex=document.querySelector('input[name="heiferCalfSex"]:checked')?.value||'';if(!calfSex)return alert('Selecione o sexo da cria: 🐮 Novilha ou 🐂 Boi.');
  const calfName=calfSex==='novilha'?document.getElementById('heiferCalfName').value.trim():'';if(calfSex==='novilha'&&!calfName)return alert('Informe o nome/brinco da novilha que nasceu.');
+ if(calfSex==='novilha'&&!(await confirmAnimalIdentifier(calfName)))return;
+ const registerMale=calfSex==='boi'&&document.getElementById('registerHeiferCalfMale').checked,maleName=registerMale?document.getElementById('heiferCalfMaleName').value.trim():'';if(registerMale&&!maleName)return alert('Informe o nome/brinco do macho que nasceu.');if(registerMale&&!(await confirmAnimalIdentifier(maleName)))return;
  const calfFather=document.getElementById('heiferCalfFather').value.trim()||reproducerForPregnancy(h,date)||h.reprodutor||'';
  const history=JSON.parse(JSON.stringify(h.historicoReprodutivo||newReproductiveHistory()));ensureCowReproductiveHistory({historicoReprodutivo:history});
  if(h.inseminacao){const prior=history.inseminacoes.find(x=>String(x.data||'')===String(h.inseminacao));if(prior)prior.resultado='confirmada';}
  history.partos.push({id:generateUniqueHistoryId(),data:date,sexoCria:calfSex,identificacaoCria:calfSex==='novilha'?calfName:'',reprodutor:calfFather});
  const newCow={id:generateUniqueAnimalId(),nome:name,parto:date,inseminacao:'',status:'lactacao',dataEntradaLactacao:date,dataSaidaLactacao:null,pai:h.pai||'',mae:h.mae||'',avoMaterna:h.avoMaterna||'',avoMaterno:h.avoMaterno||'',bisavoMaterna:h.bisavoMaterna||'',bisavoMaterno:h.bisavoMaterno||'',reprodutor:'',fotoPath:h.fotoPath||'',historicoReprodutivo:history};
  db.vacas.push(newCow);
+ if(registerMale){db.machos.push({id:generateUniqueAnimalId(),nome:maleName,nascimento:date,pai:document.getElementById('heiferCalfMaleFather').value.trim()||calfFather,mae:name,reprodutor:false,fotoPath:''});}
  if(calfSex==='novilha'){db.novilhas.push({id:generateUniqueAnimalId(),nome:calfName,nascimento:date,pai:calfFather,mae:name,avoMaterna:h.mae||'',avoMaterno:h.pai||'',bisavoMaterna:h.avoMaterna||'',bisavoMaterno:h.avoMaterno||'',inseminacao:'',reprodutor:'',parto:null,transferida:false,fotoPath:''});}
  db.novilhas=db.novilhas.filter(x=>x.id!==id);saveDB(false);closeCalfParturitionModal();alert('Novilha transferida para o Rebanho Principal.');renderAll();
 }
+/* =========================
+   MACHOS — V9.1
+   ========================= */
+function openNewMaleModal(){
+ resetAnimalPhotoState('male');
+ document.getElementById('maleEditId').value='';document.getElementById('maleModalTitle').textContent='Novo macho';document.getElementById('maleNameModal').value='';document.getElementById('maleBirth').value=isoToday();document.getElementById('maleFatherModal').value='';document.getElementById('maleMotherModal').value='';document.getElementById('maleReproducer').value='nao';document.getElementById('deleteMaleBtn').classList.add('hidden');document.getElementById('maleModal').classList.add('open');
+}
+function editMale(id){
+ const m=db.machos.find(x=>Number(x.id)===Number(id));if(!m)return;resetAnimalPhotoState('male');document.getElementById('maleEditId').value=m.id;document.getElementById('maleModalTitle').textContent='Editar macho';document.getElementById('maleNameModal').value=m.nome||'';document.getElementById('maleBirth').value=m.nascimento||'';document.getElementById('maleFatherModal').value=m.pai||'';document.getElementById('maleMotherModal').value=m.mae||'';document.getElementById('maleReproducer').value=m.reprodutor?'sim':'nao';document.getElementById('deleteMaleBtn').classList.remove('hidden');renderAnimalPhotoEditor('male',m);document.getElementById('maleModal').classList.add('open');
+}
+function closeMaleModal(){document.getElementById('maleModal').classList.remove('open')}
+async function saveMale(){
+ const name=document.getElementById('maleNameModal').value.trim(),birth=document.getElementById('maleBirth').value;if(!name||!birth)return alert('Informe nome e data de nascimento.');if(!validateISODate(birth,'Data de nascimento',false))return;if(window.__savingMale)return;window.__savingMale=true;
+ const edit=document.getElementById('maleEditId').value,old=edit?db.machos.find(x=>Number(x.id)===Number(edit)):null;
+ if(!(await confirmAnimalIdentifier(name,edit)))return window.__savingMale=false;
+ const obj={id:edit?Number(edit):generateUniqueAnimalId(),nome:name,nascimento:birth,pai:document.getElementById('maleFatherModal').value.trim(),mae:document.getElementById('maleMotherModal').value.trim(),reprodutor:document.getElementById('maleReproducer').value==='sim',fotoPath:old?.fotoPath||''};
+ if(window.malePhotoRemoveRequested)obj.fotoPathDeleteRequestedAt=new Date().toISOString();
+ if(edit){const i=db.machos.findIndex(x=>Number(x.id)===Number(edit));if(i>=0)db.machos[i]=obj}else db.machos.push(obj);
+ const hasPhotoAction=!!(window.malePhotoPendingFile||window.malePhotoRemoveRequested);saveDB(false,!hasPhotoAction);if(hasPhotoAction){const target=db.machos.find(x=>Number(x.id)===Number(obj.id));if(target)await uploadAnimalPhotoAfterSave('male',target);}window.__savingMale=false;closeMaleModal();renderAll();toast('Macho salvo.');
+}
+async function deleteMale(id){
+ const targetId=id??Number(document.getElementById('maleEditId').value),m=db.machos.find(x=>Number(x.id)===Number(targetId));if(!m)return;if(!confirm('Excluir este macho? Esta ação não poderá ser desfeita.'))return;if(m.fotoPath){try{await removeCowPhotoPath(m.fotoPath)}catch(e){alert(`Não foi possível excluir a foto com segurança. O macho não foi excluído. ${e?.message||''}`);return;}}db.machos=db.machos.filter(x=>Number(x.id)!==Number(targetId));saveDB(false);closeMaleModal();renderAll();toast('Macho excluído.');
+}
+function renderMales(){
+ const box=document.getElementById('maleList');if(!box)return;
+ const sorted=[...db.machos].sort((a,b)=>{if(!!a.reprodutor!==!!b.reprodutor)return a.reprodutor?-1:1;return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR');});
+ box.innerHTML=sorted.length?sorted.map(m=>`<div class="card animal"><div class="animal-head"><span class="animal-name">${escapeHTML(m.nome||'Sem identificação')}</span>${m.reprodutor?'<span class="badge" style="background:var(--laranja)">REPRODUTOR / TOURO</span>':''}</div><div class="animal-info"><div id="male-photo-card-${m.id}" class="animal-photo male-card-photo" onclick="event.stopPropagation()"><div class="animal-photo-placeholder no-photo">📷<br>Carregando</div></div><b>Idade:</b> ${monthsDays(daysBetween(m.nascimento))}<br><b>Pai:</b> ${escapeHTML(m.pai||'Não informado')}<br><b>Mãe:</b> ${escapeHTML(m.mae||'Não informado')}</div><div class="heifer-actions"><button class="btn btn-light" onclick="editMale(${m.id})">✏️ EDITAR</button><button class="btn btn-blue" onclick="openGenealogy(${m.id},'male')">🌳 LINHAGEM</button></div></div>`).join(''):'<div class="empty">Nenhum macho cadastrado.</div>';
+ sorted.forEach(m=>renderMaleCardPhoto(m));
+}
+
 /* =========================
    CONFIGURAÇÕES / PRO
    ========================= */
@@ -2685,7 +2861,7 @@ function renderBackup(){
    RENDER / INICIALIZAÇÃO
    ========================= */
 function renderAll(){
- renderHome();renderCowList();renderAgenda();renderHeifers();renderConfig();renderBackup();renderCloudStatus();renderFinanceiro();
+ renderHome();renderCowList();renderAgenda();renderHeifers();renderMales();renderConfig();renderBackup();renderCloudStatus();renderFinanceiro();
 }
 document.getElementById('prodDate').value=isoToday();document.getElementById('agendaDate').value=isoToday();
 renderAll();
